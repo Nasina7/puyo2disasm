@@ -1,7 +1,7 @@
 # Puyo Puyo Tsuu Sega Megadrive Disassembly
 
-This is a rudimentary disassembly of Puyo Puyo Tsuu for the Sega Megadrive.
-Currently, this is mostly meant to be used as a reference, and not for any large projects.
+This is a work-in-progress disassembly of Puyo Puyo Tsuu for the Sega Megadrive.
+Currently, it's in a very early state.  It isn't shiftable, and shouldn't be used for any major projects for now.
 
 ## Disclaimer
 
