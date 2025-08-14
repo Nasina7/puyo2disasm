@@ -9,7 +9,8 @@
 ;		the encoding has been set up correctly.
 ;“ú–{Œê
 
-	include "puyo2_constants.asm"
+	include "constants.asm"
+	include "macros.asm"
 StartOfRom:
 	dc.l	SystemStack
 	dc.l	Reset
@@ -778,7 +779,7 @@ loc_00000D9E:
 	BSR.w	loc_00000DC4
 	BSR.w	loc_00001D76
 	BRA.w	loc_00000D6C
-loc_00000DBC:
+Bytecode_SetVDPMode:
 	BSR.w	loc_00000DC4
 	BRA.w	loc_00000A64
 loc_00000DC4:
@@ -2351,9 +2352,9 @@ loc_000023B2:
 	BSR.w	loc_00000A64
 	MOVE.b	#$FF, rbBytecode_StopRun
 	LEA	loc_000024EC(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	LEA	loc_00002FE8(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.b	#1, rbBytecode_StopLoop
 loc_0000249C:
 	LEA	$00FFC000, A2
@@ -2414,7 +2415,7 @@ loc_00002534:
 	BSR.w	loc_0000280C
 	BSR.w	loc_0000278C
 	MOVE.b	#$80, $6(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	BSR.w	loc_00002F9A
 	MOVE.b	$00FFA1AD, D0
@@ -2505,7 +2506,7 @@ loc_00002660:
 loc_0000266A:
 	MOVEQ	#7, D0
 	BSR.w	loc_00002160
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000023B0
 	CLR.b	$00FFA106
@@ -2997,7 +2998,7 @@ loc_00002FF2:
 	ANDI.w	#$000E, D0
 	MOVE.w	loc_00003074(PC,D0.w), D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	BCS.b	loc_00002FF2
 	MOVEQ	#0, D0
@@ -3055,7 +3056,7 @@ loc_000030BE:
 	DBF	D0, loc_000030BE
 	RTS
 loc_000030C6:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFF070, D0
 	MOVE.w	#$C498, D5
 	MOVE.w	#$A500, D1
@@ -3079,7 +3080,7 @@ loc_00003106:
 	LEA	loc_00003240(PC), A2
 	MOVE.w	#$C000, D2
 	BSR.w	loc_00001476
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	MOVE.b	$00FFF070, D0
 	OR.b	$00FFF076, D0
@@ -3399,7 +3400,7 @@ loc_0000373E:
 loc_00003766:
 	BSET.b	#0, $7(A0)
 	BSR.w	loc_00003A02
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#0, $7(A0)
 	BEQ.b	loc_0000377E
 	RTS
@@ -3407,7 +3408,7 @@ loc_0000377E:
 	BSR.w	loc_000071E2
 	BSR.w	loc_00007094
 loc_00003786:
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#1, $7(A0)
 	BNE.w	loc_000034AA
 	BSR.w	loc_000036EA
@@ -3428,7 +3429,7 @@ loc_000037C8:
 	CLR.b	$9(A0)
 	BSR.w	loc_000069E6
 	BSR.w	loc_00004F84
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#2, $7(A0)
 	BNE.w	loc_000034AA
 	BTST.b	#5, $7(A0)
@@ -3440,21 +3441,21 @@ loc_000037F0:
 	BSR.w	loc_00007504
 	BSR.w	loc_00009884
 	BSR.w	loc_000034F4
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	ANDI.b	#$FE, $36(A0)
 	BSR.w	loc_00009134
 	BCS.b	loc_00003818
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BRA.b	loc_0000383E
 loc_00003818:
 	ORI.b	#1, $36(A0)
 	MOVE.b	#0, $00FFA1A4
 	JSR	loc_00009962
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#$FF, $00FFA1A4
 	JSR	loc_00009962
 loc_0000383E:
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	CLR.w	D0
 	MOVE.b	$2A(A0), D0
 	LEA	$00FFA1A0, A1
@@ -3466,7 +3467,7 @@ loc_0000383E:
 	BEQ.b	loc_0000386A
 	BSR.w	loc_00009120	;Predicted (Code-scan)
 loc_0000386A:
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA042
 	BEQ.b	loc_00003884
 	MOVE.b	$00FFF071, D0	;Predicted (Code-scan)
@@ -3481,7 +3482,7 @@ loc_0000388E:
 	BSR.w	loc_00004EEA
 	BSR.w	loc_00005EA8
 	BCS.w	loc_0000A164
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_0000BB46
 	ADDQ.b	#1, $26(A0)
 	MOVE.b	$7(A0), D0
@@ -3495,12 +3496,12 @@ loc_000038BC:
 	MOVEQ	#1, D0
 	BRA.w	loc_00007500
 loc_000038C8:
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_0000484E
 	MOVE.w	D1, $26(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_000072F8
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	TST.w	$26(A0)
 	BNE.b	loc_0000391E
 	BSR.w	loc_00003578
@@ -3511,7 +3512,7 @@ loc_000038C8:
 loc_000038FA:
 	MOVE.w	D2, D0
 	BSR.w	loc_00008AE2
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFA7E0, A2
 	TST.b	$2A(A0)
 	BEQ.b	loc_00003912
@@ -3533,16 +3534,16 @@ loc_0000391E:
 loc_00003942:
 	BSR.w	loc_000090FE
 	BSR.w	loc_000052C0
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00006E26
 	BSR.w	loc_00007676
 	BSR.w	loc_00007082
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00004070
 	MOVE.w	#$0018, D0
 	BSR.w	loc_00008AE2
 	BSR.w	loc_00004088
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00005A4C
 	MOVEM.l	D1, -(A7)
 	BSR.w	loc_000040E4
@@ -3552,17 +3553,17 @@ loc_00003942:
 	MOVE.w	#$0019, $24(A0)
 	MOVE.l	#$00003998, $2(A0)
 	BSR.w	loc_00004256
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_000043B8
 	BSET.b	#4, $7(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#4, $7(A0)
 	BEQ.b	loc_000039BA
 	BRA.w	loc_00004480
 loc_000039BA:
 	BSR.w	loc_00007504
 	BSR.w	loc_00007192
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BRA.w	loc_000038C8
 loc_000039CA:
 	BCLR.b	#0, $7(A0)
@@ -3594,7 +3595,7 @@ loc_00003A02:
 	JSR	loc_000158CE
 loc_00003A2E:
 	LEA	loc_00003A72, A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	BCS.w	loc_000034AA
 	MOVE.b	#$FF, $7(A1)
 	MOVE.b	$2A(A0), $2A(A1)
@@ -3644,7 +3645,7 @@ loc_00003AAE:
 	LEA	loc_00003FC8, A2	;Predicted (Code-scan)
 loc_00003ADC:
 	MOVE.l	A2, $32(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_00003DE4, A2
 	MOVEQ	#2, D3
 	TST.b	$28(A0)
@@ -3694,7 +3695,7 @@ loc_00003B66:
 	BSR.w	loc_00003D5E
 	MOVE.b	#$6C, D0
 	JSR	loc_0001B1A2
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#$0181, $28(A0)
 	MOVE.w	#$CC0A, D5
 	MOVE.b	#$85, D6
@@ -3704,7 +3705,7 @@ loc_00003B66:
 	MOVE.b	#$A5, D6
 loc_00003BAA:
 	JSR	loc_00006C7C
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	SUBQ.w	#1, $28(A0)
 	BEQ.w	loc_00003C24
 	BSR.w	loc_000047AC
@@ -3746,9 +3747,9 @@ loc_00003C24:
 	MOVE.b	#$52, D0
 	JSR	loc_0001B1A2
 	CLR.w	$28(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#$0018, $28(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	CLR.w	D4
 	MOVE.w	$28(A0), D1
 	ANDI.b	#2, D1
@@ -3769,13 +3770,13 @@ loc_00003C5C:
 	LEA	$00FFA116, A2
 	MOVE.b	D0, (A2,D1.w)
 	CLR.b	$7(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#7, $28(A0)
 	MOVE.w	$18(A0), D5
 	MOVE.w	D5, $12(A0)
 	ADDI.w	#$0700, D5
 	MOVE.w	D5, $14(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_00003DF0, A2
 	MOVEQ	#6, D2
 	MOVEQ	#2, D3
@@ -3794,7 +3795,7 @@ loc_00003CCE:
 	BMI.b	loc_00003CDA
 	RTS
 loc_00003CDA:
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	$16(A0), D5
 	LEA	loc_00003DD0, A2
 	MOVE.b	#$85, $00FFF06A
@@ -3804,7 +3805,7 @@ loc_00003CDA:
 	BCLR.b	#0, $7(A1)
 	CMPI.b	#2, $00FFA142
 	BEQ.b	loc_00003D54
-	BSR.w	loc_00008AEC	;Predicted (Code-scan)
+	BSR.w	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	TST.b	$00FFA119	;Predicted (Code-scan)
 	BEQ.b	loc_00003D54	;Predicted (Code-scan)
 	MOVE.b	$00FFA069, D0	;Predicted (Code-scan)
@@ -3824,7 +3825,7 @@ loc_00003D4E:
 	JMP	loc_00001152	;Predicted (Code-scan)
 loc_00003D54:
 	JSR	loc_0000AA70
-	BRA.w	loc_00008AB8
+	BRA.w	ObjSys_DeleteObjectA0
 loc_00003D5E:
 	MOVEA.l	$32(A0), A2
 	CLR.w	D0
@@ -3895,7 +3896,7 @@ loc_00003DFC:
 loc_00003E4C:
 	MOVEA.l	$2E(A0), A1
 	TST.b	$7(A1)
-	BEQ.w	loc_00008AB8
+	BEQ.w	ObjSys_DeleteObjectA0
 	CLR.b	$6(A0)
 	MOVE.b	$26(A1), D0
 	CMPI.b	#5, D0
@@ -3930,7 +3931,7 @@ loc_00003EBC:
 loc_00003ED0:
 	MOVEA.l	$2E(A0), A1
 	TST.b	$7(A1)
-	BEQ.w	loc_00008AB8
+	BEQ.w	ObjSys_DeleteObjectA0
 	CLR.b	$6(A0)
 	MOVE.b	$26(A1), D0
 	CMPI.b	#5, D0
@@ -4741,7 +4742,7 @@ loc_00004A34:
 	dc.w	$0090, $0150, $0090, $0090, $0090, $0150, $0090 ;0x0 (0x00004A34-0x00004A42, Entry count: 0xE)
 	dc.b	$00, $90, $00, $90, $01, $50, $00, $90, $00, $90, $00, $90, $01, $50, $00, $90 ;0x0 (0x00004A42-0x00004A52, Entry count: 0x10) [Unknown data]
 	LEA	loc_00004A70(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.w	#$0708, $26(A1)
 	MOVE.w	#$0120, $A(A1)
 	MOVE.w	#$00DA, $E(A1)
@@ -4768,9 +4769,9 @@ loc_00004A98:
 loc_00004ABE:
 	MOVEQ	#1, D0	;Predicted (Code-scan)
 loc_00004AC0:
-	MOVE.b	D0, rbBytecode_Return
+	MOVE.b	D0, rbBytecode_Ret
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 	LEA	loc_00004BEE(PC), A2
 	BSR.w	loc_00004BF6
 	CMPI.b	#1, $00FFA130
@@ -4982,7 +4983,7 @@ loc_00004D8A:
 	dc.w	$00C6
 loc_00004D90:
 	LEA	loc_00004D98(PC), A1
-	BRA.w	loc_000089FA
+	BRA.w	ObjSys_InitObjWithFunc
 loc_00004D98:
 	LEA	$00FF85A0, A1
 	BSR.w	loc_00004DA8
@@ -5138,7 +5139,7 @@ loc_00004F84:
 	BSR.w	loc_00005130
 	SUB.w	D7, $14(A0)
 	LEA	loc_000051F8, A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	BCC.b	loc_00004FC4
 	RTS	;Predicted (Code-scan)
 loc_00004FC4:
@@ -5177,7 +5178,7 @@ loc_00005030:
 	dc.w	$0000
 loc_00005036:
 	LEA	loc_00005176, A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	BCC.b	loc_00005044
 	RTS	;Predicted (Code-scan)
 loc_00005044:
@@ -5327,7 +5328,7 @@ loc_000051F8:
 	BSR.w	loc_000049CA
 	ANDI.w	#$007F, D0
 	MOVE.w	D0, $2C(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	$26(A0), D0
 	CMP.w	$28(A0), D0
 	BEQ.w	loc_0000525A
@@ -5374,7 +5375,7 @@ loc_000052AA:
 loc_000052B2:
 	MOVEA.l	$2E(A0), A1
 	BCLR.b	#2, $7(A1)
-	BRA.w	loc_00008AB8
+	BRA.w	ObjSys_DeleteObjectA0
 loc_000052C0:
 	CLR.w	$1E(A0)
 	BSR.w	loc_000049CA
@@ -5675,7 +5676,7 @@ loc_000056AE:
 loc_000056D4:
 	MOVE.b	#1, $2C(A0)
 	MOVE.b	#$FF, $8(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 loc_000056E4:
 	BSR.w	loc_00008B34
 	BCC.w	loc_00005714
@@ -5710,7 +5711,7 @@ loc_00005740:
 	MOVE.w	$28(A0), D0
 	LEA	$00FFA190, A2
 	CLR.b	(A2,D0.w)
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00005754:
 	dc.w	$2000, $0004, $2B00, $0004, $3600, $0009, $4100, $0004, $4C00, $0006 ;0x0 (0x00005754-0x00005768, Entry count: 0x14)
 	dc.l	loc_0000577C
@@ -6505,7 +6506,7 @@ loc_00005EA8:
 	RTS
 loc_00005EC4:
 	LEA	loc_00005F66, A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	MOVE.l	A0, $2E(A1)
 	MOVE.l	#$00005F5C, $32(A1)
 	MOVE.b	$2A(A0), $2A(A1)
@@ -6517,7 +6518,7 @@ loc_00005EC4:
 	ORI.b	#1, $7(A0)
 	MOVEA.l	A1, A2
 	LEA	loc_00006394, A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	MOVE.l	A2, $2E(A1)
 	MOVE.l	#$00005F44, $32(A1)
 	MOVE.b	$2A(A0), $2A(A1)
@@ -6574,7 +6575,7 @@ loc_00005F5C:
 loc_00005F66:
 	BSR.w	loc_00004716
 	MOVE.b	#$80, $6(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#0, $7(A1)
 	BEQ.b	loc_00005F9C
@@ -6590,7 +6591,7 @@ loc_00005F84:
 loc_00005F9C:
 	MOVEA.l	$36(A0), A1
 	JSR	loc_00008AC2
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00005FAC:
 	BSR.w	loc_00004716
 	BSR.w	loc_00004668
@@ -6604,7 +6605,7 @@ loc_00005FAC:
 	MOVE.w	#$3000, $1E(A0)
 	MOVE.w	#1, $16(A0)
 	MOVE.b	#0, $9(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00006496
 	BCS.w	loc_00005FF0
 	RTS
@@ -6613,7 +6614,7 @@ loc_00005FF0:
 	MOVE.l	#$00005F34, $32(A0)
 loc_00005FFC:
 	CLR.b	$22(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00008B34
 	BCS.b	loc_0000600C
 	RTS
@@ -6631,15 +6632,15 @@ loc_00006026:
 	MOVE.b	$2A(A0), D0
 	LEA	$00FFA144, A1
 	TST.b	(A1,D0.w)
-	BNE.w	loc_00008AB8
-	BSR.w	loc_00008AEC
+	BNE.w	ObjSys_DeleteObjectA0
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#6, $26(A0)
 	CLR.b	$28(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$2A(A0), D0
 	LEA	$00FFA144, A1
 	TST.b	(A1,D0.w)
-	BNE.w	loc_00008AB8
+	BNE.w	ObjSys_DeleteObjectA0
 	ADDQ.b	#1, $28(A0)
 	CMPI.b	#4, $28(A0)
 	BCC.w	loc_00006076
@@ -6649,7 +6650,7 @@ loc_00006076:
 	SUBQ.w	#1, $A(A0)
 	SUBQ.w	#1, $E(A0)
 	SUBQ.b	#1, $26(A0)
-	BEQ.w	loc_00008AB8
+	BEQ.w	ObjSys_DeleteObjectA0
 	RTS
 loc_0000608C:
 	BCLR.b	#7, $1(A0)
@@ -6659,7 +6660,7 @@ loc_0000608C:
 	CMPI.b	#$1A, D0
 	BEQ.b	loc_000060AA
 	CMPI.b	#$20, D0
-	BNE.w	loc_00008AB8
+	BNE.w	ObjSys_DeleteObjectA0
 loc_000060AA:
 	ADDI.b	#5, $9(A0)
 	BRA.w	loc_00006026
@@ -6911,7 +6912,7 @@ loc_00006386:
 loc_00006394:
 	BSR.w	loc_00006466
 	MOVE.b	#$80, $6(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00008B34
 	BSR.w	loc_00006448
 	BSR.w	loc_00006466
@@ -6932,7 +6933,7 @@ loc_000063BC:
 	MOVE.w	D1, $1C(A0)
 	MOVE.l	$2E(A1), $2E(A0)
 	MOVE.b	$7(A1), $7(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#1, $7(A0)
 	BNE.b	loc_0000642A
 	MOVE.w	$E(A0), D0
@@ -6940,7 +6941,7 @@ loc_000063BC:
 	MOVE.w	D0, $20(A0)
 	MOVE.w	#$3000, $1E(A0)
 	MOVE.w	#1, $16(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00006496
 	BCS.b	loc_0000641E
 	RTS
@@ -6948,7 +6949,7 @@ loc_0000641E:
 	BSR.w	loc_000034AC
 	MOVE.l	#$00005F34, $32(A0)
 loc_0000642A:
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00008B34
 	BCS.b	loc_00006436
 	RTS
@@ -7025,7 +7026,7 @@ loc_00006500:
 loc_00006502:
 	CLR.w	$00FFA120
 	LEA	loc_00006594(PC), A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	BSR.w	loc_00006516
 	RTS
 loc_00006516:
@@ -7070,7 +7071,7 @@ loc_0000659E:
 	BNE.w	loc_0000674A
 loc_000065BC:
 	CLR.b	$00FFA119
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	TST.b	$2C(A0)
 	BEQ.b	loc_000065D0
 	BSR.w	loc_000068A0
@@ -7117,7 +7118,7 @@ loc_0000664E:
 	BCC.b	loc_00006676
 	MOVE.b	#1, $00FFA026
 loc_00006676:
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	TST.b	$2C(A0)
 	BEQ.b	loc_00006684
 	BSR.w	loc_000068A0
@@ -7363,13 +7364,13 @@ loc_00006954:
 	RTS
 loc_0000695A:
 	BSR.w	loc_00008BE0
-	BCS.w	loc_00008AB8
+	BCS.w	ObjSys_DeleteObjectA0
 	SUBI.w	#1, $26(A0)
 	RTS
 	dc.b	$11, $7C, $00, $87, $00, $06, $61, $00, $21, $7A, $61, $00, $22, $6A, $65, $00, $21, $3E, $4E, $75 ;0x0 (0x0000696A-0x0000697E, Entry count: 0x14) [Unknown data]
 	MOVE.w	#$0101, $00FFA120
 	LEA	loc_00006992(PC), A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	BRA.w	loc_00006516
 loc_00006992:
 	TST.b	$00FFA120
@@ -7385,10 +7386,10 @@ loc_000069AC:
 	MOVE.l	#$000069DC, $32(A0)
 	BTST.b	#0, $7(A0)
 	BNE.w	loc_0000668E
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BRA.w	loc_00008B34
 loc_000069D6:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_000069DC:
 	dc.b	$F1
 	dc.b	$09 ;0x0 (0x000069DD-0x000069DE, Entry count: 0x1) [Unknown data]
@@ -7444,11 +7445,11 @@ loc_00006A74:
 	MOVE.b	#$81, $6(A0)
 	MOVE.b	#$0A, $8(A0)
 	MOVE.l	#$FFF80000, $16(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00008BE0
 	ADDI.l	#$00003000, $16(A0)
 	BMI.w	loc_000034AA
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA140
 	BNE.w	loc_00006AEA
 	MOVEQ	#0, D0
@@ -7459,13 +7460,13 @@ loc_00006A74:
 	MOVEA.l	$2E(A0), A1
 	TST.b	$9(A1)
 	BEQ.w	loc_000034AA
-	BSR.w	loc_00008AEC	;Predicted (Code-scan)
+	BSR.w	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	BSR.w	loc_00008BE0	;Predicted (Code-scan)
 	BCS.b	loc_00006AEA	;Predicted (Code-scan)
 	SUBI.l	#$00004000, $16(A0)	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
 loc_00006AEA:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 	CMPI.b	#2, $00FFA142
 	BEQ.b	loc_00006B62
 	BTST.b	#0, $00FFA13F	;Predicted (Code-scan)
@@ -7563,7 +7564,7 @@ loc_00006C4C:
 	dc.b	$85, $74, $85, $76, $85, $75, $85, $77 ;0x20
 loc_00006C7C:
 	LEA	loc_00006CD0, A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCC.b	loc_00006C8C
 	RTS	;Predicted (Code-scan)
 loc_00006C8C:
@@ -7595,7 +7596,7 @@ loc_00006CE8:
 loc_00006D04:
 	LEA	loc_00006D4A, A2
 	BSR.b	loc_00006D12
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00006D12:
 	MOVE.b	$E(A0), $00FFF06A
 	MOVE.w	$A(A0), D5
@@ -8359,7 +8360,7 @@ loc_0000792E:
 	BTST.b	#1, $00FFA130
 	BNE.w	loc_0000798A
 	LEA	loc_0000798C, A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.b	D1, $2C(A1)
 	MOVE.l	A0, $2E(A1)
 	MOVE.b	$2A(A0), D0
@@ -8382,11 +8383,11 @@ loc_0000798C:
 loc_00007998:
 	JSR	loc_00008B34
 	MOVE.b	#$83, $6(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#8, D0
 	JSR	loc_00008AE2
 	JSR	loc_00008B34
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#2, $2C(A0)
 	BCS.w	loc_00007B9A
 	MOVE.w	#$000F, $26(A0)
@@ -8403,7 +8404,7 @@ loc_000079E4:
 	ASR.l	#4, D0
 	MOVE.l	D0, $16(A0)
 	MOVE.w	$A(A0), $1E(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	MOVE.w	$1E(A0), $A(A0)
 	JSR	loc_00008BE0
@@ -8474,7 +8475,7 @@ loc_00007B08:
 	MOVEQ	#7, D0
 	BSR.w	loc_00008AE2
 	JSR	loc_00008B34
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00007C9A
 	CMPI.b	#3, $2C(A0)
 	BEQ.b	loc_00007B3E
@@ -8490,7 +8491,7 @@ loc_00007B4E:
 	MOVE.b	#$82, $6(A0)
 	MOVE.w	#$001F, $26(A0)
 	MOVE.w	$E(A0), $20(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	JSR	loc_00008BE0
 	MOVE.b	$27(A0), D0
@@ -8518,7 +8519,7 @@ loc_00007BB4:
 	ASR.l	#5, D0
 	MOVE.l	D0, $16(A0)
 	MOVE.w	$A(A0), $1E(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	MOVE.w	$1E(A0), $A(A0)
 	JSR	loc_00008BE0
@@ -8549,11 +8550,11 @@ loc_00007C2E:
 	BSR.w	loc_00005A30
 loc_00007C44:
 	MOVEM.l	(A7)+, A0
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	BCC.b	loc_00007C60
 	CLR.b	$6(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 loc_00007C60:
 	TST.b	$2B(A0)
 	BEQ.b	loc_00007C8C
@@ -8573,7 +8574,7 @@ loc_00007C88:
 loc_00007C8C:
 	TST.b	$6(A0)
 	BNE.b	loc_00007C98
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00007C98:
 	RTS
 loc_00007C9A:
@@ -8652,9 +8653,9 @@ loc_00007D2C:
 	dc.b	$00 ;0x0 (0x00007D37-0x00007D38, Entry count: 0x1) [Unknown data]
 loc_00007D38:
 	BSR.w	loc_00008BE0
-	BCS.w	loc_00008AB8
+	BCS.w	ObjSys_DeleteObjectA0
 	BSR.w	loc_00008B34
-	BCS.w	loc_00008AB8
+	BCS.w	ObjSys_DeleteObjectA0
 	RTS
 	dc.b	$22, $68, $00, $2E, $30, $29, $00, $02, $80, $69, $00, $0A, $67, $00, $00, $D0, $31, $7C, $00, $E8, $00, $0E, $10, $28, $00, $2A, $06, $00, $00, $1C, $11, $40 ;0x0 (0x00007D4A-0x00007E78, Entry count: 0x12E) [Unknown data]
 	dc.b	$00, $08, $21, $7C, $00, $00, $7C, $BE, $00, $32, $42, $68, $00, $26, $4E, $B9, $00, $00, $8A, $EC, $4E, $B9, $00, $00, $8B, $34, $30, $28, $00, $26, $D0, $40 ;0x20
@@ -8681,7 +8682,7 @@ loc_00007E78:
 	NEG.w	D0
 loc_00007EB8:
 	MOVE.w	D0, $12(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	SUBQ.w	#1, $26(A0)
 	BEQ.b	loc_00007EDE
@@ -8691,7 +8692,7 @@ loc_00007EB8:
 loc_00007EDC:
 	RTS
 loc_00007EDE:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00007EE4:
 	CMPI.b	#1, $00FFA130
 	BEQ.b	loc_00007EF4
@@ -8729,7 +8730,7 @@ loc_00007F48:
 	MOVE.w	#$FFFD, $16(A0)
 	MOVE.b	#5, $6(A0)
 	MOVE.w	#$0032, $26(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	SUBQ.w	#1, $26(A0)
 	BEQ.w	loc_00007EDE
@@ -8820,13 +8821,13 @@ loc_000080CC:
 loc_000080CE:
 	MOVE.w	#4, D0
 	BSR.w	loc_00008AE2
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#$87, $6(A0)
 	BSR.w	loc_00008B2E
 	BSR.w	loc_00008B34
-	BCS.w	loc_00008AB8
+	BCS.w	ObjSys_DeleteObjectA0
 	BSR.w	loc_00008BE0
-	BCS.w	loc_00008AB8
+	BCS.w	ObjSys_DeleteObjectA0
 	RTS
 	dc.b	$01
 	dc.b	$06 ;0x0 (0x000080F7-0x000080F8, Entry count: 0x1) [Unknown data]
@@ -8856,14 +8857,14 @@ loc_000080CE:
 loc_000082B2:
 	MOVEQ	#4, D0
 	BSR.w	loc_00008AE2
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	ORI.b	#$80, $6(A0)
 	BSR.w	loc_00008BE0
-	BCS.w	loc_00008AB8
+	BCS.w	ObjSys_DeleteObjectA0
 	BSR.w	loc_00008B34
 	SUBQ.w	#1, $26(A0)
 	BNE.w	loc_000034AA
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 	dc.b	$43, $FA, $FF, $D4, $61, $00, $0D, $7A, $65, $00, $B1, $C4, $13, $7C, $00, $08, $00, $08, $13, $7C, $00, $05, $00, $06, $23, $7C, $00, $00, $83, $22, $00, $32 ;0x0 (0x000082DC-0x00008396, Entry count: 0xBA) [Unknown data]
 	dc.b	$33, $42, $00, $0A, $48, $42, $33, $42, $00, $0E, $48, $42, $33, $7C, $0C, $00, $00, $1C, $33, $7C, $FF, $FE, $00, $16, $33, $7C, $FF, $FF, $00, $20, $33, $7C ;0x20
 	dc.b	$00, $30, $00, $26, $4E, $75, $12, $10, $06, $11, $40, $12, $FE, $00, $43, $FA, $FF, $86, $61, $00, $0D, $2C, $65, $00, $B1, $76, $13, $7C, $00, $08, $00, $08 ;0x40
@@ -8932,9 +8933,9 @@ loc_0000859A:
 	MOVE.b	#2, $26(A0)
 	MOVEQ	#8, D0
 	BSR.w	loc_00008AE2
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00008BE0
-	BCS.w	loc_00008AB8
+	BCS.w	ObjSys_DeleteObjectA0
 	TST.b	$26(A0)
 	BEQ.w	loc_000034AA
 	TST.w	$16(A0)
@@ -8989,10 +8990,10 @@ loc_000086CC:
 	MOVE.b	#$87, $6(A0)
 	MOVEQ	#8, D0
 	BSR.w	loc_00008AE2
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00008BE0
 	BCC.w	loc_000034AA
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 	dc.b	$43, $FA, $00, $2C, $61, $00, $09, $6C, $65, $00, $AD, $B6, $13, $7C, $00, $08, $00, $08, $23, $7C, $00, $00, $83, $DC, $00, $32, $33, $42, $00, $0A, $48, $42 ;0x0 (0x000086EA-0x00008956, Entry count: 0x26C) [Unknown data]
 	dc.b	$33, $42, $00, $0E, $48, $42, $33, $7C, $00, $50, $00, $26, $4E, $75, $70, $04, $61, $00, $03, $C6, $61, $00, $03, $CC, $61, $00, $04, $10, $11, $7C, $00, $80 ;0x20
 	dc.b	$00, $06, $0C, $28, $00, $1E, $00, $27, $64, $0C, $08, $28, $00, $00, $00, $27, $67, $04, $42, $28, $00, $06, $53, $68, $00, $26, $66, $00, $AD, $64, $4E, $F9 ;0x40
@@ -9066,7 +9067,7 @@ loc_000089EC:
 	JSR	(A0)	;Predicted (Code-scan) (Uncertain target!)
 loc_000089F8:
 	RTS
-loc_000089FA:
+ObjSys_InitObjWithFunc:
 	BSR.w	loc_00008A78
 	BCC.w	loc_00008A48
 	MOVEM.l	A0/D0, -(A7)	;Predicted (Code-scan)
@@ -9123,7 +9124,7 @@ loc_00008AA2:
 	MOVEM.l	(A7)+, D0/A0
 	ANDI	#$FFFE, SR
 	RTS
-loc_00008AB8:
+ObjSys_DeleteObjectA0:
 	MOVEM.l	A2, -(A7)
 	MOVEA.l	A0, A2
 	BRA.w	loc_00008AC8
@@ -9144,7 +9145,7 @@ loc_00008AE2:
 	MOVE.w	D0, $24(A0)
 	MOVE.l	(A7)+, $2(A0)
 	RTS
-loc_00008AEC:
+ObjSys_UpdateObjNextOpTimer:
 	TST.w	$24(A0)
 	BEQ.b	loc_00008AFC
 	SUBQ.w	#1, $24(A0)
@@ -10692,16 +10693,16 @@ loc_0000A164:
 	CMPI.b	#1, $00FFA130
 	BCC.b	loc_0000A180
 	JSR	loc_0001B190
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 loc_0000A180:
 	BSR.w	loc_0000A1F6
 	BSR.w	loc_0000AE34
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.w	$26(A0)
 	BNE.w	loc_0000B29C
 	JSR	loc_0000479A
 	BSR.w	loc_000072F8
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_000049CA
 	ANDI.w	#$007F, D0
 	MOVEQ	#5, D1
@@ -10822,7 +10823,7 @@ loc_0000A3AE:
 	dc.b	$42, $40, $10, $28, $00, $2A, $43, $F9, $00, $FF, $A1, $44, $13, $BC, $00, $FF, $00, $00, $10, $3C, $00, $61, $4E, $F9, $00, $01, $B1, $A2 ;0x0 (0x0000A3CA-0x0000A3E6, Entry count: 0x1C) [Unknown data]
 	BTST.b	#2, $00FFA130
 	BEQ.b	loc_0000A3F6
-	BSR.w	loc_00008AEC	;Predicted (Code-scan)
+	BSR.w	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
 loc_0000A3F6:
 	TST.b	$2A(A0)
@@ -10837,7 +10838,7 @@ loc_0000A3F6:
 	BSR.w	loc_0000C01A
 	MOVE.w	#$0020, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#$C034, D2
 	TST.b	$00FFA132
 	BEQ.b	loc_0000A444
@@ -10873,7 +10874,7 @@ loc_0000A488:
 loc_0000A4AE:
 	MOVE.w	D0, $28(A0)
 	MOVE.w	#$00A0, $26(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_000047AC
 	ANDI.b	#$70, D0
 	BNE.b	loc_0000A4DC
@@ -10933,7 +10934,7 @@ loc_0000A590:
 loc_0000A59E:
 	MOVE.w	D0, $28(A0)
 	MOVE.w	#$0080, $26(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_000047AC
 	ANDI.b	#$70, D0
 	BNE.b	loc_0000A5CC
@@ -10961,7 +10962,7 @@ loc_0000A602:
 	BSR.w	loc_00008AE2
 	JSR	loc_00008B02
 	BSET.b	#0, $00FFA141
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0000A61C:
 	MOVE.b	#1, $7(A0)
 	BSR.w	loc_0000B00A
@@ -10976,17 +10977,17 @@ loc_0000A61C:
 	BCC.b	loc_0000A65E
 	BSR.w	loc_0000B3E4
 loc_0000A65E:
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#1, $7(A0)
 	BNE.w	loc_0000B29C
 	JSR	loc_0000479A
 	BSR.w	loc_000072F8
-	CLR.b	rbBytecode_Return
+	CLR.b	rbBytecode_Ret
 	CLR.b	rbBytecode_StopRun
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 	LEA	loc_0000AD1C(PC), A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	BSET.b	#6, $1(A1)
 	MOVE.b	#$93, $6(A1)
 	MOVE.b	#$17, $8(A1)
@@ -10995,7 +10996,7 @@ loc_0000A65E:
 	MOVE.b	$2A(A0), $2A(A1)
 loc_0000A6B4:
 	CLR.b	$2B(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFA7F0, A2
 	TST.b	$2A(A0)
 	BEQ.b	loc_0000A6CC
@@ -11046,9 +11047,9 @@ loc_0000A752:
 	BSR.w	loc_0000AA70
 	JSR	loc_000036EA
 	BNE.b	loc_0000A76E
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_0000A76E:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 loc_0000A774:
 	BTST.b	#4, $00FFA141
 	BEQ.w	loc_0000A91C
@@ -11057,13 +11058,13 @@ loc_0000A774:
 	BSR.w	loc_00008B02	;Predicted (Code-scan)
 	ANDI.b	#$F7, $7(A0)	;Predicted (Code-scan)
 	MOVE.b	#$FF, $2B(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	BTST.b	#6, $00FFA141	;Predicted (Code-scan)
 	BEQ.w	loc_0000BB44	;Predicted (Code-scan)
 	MOVE.b	$2A(A0), D0	;Predicted (Code-scan)
 	BTST.b	D0, $00FFA09C	;Predicted (Code-scan)
 	BEQ.b	loc_0000A81E	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	BTST.b	#5, $00FFA141	;Predicted (Code-scan)
 	BNE.w	loc_0000A8F2	;Predicted (Code-scan)
 	JSR	loc_000047AC	;Predicted (Code-scan)
@@ -11089,7 +11090,7 @@ loc_0000A800:
 loc_0000A818:
 	JMP	loc_00001180	;Predicted (Code-scan)
 loc_0000A81E:
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	BTST.b	#5, $00FFA141	;Predicted (Code-scan)
 	BNE.w	loc_0000A8F2	;Predicted (Code-scan)
 	JSR	loc_000047AC	;Predicted (Code-scan)
@@ -11130,14 +11131,14 @@ loc_0000A8EA:
 loc_0000A8F2:
 	BSR.w	loc_0000AA70	;Predicted (Code-scan)
 	ANDI.b	#$FD, $7(A0)	;Predicted (Code-scan)
-	BRA.w	loc_00008AB8	;Predicted (Code-scan)
+	BRA.w	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_0000A900:
 	MOVE.b	#$52, D0	;Predicted (Code-scan)
 	JSR	loc_0001B1A2	;Predicted (Code-scan)
 	BSR.w	loc_0000AA70	;Predicted (Code-scan)
 	MOVE.b	$2A(A0), D0	;Predicted (Code-scan)
 	BCLR.b	D0, $00FFA141	;Predicted (Code-scan)
-	BRA.w	loc_00008AB8	;Predicted (Code-scan)
+	BRA.w	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_0000A91C:
 	BTST.b	#6, $00FFA141
 	BEQ.w	loc_0000BB44
@@ -11146,14 +11147,14 @@ loc_0000A91C:
 	JSR	loc_00008B02
 	MOVE.b	$2A(A0), D0
 	BCLR.b	D0, $00FFA141
-	BRA.w	loc_00008AB8
+	BRA.w	ObjSys_DeleteObjectA0
 	dc.b	$11, $7C, $00, $01, $00, $07, $61, $00, $06, $BE, $30, $3C, $00, $C0, $4E, $B9, $00, $00, $8A, $E2, $4E, $B9, $00, $00, $8A, $EC, $33, $FC, $01, $00, $00, $FF ;0x0 (0x0000A944-0x0000A9A0, Entry count: 0x5C) [Unknown data]
 	dc.b	$A1, $6A, $23, $E8, $00, $0A, $00, $FF, $A0, $88, $33, $E8, $00, $16, $00, $FF, $A0, $8C, $13, $E8, $00, $2A, $00, $FF, $A0, $8E, $61, $00, $09, $A6, $64, $04 ;0x20
 	dc.b	$61, $00, $0A, $5E, $61, $00, $E1, $62, $08, $28, $00, $01, $00, $07, $66, $00, $09, $08, $4E, $B9, $00, $00, $47, $9A, $61, $00, $C9, $5A ;0x40
 loc_0000A9A0:
 	MOVE.b	#$FF, $2B(A0)	;Predicted (Code-scan)
 	MOVE.w	#$0080, $26(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	MOVE.b	$00FFA131, D0	;Predicted (Code-scan)
 	EORI.b	#3, D0	;Predicted (Code-scan)
 	BEQ.w	loc_0000AA5A	;Predicted (Code-scan)
@@ -11178,7 +11179,7 @@ loc_0000A9EC:
 	MOVE.b	#$52, D0	;Predicted (Code-scan)
 	JSR	loc_0001B1A2	;Predicted (Code-scan)
 	BCLR.b	#0, $7(A0)	;Predicted (Code-scan)
-	BSR.w	loc_00008AEC	;Predicted (Code-scan)
+	BSR.w	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	BSR.w	loc_000049CA	;Predicted (Code-scan)
 	SUBI.w	#$0100, D0	;Predicted (Code-scan)
 	CLR.l	D1	;Predicted (Code-scan)
@@ -11203,8 +11204,8 @@ loc_0000A9EC:
 loc_0000AA5A:
 	CLR.b	rbBytecode_StopRun	;Predicted (Code-scan)
 	BCLR.b	#0, $7(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
-	BRA.w	loc_00008AB8	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
+	BRA.w	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_0000AA70:
 	MOVEM.l	D5/D1/D0, -(A7)
 	MOVEQ	#3, D1
@@ -11263,10 +11264,10 @@ loc_0000AB30:
 loc_0000AB36:
 	JSR	loc_00008B34
 	MOVE.b	#$80, $6(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#2, $00FFD047
 	BEQ.b	loc_0000AB58
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_0000AB58:
 	JSR	loc_00008B34
 	MOVE.b	$36(A0), D0
@@ -11342,7 +11343,7 @@ loc_0000ACCE:
 	ADDI.w	#$0040, D1
 	MOVE.w	D1, $20(A0)
 	BSR.w	loc_0000AAB0
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#2, $00FFD047
 	BNE.w	loc_0000ADF2
 	MOVE.b	$36(A0), D0
@@ -11365,7 +11366,7 @@ loc_0000AD1C:
 	MOVE.w	#6, $28(A0)
 loc_0000AD48:
 	MOVE.w	#$0020, $26(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_0000ADE2
 	TST.w	$26(A0)
 	BEQ.b	loc_0000AD68
@@ -11387,9 +11388,9 @@ loc_0000AD7E:
 	MOVE.w	#$0010, D0
 	BSR.w	loc_00008AE2
 	JSR	loc_00008BE0
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 loc_0000AD9A:
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.b	loc_0000ADE2
 	CMPI.w	#$0090, $E(A0)
 	BCS.b	loc_0000ADAE
@@ -11400,7 +11401,7 @@ loc_0000ADAE:
 	CLR.l	$16(A0)	;Predicted (Code-scan)
 	MOVE.w	#$2000, $1C(A0)	;Predicted (Code-scan)
 	MOVE.w	#$FFFF, $20(A0)	;Predicted (Code-scan)
-	BSR.w	loc_00008AEC	;Predicted (Code-scan)
+	BSR.w	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	BSR.b	loc_0000ADE2	;Predicted (Code-scan)
 	JSR	loc_00008BE0	;Predicted (Code-scan)
 	CMPI.w	#$00D0, $E(A0)	;Predicted (Code-scan)
@@ -11424,10 +11425,10 @@ loc_0000ADF2:
 	NEG.w	D0	;Predicted (Code-scan)
 loc_0000AE1C:
 	MOVE.w	D0, $12(A0)	;Predicted (Code-scan)
-	BSR.w	loc_00008AEC	;Predicted (Code-scan)
+	BSR.w	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	JSR	loc_00008BE0	;Predicted (Code-scan)
 	BCC.w	loc_0000BB44	;Predicted (Code-scan)
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_0000AE34:
 	BSR.w	loc_000049CA
 	ADDA.l	#$00000018, A2
@@ -11475,7 +11476,7 @@ loc_0000AE58:
 	CLR.w	D3
 	BSR.w	loc_000049CA
 	LEA	loc_0000B118(PC), A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	BCS.b	loc_0000AEF8
 	ADDQ.w	#1, D3
 	MOVE.l	A0, $2E(A1)
@@ -11494,7 +11495,7 @@ loc_0000AEF8:
 	MOVE.w	#5, D1
 loc_0000AF1A:
 	LEA	loc_0000B16C(PC), A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	BCS.b	loc_0000AF58
 	ADDQ.w	#1, D3
 	BSR.w	loc_0000AFC6
@@ -11565,13 +11566,13 @@ loc_0000B00A:
 	LEA	loc_0000B060(PC), A1
 	CMPI.b	#1, $00FFA130
 	BNE.b	loc_0000B02C
-	BSR.w	loc_000089FA	;Predicted (Code-scan)
+	BSR.w	ObjSys_InitObjWithFunc	;Predicted (Code-scan)
 	BCS.b	loc_0000B05E	;Predicted (Code-scan)
 	MOVE.w	#$0120, $A(A1)	;Predicted (Code-scan)
 	MOVE.w	#$00E8, $20(A1)	;Predicted (Code-scan)
 	BRA.b	loc_0000B048	;Predicted (Code-scan)
 loc_0000B02C:
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	BCS.b	loc_0000B05E
 	JSR	loc_00004A0C
 	ADDI.w	#$0030, D0
@@ -11588,7 +11589,7 @@ loc_0000B05E:
 loc_0000B060:
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#0, $7(A1)
-	BEQ.w	loc_00008AB8
+	BEQ.w	ObjSys_DeleteObjectA0
 	MOVE.w	$20(A0), D0
 	CMP.w	$E(A0), D0
 	BEQ.b	loc_0000B07C
@@ -11646,7 +11647,7 @@ loc_0000B12A:
 loc_0000B150:
 	MOVEA.l	$2E(A0), A1
 	SUBI.w	#1, $26(A1)
-	BRA.w	loc_00008AB8
+	BRA.w	ObjSys_DeleteObjectA0
 	dc.b	$04
 	dc.b	$00 ;0x0 (0x0000B15F-0x0000B160, Entry count: 0x1) [Unknown data]
 	dc.b	$03
@@ -11666,7 +11667,7 @@ loc_0000B16C:
 	ANDI.w	#$007C, D0
 	ADDI.w	#$CD80, D0
 	MOVE.w	D0, $28(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.l	$E(A0), D0
 	ADD.l	$16(A0), D0
 	MOVE.l	D0, $E(A0)
@@ -11702,7 +11703,7 @@ loc_0000B202:
 loc_0000B20A:
 	MOVEA.l	$2E(A0), A1
 	SUBI.w	#1, $26(A1)
-	BRA.w	loc_00008AB8
+	BRA.w	ObjSys_DeleteObjectA0
 loc_0000B218:
 	MOVEA.l	$2E(A0), A1
 	CLR.w	D0
@@ -11760,7 +11761,7 @@ loc_0000B2A2:
 	MOVE.b	#$11, $9(A0)
 loc_0000B2CA:
 	MOVE.b	#$85, $6(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00008BE0
 	BCS.b	loc_0000B314
 	MOVE.b	$36(A0), D0
@@ -11779,7 +11780,7 @@ loc_0000B2CA:
 	MOVE.b	$29(A0), D1
 	BRA.w	loc_00008E3A
 loc_0000B314:
-	BRA.w	loc_00008AB8
+	BRA.w	ObjSys_DeleteObjectA0
 loc_0000B318:
 	dc.b	$03
 	dc.b	$11 ;0x0 (0x0000B319-0x0000B31A, Entry count: 0x1) [Unknown data]
@@ -11850,7 +11851,7 @@ loc_0000B3BE:
 	RTS
 loc_0000B3E4:
 	LEA	loc_0000B462, A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCC.b	loc_0000B3F4
 	RTS	;Predicted (Code-scan)
 loc_0000B3F4:
@@ -11894,10 +11895,10 @@ loc_0000B462:
 	MOVE.l	A1, $32(A0)
 	MOVE.b	#$69, D0
 	JSR	loc_0001B1A2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.l	#$0B0B0B00, $12(A0)
 	CLR.w	$E(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	$A(A0), D0
 	CMPI.b	#5, D0
 	BCC.b	loc_0000B4FA
@@ -11975,7 +11976,7 @@ loc_0000B592:
 	MOVE.b	$25(A0), D0
 	MOVE.w	$24(A0), D0
 	BSR.w	loc_0000B5E4
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	$A(A0), D0
 	CMPI.b	#5, D0
 	BCC.b	loc_0000B5D4
@@ -11984,7 +11985,7 @@ loc_0000B592:
 loc_0000B5D4:
 	MOVEA.l	$2E(A0), A1
 	BCLR.b	#1, $7(A1)
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0000B5E4:
 	MOVE.w	$C(A0), D5
 	ADDI.w	#$0888, D5
@@ -12089,7 +12090,7 @@ loc_0000B71C:
 	BEQ.b	loc_0000B744
 	BSR.w	loc_0000BC12	;Predicted (Code-scan)
 loc_0000B744:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#2, $00FFA142
 	BEQ.w	loc_0000B780
 	CMPI.b	#2, $00FFA13E	;Predicted (Code-scan)
@@ -12172,10 +12173,10 @@ loc_0000B868:
 	BSET.b	#5, $00FFA170	;Predicted (Code-scan)
 	JSR	loc_00016E26	;Predicted (Code-scan)
 loc_0000B884:
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0000C810(PC), A2
 	JSR	loc_0000188C
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0000BB44
 	MOVE.b	$00FFD09E, $00FFA090
@@ -12207,7 +12208,7 @@ loc_0000B884:
 	ORI.b	#1, $7(A0)	;Predicted (Code-scan)
 	BSR.w	loc_0000B00A	;Predicted (Code-scan)
 loc_0000B946:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#2, $00FFA142
 	BNE.b	loc_0000B95C
 	JSR	loc_0000CA70
@@ -12221,7 +12222,7 @@ loc_0000B96C:
 	JSR	loc_00013E06
 	MOVE.b	$00FFA101, D0
 	JSR	loc_00013E06
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0000BB44
 	BSET.b	#3, $7(A0)
@@ -12243,7 +12244,7 @@ loc_0000B9C8:
 	BSR.w	loc_0000C2D6
 	MOVE.w	#$0020, D0
 	BSR.w	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#$0104, D0
 	CMPI.b	#$81, $00FFA140
 	BEQ.b	loc_0000B9FA
@@ -12252,17 +12253,17 @@ loc_0000B9FA:
 	MOVE.w	D0, $00FFA148
 	ANDI.w	#$FF00, D0
 	MOVE.w	D0, $00FFA146
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#4, $00FFA141
 	BNE.w	loc_0000BA48
-	MOVE.b	#1, rbBytecode_Return
-	JSR	loc_00008AEC
+	MOVE.b	#1, rbBytecode_Ret
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFA141, D0
 	ANDI.b	#3, D0
 	CMPI.b	#3, D0
 	BEQ.w	loc_0000BB44
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0000BA48:
 	MOVE.w	#$0281, $28(A0)	;Predicted (Code-scan)
 	MOVE.w	#$CC24, D5	;Predicted (Code-scan)
@@ -12275,9 +12276,9 @@ loc_0000BA48:
 	BSR.w	loc_0000C738	;Predicted (Code-scan)
 	BSET.b	#2, $7(A0)	;Predicted (Code-scan)
 	LEA	loc_0000ABD6(PC), A1	;Predicted (Code-scan)
-	JSR	loc_000089FA	;Predicted (Code-scan)
+	JSR	ObjSys_InitObjWithFunc	;Predicted (Code-scan)
 loc_0000BA86:
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	TST.w	$28(A0)	;Predicted (Code-scan)
 	BEQ.w	loc_0000BAF8	;Predicted (Code-scan)
 	MOVE.b	$00FFF071, D0	;Predicted (Code-scan)
@@ -12295,27 +12296,27 @@ loc_0000BABA:
 	ANDI.b	#3, D0	;Predicted (Code-scan)
 	CMPI.b	#3, D0	;Predicted (Code-scan)
 	BEQ.w	loc_0000BB44	;Predicted (Code-scan)
-	CLR.b	rbBytecode_Return	;Predicted (Code-scan)
+	CLR.b	rbBytecode_Ret	;Predicted (Code-scan)
 	CLR.w	$00FFA008	;Predicted (Code-scan)
 	CLR.w	$00FFA00A	;Predicted (Code-scan)
 	CLR.b	rbBytecode_StopRun	;Predicted (Code-scan)
 	BCLR.b	#5, $00FFA170	;Predicted (Code-scan)
 	JSR	loc_00016E26	;Predicted (Code-scan)
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_0000BAF8:
 	CLR.w	$28(A0)	;Predicted (Code-scan)
 	BSET.b	#5, $00FFA141	;Predicted (Code-scan)
 	MOVE.b	#3, $00FFA126	;Predicted (Code-scan)
 	MOVE.b	#1, $00FFA147	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	MOVE.b	#$15, D0	;Predicted (Code-scan)
 	JSR	loc_0001B1D2	;Predicted (Code-scan)
 	MOVE.w	#$0080, D0	;Predicted (Code-scan)
 	BSR.w	loc_00008AE2	;Predicted (Code-scan)
 	BSR.w	loc_00008B02	;Predicted (Code-scan)
-	MOVE.b	#2, rbBytecode_Return	;Predicted (Code-scan)
+	MOVE.b	#2, rbBytecode_Ret	;Predicted (Code-scan)
 	CLR.b	rbBytecode_StopRun	;Predicted (Code-scan)
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_0000BB44:
 	RTS
 loc_0000BB46:
@@ -12337,7 +12338,7 @@ loc_0000BB46:
 	BSR.w	loc_000072F8
 	MOVE.b	$2A(A0), D0
 	BSET.b	D0, $00FFA141
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFA141, D0
 	ANDI.b	#3, D0
 	CMPI.b	#3, D0
@@ -12345,7 +12346,7 @@ loc_0000BB46:
 	BTST.b	#7, $00FFA141
 	BEQ.w	loc_0000BB44
 	LEA	loc_0000ACCE(PC), A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	BCS.b	loc_0000BBE6
 	BSET.b	#6, $1(A1)
 	MOVE.b	#$80, $6(A1)
@@ -12353,7 +12354,7 @@ loc_0000BB46:
 	MOVE.l	A0, $2E(A1)
 	MOVE.b	$2A(A0), $2A(A1)
 loc_0000BBE6:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BRA.w	loc_0000A774
 loc_0000BBF0:
 	MOVE.b	$00FF4810, D0
@@ -12422,7 +12423,7 @@ loc_0000BD1E:
 loc_0000BD2C:
 	ORI.b	#$80, $6(A0)
 	MOVE.w	#$0040, $26(A0)
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00008BE0
 	SUBQ.w	#1, $26(A0)
 	BEQ.w	loc_0000BD4A
@@ -12431,7 +12432,7 @@ loc_0000BD4A:
 	MOVE.b	#0, $6(A0)
 	MOVE.w	#8, D0
 	BSR.w	loc_00008AE2
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	SUBQ.b	#1, $00FFA12C
 loc_0000BD62:
 	CLR.w	D0
@@ -12462,7 +12463,7 @@ loc_0000BDC8:
 	DBF	D3, loc_0000BD72
 	MOVE.b	#$76, D0
 	JSR	loc_0001B1A2
-	BRA.w	loc_00008AB8
+	BRA.w	ObjSys_DeleteObjectA0
 loc_0000BDDA:
 	dc.l	$0000BDEA, $0000BDF2, $0000BDFA, $0000BE02 ;0x0 (0x0000BDDA-0x0000BDEA, Entry count: 0x10)
 	dc.b	$08
@@ -12538,21 +12539,21 @@ loc_0000BEAA:
 	TST.b	$00FFA12C
 	BNE.w	loc_0000BB44
 	MOVE.b	#$80, $00FFA12C
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	ADDQ.b	#1, $00FFA12C
 	CMPI.b	#$BC, $00FFA12C
 	BCS.w	loc_0000BB44
 	MOVE.b	#$FF, $00FFA12C
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0000BEE2:
 	BSR.w	loc_00008BE0
-	BCS.w	loc_00008AB8
+	BCS.w	ObjSys_DeleteObjectA0
 	BSR.w	loc_00008B34
-	BCS.w	loc_00008AB8
+	BCS.w	ObjSys_DeleteObjectA0
 	RTS
 loc_0000BEF4:
 	LEA	loc_0000BF12, A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	MOVE.l	A0, $2E(A1)
 	BSET.b	#6, $1(A1)
 	MOVE.b	$00FFA132, $2A(A1)
@@ -12569,7 +12570,7 @@ loc_0000BF20:
 	MOVE.w	D1, $12(A0)
 	ADDI.w	#$0080, D1
 	MOVE.w	D1, $14(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEQ	#2, D3
 	TST.b	$28(A0)
 	BNE.b	loc_0000BF4A
@@ -12592,7 +12593,7 @@ loc_0000BF7C:
 	MOVE.b	$28(A0), D0
 	CMP.b	$2C(A0), D0
 	BNE.w	loc_0000BB44
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$26(A0), D0
 	ANDI.b	#$0F, D0
 	BNE.b	loc_0000BFC6
@@ -12634,7 +12635,7 @@ loc_0000C00E:
 	dc.b	$C5, $FF, $80, $00, $80, $00, $80, $00 ;0x0 (0x0000C012-0x0000C01A, Entry count: 0x8) [Unknown data]
 loc_0000C01A:
 	LEA	loc_0000BF12, A1
-	BSR.w	loc_000089FA
+	BSR.w	ObjSys_InitObjWithFunc
 	MOVE.l	A0, $2E(A1)
 	BSET.b	#6, $1(A1)
 	MOVE.b	#2, $2B(A1)
@@ -13126,7 +13127,7 @@ loc_0000C810:
 	dc.w	$D000
 	dc.b	$FF
 	dc.b	$FF ;0x0 (0x0000C817-0x0000C818, Entry count: 0x1) [Unknown data]
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0000BB44
 	CLR.b	$00FFA146
@@ -13135,17 +13136,17 @@ loc_0000C810:
 	BSR.w	loc_000054EE
 	BTST.b	#2, $00FFA130
 	BEQ.b	loc_0000C84C
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0000C84C:
 	CLR.b	$00FFA12C
-	BSR.w	loc_00008AEC
+	BSR.w	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFA140, D0
 	BEQ.w	loc_0000BB44
 	CMPI.b	#$80, D0
 	BNE.w	loc_0000CA2A
 	MOVE.b	#$97, $00FFA170
 	MOVE.b	#1, $00FFA120
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#0, $00FFA141
 	BEQ.w	loc_0000BB44
 	CLR.b	$00FFA141
@@ -13153,13 +13154,13 @@ loc_0000C84C:
 	CLR.b	$00FFD0FA
 	CLR.l	$00FFA180
 	JSR	loc_00008978
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEQ	#$00000021, D0
 	MOVEQ	#3, D1
 	JSR	loc_00013E06
 	MOVE.b	$00FFA101, D0
 	JSR	loc_00013E06
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0000BB44
 	CMPI.b	#$FF, $00FFA12C
@@ -13176,18 +13177,18 @@ loc_0000C84C:
 	MOVE.b	$00FFA101, D0
 	JSR	loc_00012982
 	MOVE.w	#$01A4, $26(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	SUBQ.w	#1, $26(A0)
 	BEQ.b	loc_0000C940
 	BTST.b	#0, $00FFA141
 	BEQ.w	loc_0000BB44
 loc_0000C940:
 	MOVE.w	#$0300, $00FFA126
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#0, $00FFA141
 	BEQ.w	loc_0000BB44
 	CLR.b	$00FFA049
-	MOVE.b	#1, rbBytecode_Return
+	MOVE.b	#1, rbBytecode_Ret
 	MOVEQ	#1, D1
 	CMPI.b	#5, $00FFA105
 	BCC.b	loc_0000C98E
@@ -13224,13 +13225,13 @@ loc_0000C9F0:
 	LEA	loc_0000CA30(PC), A1
 	MOVE.b	(A1,D0.w), D0
 	JSR	loc_0001B1D2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA127
 	BEQ.w	loc_0000BB44
 	CLR.b	rbBytecode_StopRun
 	MOVE.b	#$87, $00FFA170
 loc_0000CA2A:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0000CA30:
 	dc.b	$19 ;0x0 (0x0000CA30-0x0000CA31, Entry count: 0x1) [Unknown data]
 	dc.b	$1B
@@ -13285,25 +13286,25 @@ loc_0000CAE4:
 	CMPI.b	#$81, $00FFA14B
 	BEQ.w	loc_0000CB86
 	LEA	loc_0000CC78(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.b	#$FF, $0(A1)
 	BSET.b	#6, $1(A1)
 	MOVE.l	A1, $00FFA070
 loc_0000CB26:
 	LEA	loc_0000CB88(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.b	#$FF, $0(A1)
 	BSET.b	#6, $1(A1)
 	MOVE.b	#$FF, $8(A1)
 	MOVE.l	A1, $00FFA074
 	LEA	loc_0000CB88(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.b	#$FF, $0(A1)
 	BSET.b	#6, $1(A1)
 	MOVE.b	#5, $28(A1)
 	MOVE.l	A1, $00FFA078
 	LEA	loc_0000CFFC(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.b	#$FF, $0(A1)
 	BSET.b	#6, $1(A1)
 	MOVE.l	A1, $00FFA07C
@@ -13316,7 +13317,7 @@ loc_0000CB8E:
 	RTS
 loc_0000CB92:
 	MOVE.b	#$FF, $26(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA146
 loc_0000CBA4:
 	BPL.b	loc_0000CBB2
@@ -13392,12 +13393,12 @@ loc_0000CC78:
 	BSR.w	loc_0000CF2C
 	TST.b	$00FFA14B
 	BEQ.b	loc_0000CC9C
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA147
 	BEQ.b	loc_0000CCC0
 	BRA.b	loc_0000CCCC	;Predicted (Code-scan)
 loc_0000CC9C:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA140
 	BNE.b	loc_0000CCCC
 	ADDQ.b	#1, $26(A0)
@@ -13424,7 +13425,7 @@ loc_0000CCDA:
 	MOVE.b	#1, $00FFF046
 	MOVE.b	$00FFA148, $00FFA146
 	CLR.b	$2A(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.w	D5
 	MOVE.b	$2A(A0), D5
 	ASL.w	#2, D5
@@ -13453,12 +13454,12 @@ loc_0000CD38:
 	MOVE.w	$2(A1,D0.w), $2(A2)
 	MOVE.w	#$FFFF, $6(A2)
 	JSR	loc_0000188C
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0000CCBA
 	MOVE.b	$00FFA149, $00FFA146
 loc_0000CD84:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_0000CD8C:
 	TST.b	$2A(A0)
@@ -13568,19 +13569,19 @@ loc_0000CED2:
 loc_0000CEEC:
 	JSR	loc_00008B34
 	MOVE.b	#$87, $6(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	JSR	loc_00008B34
 	BCS.b	loc_0000CF0E
 	RTS
 loc_0000CF0E:
 	MOVE.l	#$0000CEE4, $32(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	BCS.b	loc_0000CF26
 	RTS
 loc_0000CF26:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0000CF2C:
 	TST.b	$00FFA101
 	BNE.b	loc_0000CF3E
@@ -13727,7 +13728,7 @@ loc_0000D266:
 	MOVE.w	D0, $26(A0)
 	MOVE.w	#$0160, $20(A0)
 	LEA	loc_0000D234(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0000D344
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$FF, $7(A1)
@@ -13737,7 +13738,7 @@ loc_0000D266:
 	MOVE.w	#$0110, $E(A1)
 	MOVE.l	A0, $2E(A1)
 	LEA	loc_0000D1E4(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0000D344
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$76, $8(A1)
@@ -13748,7 +13749,7 @@ loc_0000D266:
 	MOVE.l	#$0000D1A4, $32(A1)
 	MOVE.l	A0, $2E(A1)
 loc_0000D344:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFA146, D0
 	CMPI.b	#3, D0
 	BEQ.w	loc_0000D7EC
@@ -13828,7 +13829,7 @@ loc_0000D584:
 	DBF	D1, loc_0000D584	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
 loc_0000D58C:
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	JSR	loc_00008B34	;Predicted (Code-scan)
 	CLR.w	D0	;Predicted (Code-scan)
 	MOVE.b	$9(A0), D0	;Predicted (Code-scan)
@@ -13849,27 +13850,27 @@ loc_0000D5A6:
 	ADD.w	D2, D2	;Predicted (Code-scan)
 	MOVE.b	#1, (A1,D2.w)	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA140
 	BNE.b	loc_0000D5E4
 	RTS	;Predicted (Code-scan)
 loc_0000D5E4:
 	MOVE.w	#$000A, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#$FF, $00FFA146
 	BNE.b	loc_0000D600
 	RTS	;Predicted (Code-scan)
 loc_0000D600:
 	CMPI.b	#4, $00FFA146
 	BEQ.b	loc_0000D612
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_0000D612:
 	MOVE.l	#$0000D4DE, $32(A0)	;Predicted (Code-scan)
 	MOVE.l	#$0000D4F0, $26(A0)	;Predicted (Code-scan)
 	BRA.w	loc_0000D58C	;Predicted (Code-scan)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA140
 	BNE.b	loc_0000D636
 	RTS	;Predicted (Code-scan)
@@ -13879,7 +13880,7 @@ loc_0000D636:
 	RTS
 loc_0000D642:
 	LEA	loc_0000D6D2(PC), A1	;Predicted (Code-scan)
-	JSR	loc_000089FA	;Predicted (Code-scan)
+	JSR	ObjSys_InitObjWithFunc	;Predicted (Code-scan)
 	MOVE.b	#$BF, $6(A1)	;Predicted (Code-scan)
 	MOVE.b	#$76, $8(A1)	;Predicted (Code-scan)
 	MOVE.b	#7, $9(A1)	;Predicted (Code-scan)
@@ -13891,7 +13892,7 @@ loc_0000D642:
 	MOVE.w	#$FFFF, $20(A1)	;Predicted (Code-scan)
 	MOVE.l	A0, $2E(A1)	;Predicted (Code-scan)
 	LEA	loc_0000D6D2(PC), A1	;Predicted (Code-scan)
-	JSR	loc_000089FA	;Predicted (Code-scan)
+	JSR	ObjSys_InitObjWithFunc	;Predicted (Code-scan)
 	MOVE.b	#$BF, $6(A1)	;Predicted (Code-scan)
 	MOVE.b	#$76, $8(A1)	;Predicted (Code-scan)
 	MOVE.b	#8, $9(A1)	;Predicted (Code-scan)
@@ -13902,7 +13903,7 @@ loc_0000D642:
 	MOVE.w	#$4000, $1C(A1)	;Predicted (Code-scan)
 	MOVE.w	#$FFFF, $20(A1)	;Predicted (Code-scan)
 	MOVE.l	A0, $2E(A1)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
 loc_0000D6D2:
 	dc.b	$30, $3C, $00, $0A, $4E, $B9, $00, $00, $8A, $E2, $4E, $B9, $00, $00, $8A, $EC, $4E, $B9, $00, $00, $8B, $E0, $65, $0A, $0C, $68, $01, $60, $00, $0E, $64, $02 ;0x0 (0x0000D6D2-0x0000D7EC, Entry count: 0x11A) [Unknown data]
@@ -13915,7 +13916,7 @@ loc_0000D6D2:
 	dc.b	$23, $48, $00, $2E, $60, $00, $FF, $4E, $11, $7C, $00, $00, $00, $07, $4E, $B9, $00, $00, $8A, $EC, $4E, $75, $4A, $39, $00, $FF, $A1, $40, $66, $1C, $22, $68 ;0xE0
 	dc.b	$00, $2E, $08, $29, $00, $00, $00, $07, $67, $10, $4E, $B9, $00, $00, $8B, $E0, $65, $08, $53, $68, $00, $26, $67, $02, $4E, $75 ;0x100
 loc_0000D7EC:
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 	dc.b	$4E, $B9, $00, $00, $8A, $EC, $4A, $39, $00, $FF, $A1, $40, $66, $02, $4E, $75, $30, $3C, $00, $0A, $4E, $B9, $00, $00, $8A, $E2, $4E, $B9, $00, $00, $8A, $EC ;0x0 (0x0000D7F2-0x0000D950, Entry count: 0x15E) [Unknown data]
 	dc.b	$0C, $39, $00, $FF, $00, $FF, $A1, $46, $66, $02, $4E, $75, $0C, $39, $00, $03, $00, $FF, $A1, $46, $67, $08, $4E, $B9, $00, $00, $8A, $EC, $4E, $75, $11, $7C ;0x20
 	dc.b	$00, $80, $00, $06, $11, $7C, $00, $76, $00, $08, $11, $7C, $00, $16, $00, $09, $31, $7C, $01, $08, $00, $0A, $31, $7C, $00, $F0, $00, $20, $31, $7C, $04, $00 ;0x40
@@ -13927,7 +13928,7 @@ loc_0000D7EC:
 	dc.b	$00, $38, $4E, $B9, $00, $00, $0C, $1E, $06, $40, $00, $F0, $33, $40, $00, $0E, $23, $7C, $00, $00, $D9, $20, $00, $32, $23, $48, $00, $2E, $60, $00, $FF, $74 ;0x100
 	dc.b	$11, $7C, $00, $00, $00, $07, $4E, $B9, $00, $00, $8A, $EC, $4E, $75, $03, $17, $03, $18, $04, $19, $03, $18, $03, $17, $FE, $00, $4E, $F9, $00, $00, $8A, $B8 ;0x120
 	dc.b	$4A, $39, $00, $FF, $A1, $40, $66, $F2, $22, $68, $00, $2E, $08, $29, $00, $00, $00, $07, $67, $E6, $4E, $B9, $00, $00, $8B, $34, $65, $DE, $4E, $75 ;0x140
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 	dc.b	$4E, $75 ;0x0 (0x0000D958-0x0000D95A, Entry count: 0x2) [Unknown data]
 loc_0000D95A:
@@ -16439,7 +16440,7 @@ loc_000128CC:
 	dc.b	$01, $06, $00, $6A, $FF, $FF, $00, $05, $00, $02, $01, $06, $00, $10, $FF, $FF, $00, $01, $00, $01, $02, $8C, $00, $A6, $FF, $FF, $00, $01, $00, $01, $02, $8C ;0x40
 	dc.b	$00, $CA, $FF, $FF, $00, $01, $00, $01, $02, $8C, $00, $CC, $FF, $FF, $00, $02, $00, $01, $02, $8A, $00, $CE, $FF, $FF ;0x60
 loc_00012948:
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	CMPI.b	#$21, D2
 	BNE.b	loc_0001295C
 	MOVE.l	A1, $00FFA080
@@ -16501,13 +16502,13 @@ loc_000129F8:
 	CMPI.b	#$80, $00FFA140
 	BNE.w	loc_00012ABE
 	MOVE.w	$E(A0), $20(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	MOVE.w	$20(A0), D0	;Predicted (Code-scan)
 	SUB.w	$00FFF0B4, D0	;Predicted (Code-scan)
 	MOVE.w	D0, $E(A0)	;Predicted (Code-scan)
 	JMP	loc_00008B34	;Predicted (Code-scan)
 loc_00012A36:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_00012A3E:
 	TST.b	$00FFA132
@@ -16529,24 +16530,24 @@ loc_00012A72:
 	JSR	(A2)
 loc_00012A78:
 	MOVE.b	#1, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	CMPI.b	#1, $00FFA130
 	BNE.b	loc_00012ABE
 	CMPI.b	#$81, $00FFA140
 	BNE.b	loc_00012ABE
 	MOVE.w	$E(A0), $20(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	$20(A0), D0
 	SUB.w	$00FFF0B4, D0
 	MOVE.w	D0, $E(A0)
 	JMP	loc_00008B34
 loc_00012ABE:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#3, $7(A1)
 	BNE.b	loc_00012ADC
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 loc_00012ADC:
 	CMPI.b	#3, $00FFA126
@@ -16554,7 +16555,7 @@ loc_00012ADC:
 	MOVE.b	#$95, $6(A0)
 	MOVE.w	#$1800, $1C(A0)
 	MOVE.w	#$FFFF, $20(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	CMPI.w	#$01B0, $E(A0)
 	BCC.b	loc_00012B14
@@ -16562,11 +16563,11 @@ loc_00012ADC:
 loc_00012B14:
 	MOVE.w	#$0018, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#$70, D0
 	JSR	loc_0001B1A2
 	MOVE.w	#$0C00, $38(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$36(A0), D0
 	MOVE.w	$38(A0), D1
 	LEA	$00FFF0B4, A1
@@ -16586,7 +16587,7 @@ loc_00012B4C:
 	SUBI.w	#$0040, $38(A0)
 	BCC.w	loc_00012980
 	MOVE.b	#1, $00FFA127
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00012B92:
 	dc.b	$11, $7C, $00, $80, $00, $06, $31, $7C, $00, $C0, $00, $0A, $31, $7C, $01, $30, $00, $0E, $4E, $B9, $00, $00, $8A, $EC, $10, $39, $00, $FF, $A1, $01, $02, $40 ;0x0 (0x00012B92-0x00012C48, Entry count: 0xB6) [Unknown data]
 	dc.b	$00, $FF, $E5, $40, $24, $7B, $00, $04, $4E, $D2, $00, $01, $2C, $40, $00, $01, $2C, $40, $00, $01, $2C, $40, $00, $01, $2C, $40, $00, $01, $2C, $40, $00, $01 ;0x20
@@ -16636,12 +16637,12 @@ loc_00012D02:
 	MOVE.b	#1, $7(A0)
 	LEA	loc_0001444E(PC), A2
 	JSR	loc_00014164(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA126
 	BEQ.w	loc_00012D02
 	MOVE.b	#0, $7(A0)
 	MOVE.b	#1, $9(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 	dc.b	$11, $7C, $00, $80, $00, $06, $11, $7C, $00, $01, $00, $07, $4E, $BA, $FE, $9E, $45, $FA, $16, $48, $4E, $BA, $13, $4A, $4E, $B9, $00, $00, $8A, $EC, $4E, $75 ;0x0 (0x00012E32-0x00012E52, Entry count: 0x20) [Unknown data]
 	MOVE.b	#$80, $6(A0)
@@ -16649,12 +16650,12 @@ loc_00012D02:
 	MOVE.b	#1, $7(A0)
 	LEA	loc_0001475C(PC), A2
 	JSR	loc_00014164(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA126
 	BEQ.w	loc_00012D02
 	MOVE.b	#0, $7(A0)
 	MOVE.b	#1, $9(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 	dc.b	$11, $7C, $00, $01, $00, $07, $4E, $BA, $FE, $48, $43, $FA, $00, $F8, $4E, $B9, $00, $00, $89, $FA, $65, $00, $00, $E6, $13, $7C, $00, $80, $00, $06, $13, $68 ;0x0 (0x00012E8E-0x000130C6, Entry count: 0x238) [Unknown data]
 	dc.b	$00, $08, $00, $08, $13, $7C, $00, $06, $00, $09, $33, $68, $00, $0A, $00, $0A, $33, $68, $00, $0E, $00, $20, $33, $7C, $08, $00, $00, $38, $23, $48, $00, $2E ;0x20
@@ -16679,12 +16680,12 @@ loc_00012D02:
 	MOVE.b	#1, $7(A0)
 	LEA	loc_00014772(PC), A2
 	JSR	loc_00014164(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA126
 	BEQ.w	loc_00012D02
 	MOVE.b	#0, $7(A0)	;Predicted (Code-scan)
 	MOVE.b	#1, $9(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
 	dc.b	$11, $7C, $00, $80, $00, $06, $11, $7C, $00, $01, $00, $07, $4E, $BA, $FB, $CE, $45, $FA, $16, $74, $4E, $BA, $10, $7A, $4E, $B9, $00, $00, $8A, $EC, $4E, $75 ;0x0 (0x00013102-0x00013122, Entry count: 0x20) [Unknown data]
 	MOVE.b	#$80, $6(A0)
@@ -16700,12 +16701,12 @@ loc_00012D02:
 	JSR	loc_00014164(PC)
 	LEA	loc_00014870(PC), A2
 	JSR	loc_00014164(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA126
 	BEQ.w	loc_00012D02
 	MOVE.b	#0, $7(A0)
 	MOVE.b	#1, $9(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 	dc.b	$11, $7C, $00, $80, $00, $06, $11, $7C, $00, $01, $00, $07, $4E, $BA, $FB, $52, $45, $FA, $16, $0A, $4E, $BA, $0F, $FE, $4E, $B9, $00, $00, $8A, $EC, $4E, $75 ;0x0 (0x0001317E-0x00013CAA, Entry count: 0xB2C) [Unknown data]
 	dc.b	$11, $7C, $00, $80, $00, $06, $4E, $BA, $FB, $38, $11, $7C, $00, $01, $00, $07, $45, $FA, $16, $64, $4E, $BA, $0F, $B0, $4E, $B9, $00, $00, $8A, $EC, $4A, $39 ;0x20
@@ -17074,7 +17075,7 @@ loc_00014052:
 loc_0001405A:
 	RTS	;Predicted (Code-scan)
 loc_0001405C:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00014062:
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#0, $7(A1)
@@ -17104,7 +17105,7 @@ loc_00014098:
 	dc.b	$8B, $34, $4E, $B9, $00, $00, $8A, $EC, $60, $00, $FF, $70 ;0xA0
 loc_00014164:
 	LEA	loc_00014062(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00014190
 	MOVE.w	$A(A0), $A(A1)
 	MOVE.w	$E(A0), $E(A1)
@@ -17116,7 +17117,7 @@ loc_00014190:
 	RTS
 loc_00014192:
 	LEA	loc_00014098(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00014190
 	MOVE.b	#$80, $6(A1)
 	MOVE.w	$A(A0), $A(A1)
@@ -17182,7 +17183,7 @@ loc_000144E0:
 	dc.b	$00, $16, $34, $3C, $00, $38, $45, $FA, $00, $16, $4E, $BA, $FC, $8A, $32, $3C, $00, $14, $34, $3C, $00, $28, $45, $FA, $00, $0A, $60, $00, $FC, $7A, $00, $00 ;0x20
 	dc.b	$FE, $00, $00, $01, $FE, $00 ;0x40
 	LEA	loc_000144E0(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001405A
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#0, $6(A0)
@@ -17197,7 +17198,7 @@ loc_000144E0:
 	MOVE.w	#$0038, D2
 	MOVE.w	#$4000, D3
 	LEA	loc_00014686(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001464E
 	MOVE.b	#$BF, $6(A1)
 	MOVE.b	#$FF, $7(A1)
@@ -17223,7 +17224,7 @@ loc_000144E0:
 	MOVE.l	A0, $2E(A1)
 	MOVEA.l	A1, A2
 	LEA	loc_00014650(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001464E
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$FF, $7(A1)
@@ -17256,7 +17257,7 @@ loc_0001467E:
 	MOVE.b	#5, $9(A0)
 	RTS
 loc_00014686:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#0, $7(A1)
 	BEQ.w	loc_0001405C
@@ -17309,7 +17310,7 @@ loc_0001472E:
 	MOVE.w	D0, $16(A0)
 	JSR	loc_00000C04
 	MOVE.w	D0, $18(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BRA.w	loc_00014686
 	dc.b	$45, $FA, $00, $06, $60, $00, $FA, $0A ;0x0 (0x00014754-0x0001475C, Entry count: 0x8) [Unknown data]
 loc_0001475C:
@@ -17488,7 +17489,7 @@ loc_000149B6:
 	dc.b	$02, $03, $FF, $00, $00, $01, $4D, $1E, $45, $FA, $00, $06, $60, $00, $F4, $32, $F0, $00, $02, $03, $03, $04, $02, $03, $FF, $00, $00, $01, $4D, $34 ;0x360
 loc_00014D42:
 	LEA	loc_00014D88(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.b	$00FFA101, D0
 	ANDI.w	#$00FF, D0
 	ASL.w	#2, D0
@@ -17497,7 +17498,7 @@ loc_00014D42:
 	RTS
 loc_00014D66:
 	LEA	loc_00014DA0(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.b	$00FFA058, D0
 	ANDI.w	#3, D0
 	ASL.w	#2, D0
@@ -17509,7 +17510,7 @@ loc_00014D88:
 	ANDI.b	#$70, D0
 	BEQ.b	loc_00014DA0
 	CLR.b	rbBytecode_StopRun
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 loc_00014DA0:
 	TST.w	$26(A0)
 	BEQ.b	loc_00014DAC
@@ -17547,9 +17548,9 @@ loc_00014DCE:
 	CLR.b	$7(A0)
 	MOVEQ	#4, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 	ANDI.w	#$00FF, D0
 	MULU.w	#6, D0
 	MOVE.w	D0, $26(A0)
@@ -17681,7 +17682,7 @@ loc_00015064:
 	dc.b	$E5, $40, $45, $F9, $00, $01, $93, $74, $24, $72, $00, $00 ;0x0 (0x0001508A-0x00015096, Entry count: 0xC) [Unknown data]
 loc_00015096:
 	LEA	loc_000150C8(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.w	#1, $2A(A1)
 	MOVE.b	#$50, $8(A1)
 	MOVE.w	D1, $28(A1)
@@ -17738,7 +17739,7 @@ loc_00015138:
 	dc.b	$00, $01, $51, $8A, $00, $01, $51, $60, $00, $01, $51, $B0, $00, $01, $51, $76, $00, $01, $51, $58, $54, $A8, $00, $32, $60, $00, $FF, $9A, $22, $68, $00, $2E ;0x0 (0x00015144-0x0001516A, Entry count: 0x26) [Unknown data]
 	dc.b	$83, $29, $00, $07, $4E, $75 ;0x20
 loc_0001516A:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 	MOVE.w	D1, $2A(A0)
 	RTS
 	dc.b	$C2, $FC, $00, $06, $31, $41, $00, $26, $4E, $75 ;0x0 (0x00015176-0x00015180, Entry count: 0xA) [Unknown data]
@@ -17844,35 +17845,35 @@ loc_000152CE:
 	BRA.b	loc_000152C4
 	CLR.w	$00FFA05E
 	LEA	loc_0001530E(PC), A1
-	JMP	loc_000089FA
+	JMP	ObjSys_InitObjWithFunc
 loc_0001530E:
 	LEA	loc_0001538A(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.l	A0, $2E(A1)
 	BSET.b	#6, $1(A1)
 	LEA	loc_000154F8(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.l	A0, $2E(A1)
 	BSET.b	#6, $1(A1)
 	MOVEQ	#5, D0
 loc_00015338:
 	LEA	loc_00015670(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.l	A0, $2E(A1)
 	BSET.b	#6, $1(A1)
 	MOVE.w	D0, $26(A1)
 	DBF	D0, loc_00015338
 	LEA	loc_0001582E(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.l	A0, $2E(A1)
 	BSET.b	#6, $1(A1)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$7(A0), D0
 	ANDI.b	#7, D0
 	CMPI.b	#7, D0
 	BNE.w	loc_000150C2
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0001538A:
 	MOVEQ	#8, D0
 	LEA	loc_000154DA(PC), A1
@@ -17889,7 +17890,7 @@ loc_000153A8:
 	MOVE.w	#$0060, $A(A0)
 	MOVE.w	#$0118, $E(A0)
 	MOVE.l	#$00040000, $12(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFF071, D0
 	OR.b	$00FFF077, D0
 	ANDI.b	#$70, D0
@@ -17923,7 +17924,7 @@ loc_00015420:
 	CMPI.w	#$00E0, $E(A0)
 	BCC.w	loc_0001545A
 	JSR	loc_00006D52
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0001545A:
 	MOVE.w	#$010C, $00FFFC62
 	MOVE.w	#$C500, $00FFFC64
@@ -17970,7 +17971,7 @@ loc_000154F8:
 	BNE.b	loc_00015512
 	MOVEA.l	$2E(A0), A1	;Predicted (Code-scan)
 	BSET.b	#1, $7(A1)	;Predicted (Code-scan)
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_00015512:
 	MOVEQ	#0, D0
 	MOVE.b	$00FFA100, D0
@@ -17982,7 +17983,7 @@ loc_00015512:
 	MOVE.w	#$C000, $2A(A0)
 	MOVE.w	#$0138, $A(A0)
 	MOVE.w	#$0118, $E(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFF071, D0
 	OR.b	$00FFF077, D0
 	ANDI.b	#$70, D0
@@ -18024,7 +18025,7 @@ loc_000155C6:
 	SUBQ.w	#2, $E(A0)
 	CMPI.w	#$00E0, $E(A0)
 	BCC.w	loc_0001560E
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_000155FE:
 	dc.b	$00 ;0x0 (0x000155FE-0x000155FF, Entry count: 0x1) [Unknown data]
 	dc.b	$10
@@ -18081,7 +18082,7 @@ loc_00015670:
 	MOVE.b	D2, $28(A0)
 loc_000156AE:
 	MOVE.b	$3(A1,D0.w), $29(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFF071, D0
 	OR.b	$00FFF077, D0
 	ANDI.b	#$70, D0
@@ -18140,7 +18141,7 @@ loc_0001578A:
 	BSR.w	loc_000157E8
 	RTS
 loc_0001579A:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_000157A0:
 	dc.w	$FFE8
 	dc.b	$2C
@@ -18190,7 +18191,7 @@ loc_0001582E:
 	MOVE.w	#$01C0, $A(A0)	;Predicted (Code-scan)
 	MOVE.w	#$0138, $E(A0)	;Predicted (Code-scan)
 	MOVE.l	#$FFFC0000, $12(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	TST.b	$00FFA05E	;Predicted (Code-scan)
 	BNE.b	loc_0001589E	;Predicted (Code-scan)
 	MOVE.l	$A(A0), D0	;Predicted (Code-scan)
@@ -18200,7 +18201,7 @@ loc_0001582E:
 	CMPI.w	#$0120, D0	;Predicted (Code-scan)
 	BNE.w	loc_000154D8	;Predicted (Code-scan)
 	CLR.l	$12(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	TST.b	$00FFA05E	;Predicted (Code-scan)
 	BEQ.w	loc_0001545A	;Predicted (Code-scan)
 loc_0001589E:
@@ -18214,7 +18215,7 @@ loc_0001589E:
 	BCC.w	loc_000154D8	;Predicted (Code-scan)
 loc_000158C2:
 	JSR	loc_00016DAA
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_000158CE:
 	TST.b	$00FFA11C
 	BEQ.b	loc_00015908
@@ -18328,7 +18329,7 @@ loc_00015A1C:
 	NEG.l	D2
 	MOVE.l	D2, $16(A0)
 	MOVE.b	#$20, $28(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.l	$12(A0), D0
 	ADD.l	D0, $A(A0)
 	MOVE.l	$16(A0), D0
@@ -18385,23 +18386,23 @@ loc_00015B2A:
 	MOVEQ	#$0000000C, D4
 	JMP	loc_00008EFE
 loc_00015B3A:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 
 Bytecode_Init:
-	MOVE.l	#Bytecode_Bootup, rlBytecode_CurLocation
-	CLR.b	rbBytecode_Return
+	MOVE.l	#Bytecode_Bootup, rlBytecode_PC
+	CLR.b	rbBytecode_Ret
 	CLR.b	rbBytecode_StopRun
-_Bytecode_InitRet:
+@Ret:
 	RTS
 Bytecode_Run:
 	TST.b	rbBytecode_StopRun
-	BNE.b	_Bytecode_InitRet
+	BNE.b	Bytecode_Init.Ret
 @StepBytecode:
 	CLR.b	rbBytecode_StopLoop
-	MOVEA.l	rlBytecode_CurLocation, A0
+	MOVEA.l	rlBytecode_PC, A0
 	MOVE.w	(A0)+, D1
 	MOVE.w	(A0)+, D0
-	MOVE.l	A0, rlBytecode_CurLocation
+	MOVE.l	A0, rlBytecode_PC
 	ASL.w	#2, D1
 	MOVEA.l	loc_00015B88(PC,D1.w), A0
 	JSR	(A0)
@@ -18412,15 +18413,15 @@ loc_00015B86:
 loc_00015B88:
 	dc.l	BytecodeOP_Stop
 	dc.l	BytecodeOP_Nop
-	dc.l	loc_00015C24
+	dc.l	BytecodeOP_Delay
 	dc.l	loc_00015C5E
 	dc.l	BytecodeOP_WriteRAMWord
-	dc.l	loc_00015CE8
-	dc.l	loc_00015CFC
-	dc.l	loc_00015D0E
-	dc.l	loc_00015D20
-	dc.l	loc_00015D84
-	dc.l	loc_00015DAA
+	dc.l	BytecodeOP_RunFunc
+	dc.l	BytecodeOP_Jump
+	dc.l	BytecodeOP_JumpEQ
+	dc.l	BytecodeOP_JumpNE
+	dc.l	BytecodeOP_JumpTbl
+	dc.l	BytecodeOP_SetVDP
 	dc.l	loc_00015DB0
 	dc.l	loc_00015C14
 	dc.l	loc_00015DDA
@@ -18431,129 +18432,137 @@ loc_00015B88:
 	dc.l	loc_00015E0A
 	dc.l	loc_00015E16
 	dc.l	BytecodeOP_WriteRAMLong
-	dc.l	loc_00015CCE
+	dc.l	BytecodeOP_WriteRAMByte
 	dc.l	loc_00015C7E
 	dc.l	loc_00015D58
 	dc.l	loc_00015D32
 BytecodeOP_Stop:
-	SUBQ.l	#2, rlBytecode_CurLocation
+	SUBQ.l	#2, rlBytecode_PC
 	MOVE.b	#$FF, rbBytecode_StopLoop
 	MOVE.b	#$FF, rbBytecode_StopRun
 	RTS
 BytecodeOP_Nop:
-	SUBQ.l	#2, rlBytecode_CurLocation
+	SUBQ.l	#2, rlBytecode_PC
 	MOVE.b	#$FF, rbBytecode_StopLoop
 	RTS
 loc_00015C14:
 	tst.b	rbBytecode_StopRun
 	bne.s	BytecodeOP_Nop
-	subq.l	#2, rlBytecode_CurLocation
+	subq.l	#2, rlBytecode_PC
 	rts
 	
-loc_00015C24:
+BytecodeOP_Delay:
 	move.b	#-1, rbBytecode_StopLoop
 	move.b	#-1, rbBytecode_StopRun
-	lea loc_00015C4C, a1
-	jsr loc_000089FA
-	bcc.w	loc_00015C46
+	lea @DelayObjInit, a1
+	jsr ObjSys_InitObjWithFunc
+	bcc.w	@ObjCreateSuccess
 	rts
-loc_00015C46:
+@ObjCreateSuccess:
 	move.w d0, $24(a1)
 	rts
-loc_00015C4C:
-	jsr loc_00008AEC
+@DelayObjInit:
+	jsr ObjSys_UpdateObjNextOpTimer
 	clr.b	rbBytecode_StopRun
-	jmp	loc_00008AB8
+	jmp	ObjSys_DeleteObjectA0
 
 loc_00015C5E:
-	SUBQ.l	#2, rlBytecode_CurLocation
+	SUBQ.l	#2, rlBytecode_PC
 	MOVE.b	#$FF, rbBytecode_StopLoop
 	TST.b	$00FFF048
 	BEQ.w	loc_00015B86
-	SUBQ.l	#2, rlBytecode_CurLocation
+	SUBQ.l	#2, rlBytecode_PC
 	RTS
 loc_00015C7E:
 	dc.b	$55, $B9, $00, $FF, $A0, $50, $13, $FC, $00, $FF, $00, $FF, $A0, $56, $4A, $39, $00, $FF, $F0, $80, $67, $00, $FE, $F2, $55, $B9, $00, $FF, $A0, $50, $4E, $75 ;0x0 (0x00015C7E-0x00015C9E, Entry count: 0x20) [Unknown data]
 
 BytecodeOP_WriteRAMWord:
-	MOVEA.l	rlBytecode_CurLocation, A0
+	MOVEA.l	rlBytecode_PC, A0
 	SWAP	D0
 	MOVE.w	(A0)+, D0
 	MOVE.w	(A0)+, D1
-	MOVE.l	A0, rlBytecode_CurLocation
+	MOVE.l	A0, rlBytecode_PC
 	MOVEA.l	D0, A0
 	MOVE.w	D1, (A0)
 	RTS
 	
 BytecodeOP_WriteRAMLong:
-	MOVEA.l	rlBytecode_CurLocation, A0
+	MOVEA.l	rlBytecode_PC, A0
 	SWAP	D0
 	MOVE.w	(A0)+, D0
 	MOVE.l	(A0)+, D1
-	MOVE.l	A0, rlBytecode_CurLocation
+	MOVE.l	A0, rlBytecode_PC
 	MOVEA.l	D0, A0
 	MOVE.l	D1, (A0)
 	RTS
 	
-loc_00015CCE:
-	MOVEA.l	rlBytecode_CurLocation, A0
+BytecodeOP_WriteRAMByte:
+	MOVEA.l	rlBytecode_PC, A0
 	SWAP	D0
 	MOVE.w	(A0)+, D0
 	MOVE.b	(A0)+, D1
 	ADDQ.l	#1, A0
-	MOVE.l	A0, rlBytecode_CurLocation
+	MOVE.l	A0, rlBytecode_PC
 	MOVEA.l	D0, A0
 	MOVE.b	D1, (A0)
 	RTS
-loc_00015CE8:
-	MOVEA.l	rlBytecode_CurLocation, A0
+
+BytecodeOP_RunFunc:
+	MOVEA.l	rlBytecode_PC, A0
 	SWAP	D0
 	MOVE.w	(A0)+, D0
-	MOVE.l	A0, rlBytecode_CurLocation
+	MOVE.l	A0, rlBytecode_PC
 	MOVEA.l	D0, A0
 	JMP	(A0)
-loc_00015CFC:
-	MOVEA.l	rlBytecode_CurLocation, A0
+
+BytecodeOP_Jump:
+	MOVEA.l	rlBytecode_PC, A0
 	SWAP	D0
 	MOVE.w	(A0), D0
-	MOVE.l	D0, rlBytecode_CurLocation
+	MOVE.l	D0, rlBytecode_PC
 	RTS
-loc_00015D0E:
-	TST.b	rbBytecode_Return
-	BEQ.w	loc_00015CFC
-	ADDQ.l	#2, rlBytecode_CurLocation
+
+BytecodeOP_JumpEQ:
+	TST.b	rbBytecode_Ret
+	BEQ.w	BytecodeOP_Jump
+	ADDQ.l	#2, rlBytecode_PC
 	RTS
-loc_00015D20:
-	TST.b	rbBytecode_Return
-	BNE.w	loc_00015CFC
-	ADDQ.l	#2, rlBytecode_CurLocation
+
+BytecodeOP_JumpNE:
+	TST.b	rbBytecode_Ret
+	BNE.w	BytecodeOP_Jump
+	ADDQ.l	#2, rlBytecode_PC
 	RTS
+
 loc_00015D32:
 	dc.b	$20, $79, $00, $FF, $A0, $50, $48, $40, $30, $18, $12, $18, $52, $88, $22, $40, $30, $18, $23, $C8, $00, $FF, $A0, $50, $B2, $11, $66, $00, $FF, $AE, $54, $B9 ;0x0 (0x00015D32-0x00015D84, Entry count: 0x52) [Unknown data]
 	dc.b	$00, $FF, $A0, $50, $4E, $75
 loc_00015D58:
 	dc.b	$20, $79, $00, $FF, $A0, $50, $48, $40, $30, $18, $12, $18, $52, $88, $23, $C8, $00, $FF, $A0, $50, $22, $40, $30, $18, $23, $C8 ;0x20
 	dc.b	$00, $FF, $A0, $50, $B2, $11, $67, $00, $FF, $82, $54, $B9, $00, $FF, $A0, $50, $4E, $75 ;0x40
-loc_00015D84:
-	MOVEA.l	rlBytecode_CurLocation, A0
+
+BytecodeOP_JumpTbl:
+	MOVEA.l	rlBytecode_PC, A0
 	CLR.w	D1
-	MOVE.b	rbBytecode_Return, D1
+	MOVE.b	rbBytecode_Ret, D1
 	CMP.w	D0, D1
-	BCS.w	loc_00015D9C
+	BCS.w	@NotOOB
 	MOVE.w	D0, D1	;Predicted (Code-scan)
 	SUBQ.w	#1, D1	;Predicted (Code-scan)
-loc_00015D9C:
+@NotOOB:
 	LSL.w	#2, D1
 	MOVE.l	(A0,D1.w), D2
-	MOVE.l	D2, rlBytecode_CurLocation
+	MOVE.l	D2, rlBytecode_PC
 	RTS
-loc_00015DAA:
-	JMP	loc_00000DBC
+
+BytecodeOP_SetVDP:
+	JMP	Bytecode_SetVDPMode
+
 loc_00015DB0:
-	MOVEA.l	rlBytecode_CurLocation, A1
+	MOVEA.l	rlBytecode_PC, A1
 	SWAP	D0
 	MOVE.w	(A1)+, D0
-	MOVE.l	A1, rlBytecode_CurLocation
+	MOVE.l	A1, rlBytecode_PC
 	MOVEA.l	D0, A2
 	JMP	loc_000018CA
 loc_00015DC8
@@ -18563,10 +18572,10 @@ loc_00015DC8
 loc_00015DD4:
 	JMP	loc_00002160
 loc_00015DDA:
-	MOVEA.l	rlBytecode_CurLocation, A0
+	MOVEA.l	rlBytecode_PC, A0
 	SWAP	D0
 	MOVE.w	(A0)+, D0
-	MOVE.l	A0, rlBytecode_CurLocation
+	MOVE.l	A0, rlBytecode_PC
 	MOVEA.l	D0, A2
 	JSR	loc_00001DB0
 loc_00015DF2:
@@ -18574,10 +18583,10 @@ loc_00015DF2:
 loc_00015DF8:
 	dc.b	$4E, $F9, $00, $01, $B1, $A2 ;0x0 (0x00015DF8-0x00015DFE, Entry count: 0x6) [Unknown data]
 loc_00015DFE:
-	SUBQ.l	#2, rlBytecode_CurLocation
+	SUBQ.l	#2, rlBytecode_PC
 	JMP	loc_0001B2AC
 loc_00015E0A:
-	SUBQ.l	#2, rlBytecode_CurLocation
+	SUBQ.l	#2, rlBytecode_PC
 	JMP	loc_0001B190
 loc_00015E16:
 	dc.b	$4E, $F9, $00, $01, $B1, $D2, $42, $79, $00, $FF, $A5, $00 ;0x0 (0x00015E16-0x00015E22, Entry count: 0xC) [Unknown data]
@@ -18641,7 +18650,7 @@ loc_00015EB4:
 loc_00015F0E:
 	MOVE.b	#1, $00FFD066	;Predicted (Code-scan)
 	MOVE.b	#$FF, rbBytecode_StopRun	;Predicted (Code-scan)
-	MOVE.l	#$0001668C, rlBytecode_CurLocation	;Predicted (Code-scan)
+	MOVE.l	#$0001668C, rlBytecode_PC	;Predicted (Code-scan)
 	MOVE.b	#$82, $00FFA170	;Predicted (Code-scan)
 	JMP	loc_00016E26	;Predicted (Code-scan)
 	dc.b	$23, $D7, $00, $FF, $A1, $74, $4E, $75 ;0x0 (0x00015F36-0x00015F3E, Entry count: 0x8) [Unknown data]
@@ -18692,111 +18701,7 @@ loc_0001605A:
 	MOVE.w	$00FFA104, $24(A2)	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
 Bytecode_Bootup:
-	dc.b	$00, $15, $00, $FF, $A1, $70, $00, $00, $00, $05, $00, $01, $6E, $26, $00, $15, $00, $FF, $A0, $5C, $00, $00, $00, $05, $00, $00, $89, $56, $00, $05, $00, $00 ;0x0 (0x00016098-0x000160D6, Entry count: 0x3E) [Unknown data]
-	dc.b	$1D, $76, $00, $15, $00, $FF, $A1, $70, $09, $00, $00, $05, $00, $01, $6E, $26, $00, $05, $00, $00, $33, $30, $00, $15, $00, $FF, $AA, $A1, $00, $00 ;0x20
-	dc.w	$0004, $00FF, $F07C, $1003, $0005, $0000 ;0x0 (0x000160D6-0x000160E2, Entry count: 0xC)
-	dc.b	$89, $56, $00, $05, $00, $00, $1D, $76, $00, $15, $00, $FF, $A0, $1F, $00, $00 ;0x0 (0x000160E2-0x000160F2, Entry count: 0x10) [Unknown data]
-	dc.w	$0004, $00FF, $A00C, $0000, $0004, $00FF, $A00E, $0000, $0005, $0000 ;0x0 (0x000160F2-0x00016106, Entry count: 0x14)
-	dc.b	$32, $AA, $00, $06, $00, $01 ;0x0 (0x00016106-0x0001610C, Entry count: 0x6) [Unknown data]
-	dc.w	$C904
-	dc.b	$00, $14, $00, $FF, $F0, $4C, $00, $01, $AD, $22, $00, $05, $00, $00, $89, $56, $00, $05, $00, $01, $69, $44, $00, $09, $00, $03 ;0x0 (0x0001610E-0x00016128, Entry count: 0x1A) [Unknown data]
-	dc.l	$00016156
-	dc.l	$0001CB5A
-	dc.l	$000165A8
-	dc.b	$00, $14, $00, $FF, $F0, $4C, $00, $01, $AD, $22, $00, $05, $00, $00, $89, $56, $00, $05, $00, $01, $69, $80, $00, $09, $00, $02, $00, $01, $61, $56 ;0x0 (0x00016134-0x00016152, Entry count: 0x1E) [Unknown data]
-	dc.l	$00016572
-	dc.w	$0004, $00FF, $A008, $0000, $0004, $00FF, $A00A, $0000, $0005, $0000 ;0x0 (0x00016156-0x0001616A, Entry count: 0x14)
-	dc.b	$89, $56, $00, $15, $00, $FF, $9F, $F1, $00, $00, $00, $15, $00, $FF, $A1, $02, $01, $00, $00, $05, $00, $01, $6E, $2E, $00, $06, $00, $01 ;0x0 (0x0001616A-0x00016186, Entry count: 0x1C) [Unknown data]
-	dc.w	$CB98
-	dc.b	$00, $14, $00, $FF, $F0, $4C, $00, $01, $AD, $22, $00, $05, $00, $01, $69, $98, $00, $09, $00, $03 ;0x0 (0x00016188-0x0001619C, Entry count: 0x14) [Unknown data]
-	dc.l	$000161D6
-	dc.l	$000163CA
-	dc.l	$00016684
-	dc.b	$00, $05, $00, $01, $67, $F4, $00, $05, $00, $01, $66, $D2, $00, $05, $00, $01, $67, $E4, $00, $15, $00, $FF, $A1, $70, $87, $00, $00, $05, $00, $01, $6E, $26 ;0x0 (0x000161A8-0x000161EC, Entry count: 0x44) [Unknown data]
-	dc.b	$00, $04, $00, $FF, $A0, $08, $00, $00, $00, $06, $00, $01, $62, $06, $00, $15, $00, $FF, $A1, $30, $00, $00, $00, $15, $00, $FF, $A1, $70, $87, $00, $00, $05 ;0x20
-	dc.b	$00, $01, $6E, $26 ;0x40
-	dc.w	$0004, $00FF, $A142, $0202, $0005, $0001 ;0x0 (0x000161EC-0x000161F8, Entry count: 0xC)
-	dc.b	$6A, $50, $00, $05, $00, $01, $67, $28, $00, $05, $00, $01, $66, $C6 ;0x0 (0x000161F8-0x00016206, Entry count: 0xE) [Unknown data]
-	dc.w	$0004, $00FF, $F07C, $2008, $0005, $0000 ;0x0 (0x00016206-0x00016212, Entry count: 0xC)
-	dc.b	$0A, $6E, $00, $11, $00, $05, $00, $00, $1D, $76 ;0x0 (0x00016212-0x0001621C, Entry count: 0xA) [Unknown data]
-	dc.w	$000A, $0001, $0005, $0002 ;0x0 (0x0001621C-0x00016224, Entry count: 0x8)
-	dc.b	$38, $B4, $00, $00, $00, $05, $00, $00, $89, $56, $00, $05, $00, $01, $68, $D0, $00, $05, $00, $01, $68, $DC ;0x0 (0x00016224-0x0001623A, Entry count: 0x16) [Unknown data]
-	dc.w	$000A, $0001, $0005, $0000 ;0x0 (0x0001623A-0x00016242, Entry count: 0x8)
-	dc.b	$0A, $6E, $00, $05, $00, $00, $0D, $6C, $00, $05, $00, $01, $6A, $8A, $00, $05, $00, $01, $6B, $B6, $00, $05, $00, $01, $6D, $4C, $00, $05, $00, $00, $69, $7E ;0x0 (0x00016242-0x00016268, Entry count: 0x26) [Unknown data]
-	dc.b	$00, $05, $00, $01, $69, $1A ;0x20
-	dc.w	$000E, $0101, $0003, $0005, $0001 ;0x0 (0x00016268-0x00016272, Entry count: 0xA)
-	dc.b	$52, $FE, $00, $00, $00, $05, $00, $01, $69, $8C, $00, $00, $00, $05, $00, $00, $89, $78, $00, $05, $00, $01, $6D, $CE, $00, $05, $00, $01, $6C, $1C, $00, $15 ;0x0 (0x00016272-0x000162A0, Entry count: 0x2E) [Unknown data]
-	dc.b	$00, $FF, $A0, $5E, $01, $00, $00, $01, $00, $05, $00, $01, $6C, $34 ;0x20
-	dc.w	$0004, $00FF, $F07C, $0802, $0005, $0000 ;0x0 (0x000162A0-0x000162AC, Entry count: 0xC)
-	dc.b	$4A, $D2 ;0x0 (0x000162AC-0x000162AE, Entry count: 0x2) [Unknown data]
-	dc.w	$0004, $00FF, $A146, $FFFF, $0005, $0000 ;0x0 (0x000162AE-0x000162BA, Entry count: 0xC)
-	dc.b	$35, $A8, $00, $05, $00, $00, $CA, $52, $00, $05, $00, $00, $78, $00, $00, $00, $00, $07, $00, $01 ;0x0 (0x000162BA-0x000162CE, Entry count: 0x14) [Unknown data]
-	dc.w	$62F4
-	dc.w	$000E, $0080, $0003, $0012, $0005, $0000 ;0x0 (0x000162D0-0x000162DC, Entry count: 0xC)
-	dc.b	$89, $56, $00, $05, $00, $01, $6A, $54, $00, $09, $00, $03 ;0x0 (0x000162DC-0x000162E8, Entry count: 0xC) [Unknown data]
-	dc.l	$00016200
-	dc.b	$00, $01, $63, $44, $00, $01, $63, $52 ;0x0 (0x000162EC-0x000162F4, Entry count: 0x8) [Unknown data]
-	dc.w	$0004, $00FF, $F07C, $1003, $0015, $00FF ;0x0 (0x000162F4-0x00016300, Entry count: 0xC)
-	dc.b	$A1, $70, $00, $00, $00, $05, $00, $01, $6E, $26 ;0x0 (0x00016300-0x0001630A, Entry count: 0xA) [Unknown data]
-	dc.w	$0011, $000E, $0040, $0003, $0005, $0000 ;0x0 (0x0001630A-0x00016316, Entry count: 0xC)
-	dc.b	$89, $56, $00, $12, $00, $06, $00, $01 ;0x0 (0x00016316-0x0001631E, Entry count: 0x8) [Unknown data]
-	dc.w	$C99E
-	dc.b	$00, $14, $00, $FF, $F0, $4C, $00, $01, $AD, $22, $00, $07, $00, $01, $61, $A8, $00, $15, $00, $FF, $A1, $70, $09, $00, $00, $05, $00, $01, $6E, $26, $00, $06 ;0x0 (0x00016320-0x00016342, Entry count: 0x22) [Unknown data]
-	dc.b	$00, $01 ;0x20
-	dc.w	$6572
-	dc.b	$00, $15, $00, $FF, $A0, $58, $00, $00, $00, $06, $00, $01, $63, $5A, $00, $15, $00, $FF, $A0, $58, $01, $00, $00, $05, $00, $01, $67, $E6, $00, $15, $00, $FF ;0x0 (0x00016344-0x000163D8, Entry count: 0x94) [Unknown data]
-	dc.b	$A0, $1F, $00, $00, $00, $15, $00, $FF, $A1, $70, $00, $00, $00, $05, $00, $01, $6E, $26, $00, $06, $00, $01, $CA, $5E, $00, $14, $00, $FF, $F0, $4C, $00, $01 ;0x20
-	dc.b	$AD, $22, $00, $05, $00, $00, $89, $56, $00, $06, $00, $01, $60, $BA, $00, $15, $00, $FF, $A1, $70, $08, $00, $00, $05, $00, $01, $6E, $26, $00, $15, $00, $FF ;0x40
-	dc.b	$A1, $30, $01, $00, $00, $04, $00, $FF, $A1, $42, $04, $04, $00, $05, $00, $01, $6E, $38, $00, $05, $00, $00, $89, $56, $00, $05, $00, $01, $6D, $FC, $00, $12 ;0x60
-	dc.b	$00, $06, $00, $01, $63, $E8, $00, $15, $00, $FF, $A1, $70, $82, $00, $00, $05, $00, $01, $6E, $26 ;0x80
-	dc.w	$0004, $00FF, $A142, $0202, $0015, $00FF ;0x0 (0x000163D8-0x000163E4, Entry count: 0xC)
-	dc.b	$A1, $3F, $03, $00, $00, $15, $00, $FF, $A1, $32, $00, $00 ;0x0 (0x000163E4-0x000163F0, Entry count: 0xC) [Unknown data]
-	dc.w	$0004, $00FF, $A104, $0000, $0004, $00FF, $A116, $0202, $0004, $00FF, $A058, $0000, $0006, $0001 ;0x0 (0x000163F0-0x0001640C, Entry count: 0x1C)
-	dc.w	$CBD6
-	dc.b	$00, $14, $00, $FF, $F0, $4C, $00, $01, $AD, $22, $00, $05, $00, $01, $6A, $0A, $00, $07, $00, $01 ;0x0 (0x0001640E-0x00016422, Entry count: 0x14) [Unknown data]
-	dc.w	$6440
-	dc.b	$00, $05, $00, $01, $74, $CA, $00, $00, $00, $05, $00, $00, $89, $56, $00, $15, $00, $FF, $A0, $58, $05, $00, $00, $08, $00, $01 ;0x0 (0x00016424-0x0001643E, Entry count: 0x1A) [Unknown data]
-	dc.w	$CBD6
-	dc.b	$00, $05, $00, $01, $66, $C6, $00, $05, $00, $01, $6A, $52, $00, $05, $00, $01, $68, $54 ;0x0 (0x00016440-0x00016452, Entry count: 0x12) [Unknown data]
-	dc.w	$000A, $0001, $0005, $0000 ;0x0 (0x00016452-0x0001645A, Entry count: 0x8)
-	dc.b	$0A, $6E, $00, $05, $00, $00, $0D, $6C, $00, $05, $00, $01, $6A, $8A, $00, $05, $00, $01, $6C, $82, $00, $05, $00, $01, $6B, $B6, $00, $05, $00, $01, $6D, $18 ;0x0 (0x0001645A-0x0001648C, Entry count: 0x32) [Unknown data]
-	dc.b	$00, $05, $00, $01, $6D, $AA, $00, $05, $00, $00, $78, $00, $00, $05, $00, $00, $0A, $64 ;0x20
-	dc.w	$000E, $0107, $0003, $000F, $000B, $0015, $00FF ;0x0 (0x0001648C-0x0001649A, Entry count: 0xE)
-	dc.b	$A1, $22, $0B, $00 ;0x0 (0x0001649A-0x0001649E, Entry count: 0x4) [Unknown data]
-	dc.w	$0004, $00FF, $F07C, $0802, $0005, $0000 ;0x0 (0x0001649E-0x000164AA, Entry count: 0xC)
-	dc.b	$32, $EC ;0x0 (0x000164AA-0x000164AC, Entry count: 0x2) [Unknown data]
-	dc.w	$0004, $00FF, $A11A, $0000, $0004, $00FF, $A100, $0002, $0005, $0000 ;0x0 (0x000164AC-0x000164C0, Entry count: 0x14)
-	dc.b	$6A, $F0, $00, $05, $00, $00, $4A, $D2, $00, $05, $00, $00, $35, $A8, $00, $00, $00, $05, $00, $01, $66, $E4, $00, $09, $00, $03, $00, $01, $64, $E6 ;0x0 (0x000164C0-0x000164DE, Entry count: 0x1E) [Unknown data]
-	dc.l	$000164FA
-	dc.b	$00, $01, $65, $2C, $00, $04, $00, $FF, $A1, $1A, $00, $00, $00, $05, $00, $01, $66, $D2, $00, $05, $00, $01, $68, $6A, $00, $05, $00, $00, $89, $56, $00, $05 ;0x0 (0x000164E2-0x0001652A, Entry count: 0x48) [Unknown data]
-	dc.b	$00, $01, $6D, $18, $00, $05, $00, $01, $6D, $AA, $00, $05, $00, $00, $78, $00, $00, $01, $00, $05, $00, $01, $6C, $82, $00, $05, $00, $01, $6B, $B6, $00, $05 ;0x20
-	dc.b	$00, $00, $1E, $24, $00, $06, $00, $01 ;0x40
-	dc.w	$64B4
-	dc.b	$00, $15, $00, $FF, $A1, $70, $08, $00, $00, $05, $00, $01, $6E, $26, $00, $04, $00, $FF, $F0, $7C, $10, $03, $00, $11, $00, $0E, $00, $40, $00, $03, $00, $05 ;0x0 (0x0001652C-0x0001658A, Entry count: 0x5E) [Unknown data]
-	dc.b	$00, $00, $89, $56, $00, $12, $00, $04, $00, $FF, $A1, $6A, $00, $00, $00, $05, $00, $01, $6E, $26, $00, $05, $00, $01, $66, $EC, $00, $08, $00, $01, $61, $D6 ;0x20
-	dc.b	$00, $06, $00, $01, $65, $72, $00, $15, $00, $FF, $A1, $70, $09, $00, $00, $05, $00, $01, $6E, $26, $00, $05, $00, $01, $69, $EE, $00, $06, $00, $01 ;0x40
-	dc.w	$C9FE
-	dc.b	$00, $14, $00, $FF, $F0, $4C, $00, $01, $AD, $22, $00, $05, $00, $00, $89, $56, $00, $09, $00, $02 ;0x0 (0x0001658C-0x000165A0, Entry count: 0x14) [Unknown data]
-	dc.l	$000160BA
-	dc.l	$00016156
-	dc.b	$00, $15, $00, $FF, $A1, $70, $09, $00, $00, $05, $00, $01, $6E, $26, $00, $15, $00, $FF, $A1, $30, $04, $00 ;0x0 (0x000165A8-0x000165BE, Entry count: 0x16) [Unknown data]
-	dc.w	$0004, $00FF, $A142, $0202, $0004, $00FF, $A110, $0000, $0005, $0001 ;0x0 (0x000165BE-0x000165D2, Entry count: 0x14)
-	dc.b	$6A, $50, $00, $05, $00, $01, $68, $08, $00, $05, $00, $01, $66, $C6 ;0x0 (0x000165D2-0x000165E0, Entry count: 0xE) [Unknown data]
-	dc.w	$000A, $0001, $0005, $0000 ;0x0 (0x000165E0-0x000165E8, Entry count: 0x8)
-	dc.b	$0A, $6E, $00, $05, $00, $00, $0D, $6C, $00, $05, $00, $01, $6A, $8A, $00, $05, $00, $01, $6C, $82, $00, $05, $00, $01, $6B, $B6, $00, $05, $00, $01, $6C, $1C ;0x0 (0x000165E8-0x0001662C, Entry count: 0x44) [Unknown data]
-	dc.b	$00, $05, $00, $01, $6D, $18, $00, $05, $00, $01, $6D, $AA, $00, $05, $00, $00, $69, $7E, $00, $05, $00, $00, $6D, $52, $00, $05, $00, $00, $78, $00, $00, $05 ;0x20
-	dc.b	$00, $00, $0A, $64 ;0x40
-	dc.w	$000E, $0100, $0003, $0005, $0000 ;0x0 (0x0001662C-0x00016636, Entry count: 0xA)
-	dc.b	$4A, $52 ;0x0 (0x00016636-0x00016638, Entry count: 0x2) [Unknown data]
-	dc.w	$0004, $00FF, $F07C, $0802, $0005, $0000 ;0x0 (0x00016638-0x00016644, Entry count: 0xC)
-	dc.b	$4A, $D2 ;0x0 (0x00016644-0x00016646, Entry count: 0x2) [Unknown data]
-	dc.w	$0004, $00FF, $A146, $FFFF, $0005, $0000 ;0x0 (0x00016646-0x00016652, Entry count: 0xC)
-	dc.b	$35, $A8, $00, $05, $00, $00, $CA, $52 ;0x0 (0x00016652-0x0001665A, Entry count: 0x8) [Unknown data]
-	dc.w	$0000, $0004, $00FF, $F07C, $1003, $0011, $000E, $0003, $0003, $0012, $0005, $0000 ;0x0 (0x0001665A-0x00016672, Entry count: 0x18)
-	dc.b	$89, $56, $00, $09, $00, $03, $00, $01, $65, $72, $00, $01, $61, $56 ;0x0 (0x00016672-0x00016680, Entry count: 0xE) [Unknown data]
-	dc.l	$00016572
-	dc.b	$00, $05, $00, $00, $23, $D2, $00, $00, $00, $0E, $00, $01, $00, $03, $00, $04, $00, $FF, $F0, $7C, $10, $03, $00, $05, $00, $00, $32, $AA, $00, $15, $00, $FF ;0x0 (0x00016684-0x000166C6, Entry count: 0x42) [Unknown data]
-	dc.b	$A1, $30, $01, $00, $00, $06, $00, $01, $63, $CA, $22, $79, $00, $FF, $A0, $50, $24, $59, $12, $19, $14, $19, $23, $C9, $00, $FF, $A0, $50, $83, $12, $C5, $12 ;0x20
+	include "bytecode/table.asm"
 	rts
 	MOVE.b	$00FFA03E, $00FFA03F
 loc_000166D0:
@@ -18937,15 +18842,15 @@ loc_00016912:
 loc_00016972:
 	ADDQ.b	#1, $00FFA05C
 loc_00016978:
-	MOVE.b	D0, rbBytecode_Return
+	MOVE.b	D0, rbBytecode_Ret
 	RTS
-	MOVE.b	$00FFA05A, rbBytecode_Return
+	MOVE.b	$00FFA05A, rbBytecode_Ret
 	RTS
 	MOVE.b	$00FFA104, D0
 	JMP	loc_00014D42
 	MOVE.b	#1, $00FFA102
 	MOVE.b	$00FFA05A, D0
-	MOVE.b	D0, rbBytecode_Return
+	MOVE.b	D0, rbBytecode_Ret
 	MOVE.b	D0, $00FFA130
 	CMPI.b	#1, D0
 	BEQ.b	loc_000169D6
@@ -18965,7 +18870,7 @@ loc_000169D6:
 	MOVE.b	D0, $00FFA058
 	MOVE.b	$00FFA101, $00FFA059
 	RTS
-	CLR.b	rbBytecode_Return
+	CLR.b	rbBytecode_Ret
 	MOVEQ	#0, D0
 	MOVE.b	$00FFA05A, D0
 	MOVE.b	D0, $00FFA105
@@ -18978,22 +18883,22 @@ loc_00016A2E:
 loc_00016A34:
 	CMPI.b	#5, $00FFA105
 	BNE.w	loc_000166D0
-	MOVE.b	#1, rbBytecode_Return
+	MOVE.b	#1, rbBytecode_Ret
 	RTS
 loc_00016A4A:
 	dc.b	$01, $06, $04, $0D, $02, $FF ;0x0 (0x00016A4A-0x00016A50, Entry count: 0x6)
 	RTS
 	RTS
-	CLR.b	rbBytecode_Return
+	CLR.b	rbBytecode_Ret
 	TST.b	$00FFA049
 	BMI.w	loc_00016A6C
 	ADDQ.b	#1, $00FFA100
 	RTS
 loc_00016A6C:
-	MOVE.b	#1, rbBytecode_Return	;Predicted (Code-scan)
+	MOVE.b	#1, rbBytecode_Ret	;Predicted (Code-scan)
 	CMPI.b	#5, $00FFA105	;Predicted (Code-scan)
 	BCC.w	loc_000166D0	;Predicted (Code-scan)
-	MOVE.b	#2, rbBytecode_Return	;Predicted (Code-scan)
+	MOVE.b	#2, rbBytecode_Ret	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
 	LEA	loc_00016B1A(PC), A2
 	JSR	loc_000018CA
@@ -19325,7 +19230,7 @@ loc_00016E26:
 	LEA	$00FFD040, A1
 	JSR	loc_00008A54
 	LEA	loc_000179BA(PC), A1
-	JMP	loc_000089FA
+	JMP	ObjSys_InitObjWithFunc
 loc_0001752C:
 	dc.b	$80
 	dc.b	$00 ;0x0 (0x0001752D-0x0001752E, Entry count: 0x1) [Unknown data]
@@ -19373,7 +19278,7 @@ loc_0001758E:
 	MOVE.w	#$C000, D2
 	JSR	loc_00001682
 	MOVE.w	#2, $28(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_000176FC
 	MOVE.b	$00FFF071, D0
 	OR.b	$00FFF077, D0
@@ -19381,22 +19286,22 @@ loc_0001758E:
 	BEQ.w	loc_000166D0
 	MOVE.b	#$FF, D0
 	JSR	loc_0000225C
-	CLR.b	rbBytecode_Return
+	CLR.b	rbBytecode_Ret
 	MOVEQ	#$00000052, D0
 	JSR	loc_0001B1A2
 	MOVE.b	$26(A0), D0
 	BEQ.b	loc_000175FE
-	MOVE.b	#1, rbBytecode_Return
+	MOVE.b	#1, rbBytecode_Ret
 	CMPI.b	#2, D0
 	BNE.b	loc_00017622
 loc_000175FE:
 	MOVEQ	#3, D0
 	JSR	loc_00002160
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000166D0
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00017622:
 	MOVE.w	#$8500, D0
 	MOVE.w	#$C000, D1
@@ -19408,7 +19313,7 @@ loc_00017622:
 	BSR.w	loc_0001789C
 	MOVE.w	#1, $26(A0)
 	MOVE.w	#7, $28(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_000176FC
 	MOVE.b	$00FFF071, D0
 	OR.b	$00FFF077, D0
@@ -19659,7 +19564,7 @@ loc_000179CA:
 	ANDI.w	#$000E, D0
 	MOVE.w	loc_00017A0E(PC,D0.w), D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEQ	#$0000001B, D0
 	JSR	loc_00000C1E
 	BTST.b	D0, $00FFA1AC
@@ -19682,14 +19587,14 @@ loc_00017A1E:
 	ANDI.w	#7, D0
 	ADDQ.w	#4, D0
 	MOVE.b	D0, $28(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	BCC.b	loc_00017A6A
 	SUBQ.b	#1, $28(A0)
 	BNE.b	loc_00017A6A
 	MOVE.w	$26(A0), D0
 	BCLR.b	D0, $00FFA1AC
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00017A6A:
 	MOVEQ	#0, D0
 	MOVE.b	$9(A0), D0
@@ -22394,7 +22299,7 @@ loc_0001CEAC:
 loc_0001CEBA:
 	ORI.b	#2, $00FFF00B
 	LEA	loc_0001CF7A(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001CF72
 	MOVE.w	#2, $26(A1)
 	MOVE.w	#$FFFE, $28(A1)
@@ -22402,7 +22307,7 @@ loc_0001CEBA:
 	MOVE.l	#$0001CEAC, $32(A1)
 	MOVE.w	A0, $2E(A1)
 	LEA	loc_0001CF7A(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001CF72
 	MOVE.w	#$00A2, $26(A1)
 	MOVE.w	#2, $28(A1)
@@ -22410,7 +22315,7 @@ loc_0001CEBA:
 	MOVE.l	#$0001CEAC, $32(A1)
 	MOVE.w	A0, $2E(A1)
 	LEA	loc_0001CF7A(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001CF72
 	MOVE.w	#$01C2, $26(A1)
 	MOVE.w	#$FFFE, $28(A1)
@@ -22418,7 +22323,7 @@ loc_0001CEBA:
 	MOVE.l	#$0001CEAC, $32(A1)
 	MOVE.w	A0, $2E(A1)
 	LEA	loc_0001CF7A(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001CF72
 	MOVE.w	#$02E2, $26(A1)
 	MOVE.w	#2, $28(A1)
@@ -22426,7 +22331,7 @@ loc_0001CEBA:
 	MOVE.l	#$0001CEAC, $32(A1)
 	MOVE.w	A0, $2E(A1)
 loc_0001CF72:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_0001CF7A:
 	MOVE.w	$A(A0), D0
@@ -22556,7 +22461,7 @@ loc_0001D09E:
 	dc.w	$0000, $0000, $00B0, $00D0, $00D0, $00F0, $00F0, $00D0, $00B0, $00E0, $00F0, $00E0, $00C8, $00B8, $00E8, $00B8, $00D8, $00F0, $00C0, $00D0, $00D8, $00B0 ;0x0 (0x0001D0BC-0x0001D0E8, Entry count: 0x2C)
 	dc.b	$00, $E0, $00, $D8, $00, $D8, $00, $F0, $00, $D0, $00, $E0 ;0x0 (0x0001D0E8-0x0001D0F4, Entry count: 0xC) [Unknown data]
 loc_0001D0F4:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0001D0FA:
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#0, $7(A1)
@@ -22571,7 +22476,7 @@ loc_0001D0FA:
 	RTS
 loc_0001D128:
 	LEA	loc_0001D0FA(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001D15C
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$79, $8(A1)
@@ -22592,7 +22497,7 @@ loc_0001D16E:
 loc_0001D170:
 	LEA	loc_0002622E, A2
 	JSR	loc_00001870
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0001D16E
 	MOVE.l	#$4A4B4C00, D0
@@ -22614,7 +22519,7 @@ loc_0001D1C6:
 	dc.b	$00, $01, $D1, $D6, $00, $01, $D6, $BC ;0x0 (0x0001D1CE-0x0001D1D6, Entry count: 0x8) [Unknown data]
 	LEA	loc_0002623C, A2
 	JSR	loc_00001870
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0001D16E
 	LEA	$00FFC8C0, A2
@@ -22639,26 +22544,26 @@ loc_0001D1C6:
 	JSR	loc_0001B1A2
 	MOVE.w	#2, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_0001D16E
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00014D66
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0001D038(PC), A2
 	JSR	loc_0001D128(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#1, $00FFA124
 	BNE.w	loc_0001D16E
 	CLR.b	$7(A0)
 	JSR	loc_0001D00C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#$C312, D0
 	MOVE.w	#3, D1
 	MOVE.w	#6, D2
 	MOVE.w	#0, D5
 	JSR	loc_000258D8
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB038, A2
 	MOVE.w	#$C892, D0
 	MOVE.w	#3, D1
@@ -22679,14 +22584,14 @@ loc_0001D1C6:
 	JSR	loc_00025836
 	LEA	loc_0001D056(PC), A2
 	JSR	loc_0001D128(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#2, $00FFA124
 	BNE.w	loc_0001D16E
 	JSR	loc_0001D00C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.b	$7(A0)
 	JSR	loc_0001D022(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB08C, A2
 	MOVE.w	#$C50E, D0
 	MOVE.w	#7, D1
@@ -22695,128 +22600,128 @@ loc_0001D1C6:
 	JSR	loc_00025836
 	MOVE.w	#$0078, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB11C, A2
 	MOVE.w	#$C408, D0
 	MOVE.w	#$000C, D1
 	MOVE.w	#$000C, D2
 	MOVE.w	#$2100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_00026244, A2
 	JSR	loc_00001870
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0001D16E
 	CMPI.b	#3, $00FFA124
 	BNE.w	loc_0001D16E
 	JSR	loc_0001D00C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_0001D022(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFC918, A2
 	MOVE.w	#$C10C, D0
 	MOVE.w	#$0015, D1
 	MOVE.w	#1, D2
 	MOVE.w	#$0100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB000, A2
 	MOVE.w	#$C388, D0
 	MOVE.w	#$000D, D1
 	MOVE.w	#$000D, D2
 	MOVE.w	#$2100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0001D078-2(PC), A2
 	JSR	loc_0001D128(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#4, $00FFA124
 	BNE.w	loc_0001D16E
 	JSR	loc_0001D00C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.b	$7(A0)
 	JSR	loc_0001D022(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFC970, A2
 	MOVE.w	#$C10C, D0
 	MOVE.w	#$0015, D1
 	MOVE.w	#1, D2
 	MOVE.w	#$0100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB188, A2
 	MOVE.w	#$C388, D0
 	MOVE.w	#$000D, D1
 	MOVE.w	#$000B, D2
 	MOVE.w	#$2100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0001D080(PC), A2
 	JSR	loc_0001D128(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0002624C, A2
 	JSR	loc_00001870
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0001D16E
 	CMPI.b	#5, $00FFA124
 	BNE.w	loc_0001D16E
 	JSR	loc_0001D00C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.b	$7(A0)
 	JSR	loc_0001D022(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFC9C8, A2
 	MOVE.w	#$C10C, D0
 	MOVE.w	#$0015, D1
 	MOVE.w	#1, D2
 	MOVE.w	#$0100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB000, A2
 	MOVE.w	#$C30A, D0
 	MOVE.w	#$000D, D1
 	MOVE.w	#$0011, D2
 	MOVE.w	#$2100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0001D08A(PC), A2
 	JSR	loc_0001D128(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#6, $00FFA124
 	BNE.w	loc_0001D16E
 	JSR	loc_0001D00C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.b	$7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB1F8, A2
 	MOVE.w	#$C30A, D0
 	MOVE.w	#$000D, D1
 	MOVE.w	#$0011, D2
 	MOVE.w	#$2100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0001D08A(PC), A2
 	JSR	loc_0001D128(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#8, $00FFA124
 	BNE.w	loc_0001D16E
 	JSR	loc_0001D00C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.b	$7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_0001D022(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB3F0, A2
 	MOVE.w	#$C28A, D0
 	MOVE.w	#$000D, D1
 	MOVE.w	#$0013, D2
 	MOVE.w	#$2100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0001D15E(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001D5FA
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$79, $8(A1)
@@ -22828,13 +22733,13 @@ loc_0001D1C6:
 loc_0001D5FA:
 	LEA	loc_0001D094(PC), A2
 	JSR	loc_0001D128(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#7, $00FFA124
 	BNE.w	loc_0001D16E
 	JSR	loc_0001D00C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.b	$7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#$C28A, D0
 	MOVE.w	#$000D, D1
 	MOVE.w	#0, D2
@@ -22851,10 +22756,10 @@ loc_0001D5FA:
 	MOVE.w	#0, D2
 	MOVE.w	#0, D5
 	JSR	loc_000258D8
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0001D08A(PC), A2
 	JSR	loc_0001D128(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#8, $00FFA124
 	BNE.w	loc_0001D16E
 	RTS
@@ -22877,7 +22782,7 @@ loc_0001D692:
 	dc.w	$0002, $0980, $0002, $09A0, $0002, $09C0, $0002, $09E0, $0002, $0A00, $0002, $0A20 ;0x0 (0x0001D6A4-0x0001D6BC, Entry count: 0x18)
 	LEA	loc_00026262, A2
 	JSR	loc_00001870
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0001D16E
 	LEA	$00FFCA20, A2
@@ -22886,16 +22791,16 @@ loc_0001D692:
 	MOVE.w	#1, D2
 	MOVE.w	#$0100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB000, A2
 	MOVE.w	#$C388, D0
 	MOVE.w	#$000E, D1
 	MOVE.w	#$0010, D2
 	MOVE.w	#$4100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_00024C34(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001D742
 	MOVE.l	#$0001D692, $32(A1)
 	MOVE.l	#$0001D6A4, $26(A1)
@@ -22906,53 +22811,53 @@ loc_0001D742:
 	JSR	loc_0001B1A2
 	MOVE.w	#2, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_0001D16E
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00014D66
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#9, $00FFA124
 	BNE.w	loc_0001D16E
 	JSR	loc_0001D00C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.b	$7(A0)
 	JSR	loc_0001D022(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFCA78, A2
 	MOVE.w	#$C10C, D0
 	MOVE.w	#$0015, D1
 	MOVE.w	#1, D2
 	MOVE.w	#$0100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB1FE, A2
 	MOVE.w	#$C388, D0
 	MOVE.w	#$000D, D1
 	MOVE.w	#$000B, D2
 	MOVE.w	#$4100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#$0A, $00FFA124
 	BNE.w	loc_0001D16E
 	JSR	loc_0001D00C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFCB28, A2
 	MOVE.w	#$C10C, D0
 	MOVE.w	#$0015, D1
 	MOVE.w	#1, D2
 	MOVE.w	#$0100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB34E, A2
 	MOVE.w	#$C288, D0
 	MOVE.w	#$000D, D1
 	MOVE.w	#$0014, D2
 	MOVE.w	#$2100, D5
 	JSR	loc_00025836
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0001D15E(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001D868
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$79, $8(A1)
@@ -22963,7 +22868,7 @@ loc_0001D742:
 loc_0001D868:
 	LEA	loc_0001D09E(PC), A2
 	JSR	loc_0001D128(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 	JSR	loc_00000D6C
 	MOVE.w	#0, D0
@@ -22974,9 +22879,9 @@ loc_0001D868:
 	CLR.w	$00FFA126
 	MOVE.b	#1, $00FFA05A
 	LEA	loc_0001D170(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	LEA	loc_00022860(PC), A1
-	JMP	loc_000089FA
+	JMP	ObjSys_InitObjWithFunc
 loc_0001D8B8:
 	RTS
 loc_0001D8BA:
@@ -23034,7 +22939,7 @@ loc_0001D980:
 	LEA	$00FF9600, A2
 	JSR	loc_0000188C
 	MOVE.b	#1, $00FFF09A
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0001D8B8
 	LEA	$00FFB000, A2
@@ -23048,8 +22953,8 @@ loc_0001D980:
 	JSR	loc_0001CD46(PC)
 	JSR	loc_0001CDC4(PC)
 	LEA	loc_0001CEBA(PC), A1
-	JSR	loc_000089FA
-	JSR	loc_00008AEC
+	JSR	ObjSys_InitObjWithFunc
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#$C804, D0
 	MOVE.w	#$C100, D5
 	JSR	loc_0001D8BA(PC)
@@ -23083,15 +22988,15 @@ loc_0001D980:
 	JSR	loc_0001B1A2
 	MOVE.w	#2, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_0001D8B8
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#4, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#$80, $6(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFF071, D1
 	MOVE.b	$00FFF077, D2
 	MOVE.b	D1, D0
@@ -23148,14 +23053,14 @@ loc_0001DB44:
 	JSR	loc_0001B1A2
 	MOVE.b	#0, $6(A0)
 	MOVE.b	#$80, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_0001DCC4(PC)
 	MOVE.w	#$0032, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$26(A0), $00FFA05A
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0001DB88:
 	dc.b	$02
 	dc.b	$00 ;0x0 (0x0001DB89-0x0001DB8A, Entry count: 0x1) [Unknown data]
@@ -23290,7 +23195,7 @@ loc_0001DCC4:
 	LSL.w	#2, D0
 	MOVEA.l	loc_0001DCB8(PC,D0.w), A3
 	LEA	loc_0001DBFE(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001DD50
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	$8(A0), $8(A1)
@@ -23300,19 +23205,19 @@ loc_0001DCC4:
 	MOVE.l	#$0001DBF4, $32(A1)
 	MOVE.l	A0, $2E(A1)
 	LEA	loc_0001DB96(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001DD50
 	MOVE.w	(A3)+, $A(A1)
 	MOVE.l	#$0001DB88, $32(A1)
 	MOVE.l	A0, $2E(A1)
 	LEA	loc_0001DC28(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001DD50
 	MOVE.w	(A3)+, $A(A1)
 	MOVE.l	(A3)+, $32(A1)
 	MOVE.l	A0, $2E(A1)
 	LEA	loc_0001DC28(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001DD50
 	MOVE.w	(A3)+, $A(A1)
 	MOVE.l	(A3)+, $32(A1)
@@ -23320,7 +23225,7 @@ loc_0001DCC4:
 loc_0001DD50:
 	RTS
 loc_0001DD52:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0001DD58:
 	dc.b	$F0
 	dc.b	$00 ;0x0 (0x0001DD59-0x0001DD5A, Entry count: 0x1) [Unknown data]
@@ -23353,43 +23258,43 @@ loc_0001DD70:
 	RTS
 loc_0001DD96:
 	LEA	loc_0001DE62(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001DE60
 	MOVE.b	#0, $26(A1)
 	MOVE.w	#$00A8, $A(A1)
 	JSR	loc_0001DD70(PC)
 	LEA	loc_0001DE62(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001DE60
 	MOVE.b	#1, $26(A1)
 	MOVE.w	#$0100, $A(A1)
 	JSR	loc_0001DD70(PC)
 	LEA	loc_0001DE62(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001DE60
 	MOVE.b	#1, $26(A1)
 	MOVE.w	#$0110, $A(A1)
 	JSR	loc_0001DD70(PC)
 	LEA	loc_0001DE62(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001DE60
 	MOVE.b	#2, $26(A1)
 	MOVE.w	#$0160, $A(A1)
 	JSR	loc_0001DD70(PC)
 	LEA	loc_0001DE62(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001DE60
 	MOVE.b	#2, $26(A1)
 	MOVE.w	#$0170, $A(A1)
 	JSR	loc_0001DD70(PC)
 	LEA	loc_0001DE62(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001DE60
 	MOVE.b	#2, $26(A1)
 	MOVE.w	#$0180, $A(A1)
 	JSR	loc_0001DD70(PC)
 	LEA	loc_0001DE62(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001DE60
 	MOVE.b	#2, $26(A1)
 	MOVE.w	#$0198, $A(A1)
@@ -23421,7 +23326,7 @@ loc_0001DEA4:
 	CMP.b	$26(A0), D0
 	BEQ.b	loc_0001DEBE
 	MOVE.b	#4, $9(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_0001DEBE:
 	MOVE.w	#3, D3
@@ -23451,7 +23356,7 @@ loc_0001DEC6:
 loc_0001DF2A:
 	CLR.b	$22(A0)
 	MOVE.l	#$0001DF48, $32(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	BCS.w	loc_0001DD52
 	RTS
@@ -23480,7 +23385,7 @@ loc_0001DF2A:
 loc_0001DF5E:
 	MOVE.w	#5, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#$87, $6(A0)
 	JSR	loc_00008B34
 	BCS.w	loc_0001DD52
@@ -23511,19 +23416,19 @@ loc_0001DF9A:
 	RTS
 loc_0001DFC0:
 	LEA	loc_0001E016(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001E014
 	MOVE.b	#0, $26(A1)
 	MOVE.w	#$00A0, $A(A1)
 	JSR	loc_0001DF9A(PC)
 	LEA	loc_0001E016(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001E014
 	MOVE.b	#1, $26(A1)
 	MOVE.w	#$0100, $A(A1)
 	JSR	loc_0001DF9A(PC)
 	LEA	loc_0001E016(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001E014
 	MOVE.b	#2, $26(A1)
 	MOVE.w	#$0160, $A(A1)
@@ -23531,7 +23436,7 @@ loc_0001DFC0:
 loc_0001E014:
 	RTS
 loc_0001E016:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#7, $7(A1)
 	BNE.w	loc_0001DD52
@@ -23600,7 +23505,7 @@ loc_0001E0E6:
 	ADDA.w	#$000C, A3
 	DBF	D7, loc_0001E0E6
 	LEA	loc_0001D980(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001E132
 	MOVE.b	#$0A, $9(A1)
 	MOVE.b	#$40, $8(A1)
@@ -23689,7 +23594,7 @@ loc_0001E2F0:
 	MOVE.b	#$46, $8(A0)
 	MOVE.b	#1, $9(A0)
 	MOVE.l	#$0001E360, $32(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	CMPI.w	#$0090, $E(A0)
 	BCC.b	loc_0001E33E
@@ -23697,9 +23602,9 @@ loc_0001E2F0:
 loc_0001E33E:
 	MOVE.b	#$5F, D0
 	JSR	loc_0001B1A2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#$0090, $E(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JMP	loc_00008B34
 loc_0001E360:
 	dc.b	$01
@@ -23739,7 +23644,7 @@ loc_0001E394:
 	MOVE.b	#$69, $8(A0)
 	MOVE.b	#$30, $9(A0)
 	LEA	loc_0001E378(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001E3DC
 	MOVE.w	$A(A0), $A(A1)
 	MOVE.w	$E(A0), $E(A1)
@@ -23747,7 +23652,7 @@ loc_0001E394:
 	MOVE.l	#$0001E3EA, $32(A1)
 	MOVE.l	A0, $2E(A1)
 loc_0001E3DC:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#$80, $6(A0)
 	RTS
 loc_0001E3EA:
@@ -23763,7 +23668,7 @@ loc_0001E3F4:
 	MOVE.w	#7, D7
 loc_0001E3FC:
 	LEA	loc_0001E46A(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001E428
 	MOVE.b	#$A2, $6(A1)
 	MOVE.w	(A3)+, $A(A1)
@@ -23854,11 +23759,11 @@ loc_0001E72E:
 	LEA	loc_0001E780(PC), A1
 	MOVEA.l	(A1,D1.w), A2
 	JSR	(A2)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 	dc.b	$08, $00, $FF, $00, $00, $01, $E7, $72 ;0x0 (0x0001E772-0x0001E77A, Entry count: 0x8) [Unknown data]
 loc_0001E77A:
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_0001E780:
 	dc.l	$0001E804
 	dc.b	$00, $01, $E8, $6E, $00, $01, $E8, $90, $00, $01, $E8, $BC ;0x0 (0x0001E784-0x0001E790, Entry count: 0xC) [Unknown data]
@@ -23872,7 +23777,7 @@ loc_0001E780:
 	dc.b	$00, $01, $EE, $60, $00, $01, $EE, $82, $00, $01, $EE, $A2, $00, $01, $EE, $D4, $00, $01, $EF, $06, $00, $01, $EF, $38, $00, $01, $EF, $6A, $00, $01, $EF, $88 ;0x20
 	dc.b	$00, $01, $EF, $BA, $00, $01, $EF, $DC, $00, $01, $EF, $FE, $00, $01, $F0, $20 ;0x40
 	LEA	loc_0001F1BE(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001E86C
 	MOVE.l	A0, $2E(A1)
 	MOVE.b	#$80, $6(A1)
@@ -24082,7 +23987,7 @@ loc_0001F064:
 	JMP	loc_00008B34
 loc_0001F078:
 	LEA	loc_0001F02E(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001F0A4
 	MOVE.w	$A(A0), $A(A1)
 	MOVE.w	$E(A0), $E(A1)
@@ -24094,7 +23999,7 @@ loc_0001F0A4:
 	RTS
 loc_0001F0A6:
 	LEA	loc_0001F064(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001F0A4
 	MOVE.b	#$80, $6(A1)
 	MOVE.w	$A(A0), $A(A1)
@@ -24129,7 +24034,7 @@ loc_0001F1BE:
 	RTS
 loc_0001F1E8:
 	LEA	loc_0001F1BE(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001F22A
 	MOVE.l	A2, $2E(A1)
 	MOVE.b	#$80, $6(A1)
@@ -24197,36 +24102,36 @@ loc_0001F6B8:
 	BNE.b	loc_0001F71A
 	RTS
 loc_0001F6E2:
-	CLR.b	rbBytecode_Return
+	CLR.b	rbBytecode_Ret
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0001F6F4:
 	MOVE.b	#0, $00FFA132
 	MOVE.b	#$52, D0
 	JSR	loc_0001B1A2
-	MOVE.b	#1, rbBytecode_Return
+	MOVE.b	#1, rbBytecode_Ret
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0001F71A:
 	MOVE.b	#1, $00FFA132	;Predicted (Code-scan)
 	MOVE.b	#$52, D0	;Predicted (Code-scan)
 	JSR	loc_0001B1A2	;Predicted (Code-scan)
-	MOVE.b	#1, rbBytecode_Return	;Predicted (Code-scan)
+	MOVE.b	#1, rbBytecode_Ret	;Predicted (Code-scan)
 	CLR.b	rbBytecode_StopRun	;Predicted (Code-scan)
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 	LEA	loc_0001F6B8(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001F7D6
 	MOVE.w	#$0180, $26(A1)
 	MOVE.b	#$FF, $7(A1)
 	MOVEA.l	A1, A2
-	CLR.b	rbBytecode_Return
+	CLR.b	rbBytecode_Ret
 	LEA	loc_0001E394(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001F7D6
 	MOVE.l	A2, $2E(A1)
 	LEA	loc_0001E72E(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001F7D6
 	MOVE.l	A2, $2E(A1)
 	JSR	loc_0001E3F4(PC)
@@ -24246,7 +24151,7 @@ loc_0001F71A:
 	JSR	loc_00025798(PC)
 	JSR	loc_0001E4B2(PC)
 	LEA	loc_0001E2F0(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 loc_0001F7D6:
 	RTS
 	dc.b	$4E, $75, $22, $68, $00, $2E, $30, $28, $00, $26, $01, $29, $00, $07, $67, $00, $17, $0C, $24, $68, $00, $32, $20, $28, $00, $0E, $D0, $A8, $00, $16, $21, $40 ;0x0 (0x0001F7D8-0x0001FFF8, Entry count: 0x820) [Unknown data]
@@ -24451,7 +24356,7 @@ loc_0002041C:
 	dc.b	$8A, $EC, $42, $39, $00, $FF, $A0, $55, $4E, $F9, $00, $00, $8A, $B8, $4E, $B9, $00, $00, $0D, $6C, $43, $FA, $FF, $58, $4E, $F9, $00, $00, $89, $FA, $4E, $B9 ;0xAA0
 	dc.b	$00, $00, $8A, $EC, $10, $39, $00, $FF, $F0, $71, $02, $00, $00, $70, $66, $02, $4E, $75, $42, $39, $00, $FF, $A0, $55 ;0xAC0
 loc_00020EF4:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 	dc.b	$4E, $75 ;0x0 (0x00020EFA-0x00020EFC, Entry count: 0x2) [Unknown data]
 	JSR	loc_00000D6C
 	LEA	$00FFF0B0, A1
@@ -24500,7 +24405,7 @@ loc_00020F2C:
 	MOVE.w	#$E000, D5
 	BRA.w	loc_000257E6
 	LEA	loc_00021750(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0002101E
 	MOVE.b	#$FF, $7(A1)
 	MOVE.w	#2, $26(A1)
@@ -24509,15 +24414,15 @@ loc_00020F2C:
 	MOVE.w	$00FF4820, $2C(A1)
 	MOVEA.l	A1, A2
 	LEA	loc_000214BE(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0002101E
 	MOVE.l	A2, $2E(A1)
 	LEA	loc_00021A9C(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0002101E
 	MOVE.l	A2, $2E(A1)
 	LEA	loc_00021AE6(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0002101E
 	MOVE.l	A2, $2E(A1)
 loc_0002101E:
@@ -24827,7 +24732,7 @@ loc_000214B6:
 	dc.b	$FE
 	dc.b	$00 ;0x0 (0x000214BD-0x000214BE, Entry count: 0x1) [Unknown data]
 loc_000214BE:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#2, $7(A1)
 	BEQ.w	loc_000215CC
@@ -24852,7 +24757,7 @@ loc_00021500:
 loc_0002150A:
 	MOVE.b	D0, $9(A0)
 	ANDI.b	#$FE, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.w	D0
 	CLR.w	D4
 	MOVE.b	$9(A0), D0
@@ -24872,7 +24777,7 @@ loc_0002150A:
 	MOVE.w	(A2)+, D0
 loc_00021546:
 	LEA	loc_000215F4(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_000215AA
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$FF, $7(A1)
@@ -24901,12 +24806,12 @@ loc_000215AA:
 	ORI.b	#1, $7(A0)
 	BRA.w	loc_000214BE
 loc_000215CC:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_000215D2:
 	CLR.w	$36(A0)
 	CLR.l	$12(A0)
 	JSR	loc_00025400(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#0, $7(A1)
 	BEQ.w	loc_000215CC
@@ -24926,7 +24831,7 @@ loc_00021612:
 	JSR	loc_00025400(PC)
 	MOVE.b	#$6C, D0
 	JSR	loc_0001B1A2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	TST.b	$7(A1)
 	BEQ.b	loc_000215CC
@@ -24964,7 +24869,7 @@ loc_000216AC:
 	DBF	D3, loc_0002164A
 	MOVE.w	$2A(A0), D0
 	JSR	loc_0001B1A2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	TST.b	$7(A1)
 	BEQ.w	loc_000215CC
@@ -24977,7 +24882,7 @@ loc_000216D8:
 	MOVEA.l	$2E(A0), A1
 	TST.b	$7(A1)
 	BEQ.w	loc_000215CC
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	TST.b	$7(A1)
 	BEQ.w	loc_000215CC
@@ -24995,12 +24900,12 @@ loc_00021726:
 loc_0002172E:
 	MOVE.b	#$52, D0	;Predicted (Code-scan)
 	JSR	loc_0001B1A2	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
-	CLR.b	rbBytecode_Return	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
+	CLR.b	rbBytecode_Ret	;Predicted (Code-scan)
 	CLR.b	rbBytecode_StopRun	;Predicted (Code-scan)
-	JMP	loc_00008AB8	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
 loc_00021750:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	$2C(A0), D0
 	CMP.w	$00FF4820, D0
 	BCC.b	loc_0002177A
@@ -25033,7 +24938,7 @@ loc_000217B8:
 	MOVE.b	#$FF, $36(A0)
 	MOVE.w	#8, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#0, $36(A0)
 	MOVE.w	#$008C, $2A(A0)
 	SUBQ.b	#1, $9(A0)
@@ -25073,9 +24978,9 @@ loc_00021852:
 	MOVE.b	#$72, D0
 	JSR	loc_0001B1A2
 	CLR.b	$7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_000218BE(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_000218AA
 	MOVE.w	#$0100, $E(A1)
 	MOVE.w	#$FFFE, $16(A1)
@@ -25087,11 +24992,11 @@ loc_00021852:
 	OR.b	$00FFF077, D0
 	ANDI.b	#$F0, D0
 	BNE.b	loc_000218AA
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 loc_000218AA:
-	MOVE.b	#1, rbBytecode_Return
+	MOVE.b	#1, rbBytecode_Ret
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_000218BE:
 	MOVE.l	$E(A0), D1
 	ADD.l	$16(A0), D1
@@ -25108,7 +25013,7 @@ loc_000218BE:
 	RTS
 loc_000218EC:
 	JSR	loc_0001B190
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#$70, D0
 	JSR	loc_0001B1A2
 	MOVE.w	#0, $A(A0)
@@ -25116,7 +25021,7 @@ loc_000218EC:
 	MOVE.b	#1, $8(A0)
 	MOVE.b	#0, $9(A0)
 	MOVE.w	#$0A00, $38(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00025924(PC)
 	MOVE.b	$36(A0), D0
 	MOVE.w	$38(A0), D1
@@ -25134,7 +25039,7 @@ loc_000218EC:
 	BCS.b	loc_0002196A
 	RTS
 loc_0002196A:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BRA.w	loc_00025924
 loc_00021974:
 	dc.b	$02
@@ -25162,12 +25067,12 @@ loc_000219A4:
 	MOVE.w	loc_00021986(PC,D0.w), $E(A0)
 	MOVE.w	$E(A0), $20(A0)
 	MOVE.b	#$80, $6(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.w	D0
 	MOVE.b	$9(A0), D0
 	LSL.w	#2, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	TST.b	$7(A1)
 	BEQ.b	loc_00021A0C
@@ -25188,7 +25093,7 @@ loc_00021A0C:
 	JSR	loc_00000C1E
 	ADDI.w	#$4000, D0
 	MOVE.w	D0, $1C(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	MOVE.w	#$012C, D0
 	CMP.w	$E(A0), D0
@@ -25199,7 +25104,7 @@ loc_00021A48:
 	MOVE.w	D0, $20(A0)
 	MOVE.b	#0, $36(A0)
 	MOVE.w	#$0C00, $38(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$36(A0), D0
 	MOVE.w	$38(A0), D1
 	ANDI.b	#$7F, D0
@@ -25213,14 +25118,14 @@ loc_00021A48:
 	RTS
 loc_00021A8E:
 	MOVE.w	$20(A0), $E(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_00021A9C:
 	CLR.w	D0
 	MOVE.w	#7, D7
 loc_00021AA2:
 	LEA	loc_000219A4(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00021ADA
 	MOVE.b	#$44, $8(A1)
 	MOVE.b	D0, $9(A1)
@@ -25228,18 +25133,18 @@ loc_00021AA2:
 	ADDQ.b	#1, D0
 	DBF	D7, loc_00021AA2
 	MOVE.b	#$FF, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	TST.b	$7(A1)
 	BEQ.b	loc_00021ADA
 	RTS
 loc_00021ADA:
 	CLR.b	$7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_00021AE6:
 	ORI.b	#2, $00FFF00B
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	TST.b	$7(A1)
 	BEQ.b	loc_00021B28
@@ -25259,11 +25164,11 @@ loc_00021B28:
 	MOVE.w	#$EC00, D1
 	MOVE.w	#$0200, D2
 	JSR	loc_000010EC
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00021B40:
 	MOVE.w	#4, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFF071, D0
 	ANDI.b	#$80, D0
 	BNE.b	loc_00021B6A
@@ -25281,9 +25186,9 @@ loc_00021B7C:
 	MOVE.b	#$52, D0
 	JSR	loc_0001B1A2
 	CLR.b	$00FFA05A
-	MOVE.b	#1, rbBytecode_Return
+	MOVE.b	#1, rbBytecode_Ret
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00021BA6:
 	dc.b	$80
 	dc.b	$00 ;0x0 (0x00021BA7-0x00021BA8, Entry count: 0x1) [Unknown data]
@@ -25299,7 +25204,7 @@ loc_00021BB4:
 	MOVE.w	#$0028, $26(A0)
 	MOVE.w	#$001E, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	ADDQ.b	#1, $28(A0)
 	MOVE.b	$28(A0), D0
 	ANDI.b	#1, D0
@@ -25321,15 +25226,15 @@ loc_00021BEC:
 loc_00021C06:
 	MOVE.w	#$0078, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#5, D0
 	JSR	loc_00002160
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	LEA	loc_00021BA6(PC), A2
 	JSR	loc_00001870
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_000237BE
 	LEA	$00FFB000, A2
@@ -25342,14 +25247,14 @@ loc_00021C06:
 	JSR	loc_00001DD6
 	MOVE.w	#5, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.w	#$0096, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 	JSR	loc_00000D6C
 	MOVE.w	#0, D0
 	MOVE.w	#$C000, D1
@@ -25377,11 +25282,11 @@ loc_00021CF2:
 	LEA	loc_00021D9C(PC), A2
 	JSR	loc_00001DB0
 	LEA	loc_00021BB4(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	MOVE.b	#1, $00FFA05A
-	CLR.b	rbBytecode_Return
+	CLR.b	rbBytecode_Ret
 	LEA	loc_00021B40(PC), A1
-	JMP	loc_000089FA
+	JMP	ObjSys_InitObjWithFunc
 loc_00021D3C:
 	dc.w	$2001, $2002, $2003, $2004, $2005, $2006, $2007, $2008, $2009, $200A, $200B, $2000, $200C, $200D, $200E, $200F, $2010, $2011, $2012, $2013, $2014, $2015, $2016, $2017, $2018, $2019, $201A, $201B, $201C, $201D, $201E, $201F ;0x0 (0x00021D3C-0x00021D9C, Entry count: 0x60)
 	dc.w	$2020, $2021, $2022, $2023, $2024, $2025, $2026, $2027, $2028, $2029, $202A, $202B, $202C, $202D, $202E, $202F ;0x20
@@ -25456,7 +25361,7 @@ loc_0002214A:
 loc_000224F8:
 	MOVE.w	#$0014, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	MOVE.w	$26(A0), D0
 	MOVE.w	$28(A0), D1
@@ -25470,14 +25375,14 @@ loc_00022524:
 	MOVE.w	D1, $E(A0)
 	MOVEA.l	$2E(A0), A1
 	ORI.b	#1, $7(A1)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#0, $7(A1)
 	BNE.w	loc_000237BE
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00022550:
 	LEA	loc_000224F8(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_000225FC
 	MOVE.b	#$8F, $6(A1)
 	MOVE.b	#$6D, $8(A1)
@@ -25492,7 +25397,7 @@ loc_00022550:
 	MOVE.w	#$00C8, $28(A1)
 	MOVE.l	A0, $2E(A1)
 	LEA	loc_000224F8(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_000225FC
 	MOVE.b	#$8F, $6(A1)
 	MOVE.b	#$6D, $8(A1)
@@ -25517,21 +25422,21 @@ loc_000225FE:
 	MOVE.w	$26(A0), $E(A0)
 	MOVEA.l	$2E(A0), A1
 	ORI.b	#1, $7(A1)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#1, $7(A1)
 	BNE.w	loc_000237BE
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0002263A:
 	MOVE.w	#0, D0
 	MOVE.w	#$C000, D1
 	MOVE.w	#$1000, D2
 	JSR	loc_000010EC
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_000261AC(PC), A2
 	JSR	loc_00001870
 	MOVE.b	#1, $00FFF09A
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_000237BE
 	LEA	$00FFC000, A2
@@ -25545,29 +25450,29 @@ loc_00022682:
 	MOVE.w	#$0027, D1
 	MOVE.w	#$001B, D2
 	JSR	loc_000256D8(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	$00FFB000, A2
 	MOVE.w	#$C000, D0
 	MOVE.w	#$0027, D1
 	MOVE.w	#$001B, D2
 	MOVE.w	#$0330, D5
 	JSR	loc_00025836(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_00026186(PC), A2
 	JSR	loc_00001DB0
 	LEA	loc_00024C34(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_000235FA
 	MOVE.l	#$000227B8, $32(A1)
 	MOVE.l	#$00022840, $26(A1)
 	MOVE.l	A0, $2E(A1)
 	LEA	loc_000261C6(PC), A2
 	JSR	loc_00001870
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_000237BE
 	LEA	loc_000225FE(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_000235FA
 	MOVE.b	#$8F, $6(A1)
 	MOVE.b	#$6D, $8(A1)
@@ -25580,24 +25485,24 @@ loc_00022682:
 	MOVE.b	#$FE, $7(A0)
 	MOVE.w	#7, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	BTST.b	#0, $7(A0)
 	BEQ.w	loc_000237BE
 	MOVE.w	#$000A, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#7, D0
 	JSR	loc_00002160
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	ANDI.b	#$FD, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	ORI.b	#1, $7(A1)
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 	dc.b	$F1
 	dc.b	$01 ;0x0 (0x000227B9-0x000227BA, Entry count: 0x1) [Unknown data]
 	dc.b	$F0
@@ -25659,7 +25564,7 @@ loc_00022682:
 loc_00022860:
 	MOVE.w	#4, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFF071, D0
 	ANDI.b	#$80, D0
 	BNE.b	loc_0002288A
@@ -25678,7 +25583,7 @@ loc_0002289C:
 	JSR	loc_0001B1A2
 	CLR.b	$00FFA05A
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_000228BE:
 	MOVE.w	$36(A0), D0
 	MOVE.w	$38(A0), D1
@@ -25691,7 +25596,7 @@ loc_000228BE:
 loc_000228DC:
 	MOVE.w	$26(A0), D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	JSR	loc_000228BE(PC)
 	TST.w	$12(A0)
@@ -25699,7 +25604,7 @@ loc_000228DC:
 	SUBI.b	#$25, $9(A0)
 	TST.b	$7(A0)
 	BMI.b	loc_00022926
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	JSR	loc_000228BE(PC)
 	MOVE.w	$28(A0), D0
@@ -25707,7 +25612,7 @@ loc_000228DC:
 	BLS.b	loc_00022942
 	RTS
 loc_00022926:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	JSR	loc_000228BE(PC)
 	MOVE.w	$28(A0), D0
@@ -25716,7 +25621,7 @@ loc_00022926:
 	RTS
 loc_00022942:
 	MOVE.w	D0, $A(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.w	$38(A0)
 	BEQ.b	loc_0002295C
 	SUBI.w	#$0080, $38(A0)
@@ -25724,7 +25629,7 @@ loc_00022942:
 loc_0002295C:
 	MOVEA.l	$2E(A0), A1
 	SUBQ.w	#1, $26(A1)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_0002296C:
 	JSR	loc_00008BE0
@@ -25735,7 +25640,7 @@ loc_0002296C:
 loc_0002297E:
 	MOVE.w	D0, $A(A0)
 	SUBI.b	#$25, $9(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_00022990:
 	JSR	loc_00008BE0
@@ -25747,7 +25652,7 @@ loc_000229A2:
 	MOVE.w	D0, $E(A0)
 	MOVE.b	#$6C, D0
 	JSR	loc_0001B1A2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JMP	loc_00008B34
 loc_000229BC:
 	dc.b	$00
@@ -25810,7 +25715,7 @@ loc_00022A50:
 	MOVE.w	#$0A00, D1
 loc_00022A66:
 	LEA	loc_000228DC(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_00022B1A
 	MOVE.w	#$FFF8, $12(A1)
 	MOVE.b	#$25, $9(A1)
@@ -25818,7 +25723,7 @@ loc_00022A66:
 	MOVE.w	#$0100, $28(A1)
 	JSR	loc_000229EE(PC)
 	LEA	loc_000228DC(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_00022B1A
 	MOVE.w	#$FFF8, $12(A1)
 	MOVE.b	#$26, $9(A1)
@@ -25826,7 +25731,7 @@ loc_00022A66:
 	MOVE.w	#$0138, $28(A1)
 	JSR	loc_000229EE(PC)
 	LEA	loc_000228DC(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_00022B1A
 	MOVE.b	#$80, $7(A1)
 	MOVE.b	#$25, $9(A1)
@@ -25835,7 +25740,7 @@ loc_00022A66:
 	MOVE.w	#$0090, $28(A1)
 	JSR	loc_000229EE(PC)
 	LEA	loc_000228DC(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_00022B1A
 	MOVE.b	#$80, $7(A1)
 	MOVE.b	#$26, $9(A1)
@@ -25866,7 +25771,7 @@ loc_00022B36:
 	MOVE.w	#$6000, D5
 	BRA.w	loc_000257E6
 loc_00022B84:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00022B8A:
 	MOVEA.l	$2E(A0), A1
 	MOVE.w	$26(A0), D0
@@ -25882,7 +25787,7 @@ loc_00022B8A:
 	RTS
 loc_00022BBC:
 	LEA	loc_00022B8A(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00022C0E
 	MOVE.w	#0, $A(A1)
 	MOVE.w	#$000A, $12(A1)
@@ -25890,7 +25795,7 @@ loc_00022BBC:
 	MOVE.l	A0, $2E(A1)
 	MOVE.l	#$00FFF0B2, $32(A1)
 	LEA	loc_00022B8A(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00022C0E
 	MOVE.w	D0, $A(A1)
 	MOVE.w	#1, $12(A1)
@@ -25928,7 +25833,7 @@ loc_00022C6A:
 	MOVEA.l	$32(A0), A2
 	MOVE.w	#0, (A2)
 	MOVE.b	#1, $00FFF069
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00022C80:
 	MOVE.l	$E(A0), D1
 	ADD.l	$16(A0), D1
@@ -25947,7 +25852,7 @@ loc_00022C9E:
 loc_00022CB0:
 	MOVE.w	#4, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.l	$16(A0), D0
 	NEG.l	D0
 	MOVE.l	D0, $16(A0)
@@ -25956,7 +25861,7 @@ loc_00022CB0:
 	BSET.b	#0, $7(A1)
 	MOVE.w	#$001E, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.l	$E(A0), D1
 	ADD.l	$16(A0), D1
 	MOVE.l	D1, $E(A0)
@@ -25970,7 +25875,7 @@ loc_00022D04:
 	JSR	loc_0001B1A2
 	CLR.w	$36(A0)
 	MOVE.w	#$0A00, $38(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$36(A0), D0
 	MOVE.w	$38(A0), D1
 	ANDI.b	#$7F, D0
@@ -26001,12 +25906,12 @@ loc_00022D6A:
 loc_00022D82:
 	ADD.w	D1, (A2)+
 	DBF	D0, loc_00022D82
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00000C04
 	ANDI.b	#1, D0
 	BNE.w	loc_00022E5C
 	LEA	loc_00022C40(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00022DD4
 	MOVE.w	#$FF20, $E(A1)
 	MOVE.w	#8, $16(A1)
@@ -26018,7 +25923,7 @@ loc_00022D82:
 	MOVE.b	#1, $00FFF069
 loc_00022DD4:
 	MOVE.l	#$0002383C, $32(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	BCS.w	loc_00022E4C
 loc_00022DEC:
@@ -26050,10 +25955,10 @@ loc_00022DEC:
 loc_00022E4C:
 	MOVEA.l	$2E(A0), A1
 	BSET.b	#0, $7(A1)
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00022E5C:
 	LEA	loc_00022C80(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00022E94
 	MOVE.w	#$FF20, $E(A1)
 	MOVE.w	#$000A, $16(A1)
@@ -26065,7 +25970,7 @@ loc_00022E5C:
 	MOVE.b	#1, $00FFF069
 loc_00022E94:
 	MOVE.l	#$000237E8, $32(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#0, $7(A0)
 	BNE.b	loc_00022EB4
 	JSR	loc_00008B34
@@ -26074,7 +25979,7 @@ loc_00022EB4:
 	MOVE.l	#$00023814, $32(A0)
 	JSR	loc_00008B34
 	JSR	loc_00022DEC(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#1, $7(A0)
 	BEQ.w	loc_000237BE
 	JSR	loc_00008B34
@@ -26129,7 +26034,7 @@ loc_00022F5C:
 	BCC.b	loc_00022FA0
 	RTS
 loc_00022FA0:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00022FA6:
 	JSR	loc_00022550(PC)
 	LEA	loc_0002617E(PC), A2
@@ -26143,25 +26048,25 @@ loc_00022FA6:
 	MOVE.l	A0, $2E(A1)
 	MOVE.w	#7, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#0, $7(A0)
 	BEQ.w	loc_000237BE
 	MOVE.w	#$000A, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#7, D0
 	JSR	loc_00002160
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.b	#$FC, $7(A0)
 	LEA	loc_000261F8(PC), A2
 	JSR	loc_00001870
 	MOVE.b	#1, $00FFF09A
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_000237BE
 	JSR	loc_00022B36(PC)
@@ -26172,15 +26077,15 @@ loc_00022FA6:
 	JSR	loc_00001DD6
 	MOVE.w	#7, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.w	#$003C, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#7, D0
 	JSR	loc_00002160
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.b	#$FF, $7(A0)
@@ -26189,7 +26094,7 @@ loc_00022FA6:
 	LEA	loc_00026212(PC), A2
 	JSR	loc_00001870
 	MOVE.b	#1, $00FFF09A
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_000237BE
 	MOVE.w	#0, D0
@@ -26207,7 +26112,7 @@ loc_00022FA6:
 	MOVE.w	#$001A, D2
 	MOVE.w	#$001C, D3
 	JSR	loc_00000F68
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#$FF, $7(A0)
 	LEA	loc_00026182(PC), A2
 	JSR	loc_00001DB0
@@ -26219,28 +26124,28 @@ loc_00022FA6:
 	MOVE.l	A0, $2E(A1)
 	MOVE.w	#7, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.w	#0, $A(A0)
 	MOVE.l	#$00023894, $32(A0)
 	MOVE.b	#2, $8(A0)
 	MOVE.b	#0, $9(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00025924(PC)
 	BCC.w	loc_000237BE
 	MOVE.w	#7, D0
 	JSR	loc_00002160
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00025924(PC)
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.b	#$FD, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_000261F8(PC), A2
 	JSR	loc_00001870
 	MOVE.b	#1, $00FFF09A
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_000237BE
 	JSR	loc_00022B36(PC)
@@ -26251,35 +26156,35 @@ loc_00022FA6:
 	JSR	loc_00001DD6
 	MOVE.w	#7, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.w	#$0028, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#7, D0
 	JSR	loc_00002160
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.b	#$FF, $7(A0)
 	CLR.l	$00FFF0B0
 	MOVE.b	#1, $00FFF069
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_0002263A(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_000235FA
 	MOVE.b	#$FF, $7(A1)
 	MOVE.l	A0, $2E(A1)
 	MOVE.b	#$FE, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#0, $7(A0)
 	BEQ.w	loc_000237BE
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_000261F8(PC), A2
 	JSR	loc_00001870
 	MOVE.b	#1, $00FFF09A
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_000237BE
 	JSR	loc_00022B36(PC)
@@ -26290,17 +26195,17 @@ loc_00022FA6:
 	JSR	loc_00001DD6
 	MOVE.w	#7, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.w	#$003C, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#$FE, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_000261CE(PC), A2
 	JSR	loc_00001870
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_00026800(PC), A2
 	LEA	$00FF9460, A3
 	MOVEQ	#1, D1
@@ -26310,46 +26215,46 @@ loc_00022FA6:
 	RTS
 loc_0002334E:
 	MOVE.b	#$FF, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#0, D0
 	MOVE.w	#$E000, D1
 	MOVE.w	#$0800, D2
 	JSR	loc_000010EC
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#0, D0
 	MOVE.w	#$F000, D1
 	MOVE.w	#$0800, D2
 	JSR	loc_000010EC
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.l	#$2C323C2D, D0
 	JSR	loc_00001DD6
 	MOVE.b	#1, $00FFF046
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_000237BE
 	LEA	loc_00022D56(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_000233D4
 	MOVE.l	A0, $2E(A1)
 	MOVE.b	#$FE, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#0, $7(A0)
 	BEQ.w	loc_000237BE
 loc_000233D4:
 	MOVE.w	#$000A, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_000261E2(PC), A2
 	JSR	loc_00001870
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_000237BE
 	JSR	loc_00022A50(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.w	$26(A0)
 	BNE.w	loc_000237BE
 	LEA	loc_0002296C(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_000234E2
 	MOVE.b	#$8F, $6(A1)
 	MOVE.b	#$6E, $8(A1)
@@ -26361,10 +26266,10 @@ loc_000233D4:
 	MOVE.w	#$01C0, $1E(A1)
 	MOVE.w	#$0160, $26(A1)
 	MOVE.l	A0, $2E(A1)
-	JSR	loc_00008AEC
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_00022990(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_000234E2
 	MOVE.b	#3, $9(A1)
 	MOVE.w	#$00B0, $A(A1)
@@ -26372,7 +26277,7 @@ loc_000233D4:
 	MOVE.l	#$000229BC, $32(A1)
 	JSR	loc_00022A26(PC)
 	LEA	loc_00022990(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_000234E2
 	MOVE.b	#3, $9(A1)
 	MOVE.w	#$0120, $A(A1)
@@ -26380,7 +26285,7 @@ loc_000233D4:
 	MOVE.l	#$000229BC, $32(A1)
 	JSR	loc_00022A26(PC)
 	LEA	loc_00022990(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_000234E2
 	MOVE.b	#7, $9(A1)
 	MOVE.w	#$0160, $A(A1)
@@ -26389,20 +26294,20 @@ loc_000233D4:
 	JSR	loc_00022A26(PC)
 loc_000234E2:
 	LEA	loc_0002360E(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	LEA	$00FFC0D8, A2
 	MOVE.w	#$E098, D1
 	MOVE.w	#$000E, D2
 	MOVE.w	#$000E, D3
 	JSR	loc_00000F68
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	LEA	loc_000261F0(PC), A2
 	JSR	loc_0000188C
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_000237BE
 	LEA	loc_00022B8A(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00023556
 	MOVE.w	$00FFF0B0, $A(A1)
 	MOVE.w	#$FFFF, $12(A1)
@@ -26413,9 +26318,9 @@ loc_000234E2:
 loc_00023556:
 	MOVE.w	#$0046, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	#$FF, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	ORI	#$0700, SR
 	MOVE.w	#$8700, D0
 	MOVE.b	#$10, D0
@@ -26431,30 +26336,30 @@ loc_00023556:
 loc_000235A6:
 	MOVE.b	#$4D, D0
 	JSR	loc_0001B1D2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#$0100, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#7, D0
 	JSR	loc_00002160
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.b	#$FF, $7(A0)
 	CLR.l	$00FFF0B0
 	MOVE.b	#1, $00FFF069
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 loc_000235FA:
 	MOVE.b	#1, $00FFA05A
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0002360E:
 	MOVE.b	#$80, $6(A0)
 	MOVE.b	#$6C, $8(A0)
 	MOVE.b	#$18, $9(A0)
 	MOVE.w	#$00D0, $A(A0)
 	MOVE.w	#$0104, $E(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 	dc.b	$02, $00, $01, $01, $02, $02, $01, $01, $FF, $00, $00, $02, $36, $34, $02, $03, $01, $04, $02, $05, $01, $04, $FF, $00, $00, $02, $36, $42, $02, $06, $01, $07 ;0x0 (0x00023634-0x000237A0, Entry count: 0x16C) [Unknown data]
 	dc.b	$02, $08, $01, $07, $FF, $00, $00, $02, $36, $50, $02, $09, $01, $0A, $02, $0B, $01, $0A, $FF, $00, $00, $02, $36, $5E, $02, $0C, $01, $0D, $02, $0E, $01, $0D ;0x20
@@ -26469,11 +26374,11 @@ loc_0002360E:
 	dc.b	$3E, $3C, $00, $0F, $43, $FA, $FF, $4A, $4E, $B9, $00, $00, $90, $5C, $65, $1A, $13, $7C, $00, $6C, $00, $08, $33, $7C, $20, $00, $00, $1C, $33, $7C, $FF, $FF ;0x140
 	dc.b	$00, $20, $23, $48, $00, $2E, $51, $CF, $FF, $DC, $4E, $75 ;0x160
 	LEA	loc_00022FA6(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_000225FC
 	MOVE.b	#$FF, $7(A1)
 	LEA	loc_00022860(PC), A1
-	JMP	loc_000089FA
+	JMP	ObjSys_InitObjWithFunc
 loc_000237BE:
 	RTS
 	dc.b	$00, $84, $01, $0C, $01, $90, $02, $14, $02, $98, $03, $1C, $13, $9C, $33, $9C, $53, $9C, $73, $9C, $00, $84, $01, $0C, $01, $90, $02, $14, $02, $98, $03, $1C ;0x0 (0x000237C0-0x000237E8, Entry count: 0x28) [Unknown data]
@@ -26561,7 +26466,7 @@ loc_000238A0:
 	dc.b	$04, $0F, $00, $FE, $00, $0C, $00, $03, $01, $04, $02, $03, $01, $1E, $00, $FE, $00 ;0x0 (0x000238A3-0x000238B4, Entry count: 0x11) [Unknown data]
 	MOVE.l	#$00026500, $00FFF04C
 	MOVEQ	#4, D0
-	JSR	loc_00000DBC
+	JSR	Bytecode_SetVDPMode
 	JSR	loc_00000D6C
 	ORI.b	#2, $00FFF00B
 	JSR	loc_00001092
@@ -26644,7 +26549,7 @@ loc_000239EE:
 	RTS
 loc_000239F6:
 	LEA	loc_00024776(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00023A4A
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$77, $8(A1)
@@ -26652,7 +26557,7 @@ loc_000239F6:
 	MOVE.w	#$0090, $A(A1)
 	MOVE.w	#$00D8, $E(A1)
 	LEA	loc_00024776(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00023A4A
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$77, $8(A1)
@@ -26732,13 +26637,13 @@ loc_00023B7C:
 loc_00023B9E:
 	TST.b	$00FFF080
 	BNE.w	loc_0002408A
-	CLR.b	rbBytecode_Return
+	CLR.b	rbBytecode_Ret
 	CLR.b	$00FFA048
 	MOVEQ	#4, D0
 	JSR	loc_0001B1A2
 	JSR	loc_00024778(PC)
 	LEA	loc_0002430E(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BSET.b	#4, $00FFA170
 	BTST.b	#0, $00FFA049
 	BEQ.b	loc_00023BEE
@@ -26750,9 +26655,9 @@ loc_00023BEE:
 	JSR	loc_0002396E(PC)
 	JSR	loc_0002442E(PC)
 	JSR	loc_000239F6(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00023A4C(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00000A64
 	MOVE.l	#$35383338, D0
 	JSR	loc_00001DD6
@@ -26760,11 +26665,11 @@ loc_00023BEE:
 	JSR	loc_00002128
 	LEA	loc_0002615E(PC), A2
 	JSR	loc_0000188C
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_0002408A
 	LEA	loc_0002434C(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_00023D94
 	MOVE.l	A0, $2E(A1)
 	BRA.w	loc_00023D94
@@ -26782,7 +26687,7 @@ loc_00023C68:
 	ADD.l	D0, $00FFA158	;Predicted (Code-scan)
 	JSR	loc_0002442E(PC)	;Predicted (Code-scan)
 	LEA	loc_00023B7C(PC), A1	;Predicted (Code-scan)
-	JSR	loc_000089FA	;Predicted (Code-scan)
+	JSR	ObjSys_InitObjWithFunc	;Predicted (Code-scan)
 	BCS.w	loc_00023CD2	;Predicted (Code-scan)
 	MOVE.b	#$80, $6(A1)	;Predicted (Code-scan)
 	MOVE.b	#$77, $8(A1)	;Predicted (Code-scan)
@@ -26799,25 +26704,25 @@ loc_00023CD2:
 	JSR	loc_00001DD6	;Predicted (Code-scan)
 	MOVEQ	#2, D0	;Predicted (Code-scan)
 	JSR	loc_00002128	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	TST.b	$00FFF048	;Predicted (Code-scan)
 	BNE.w	loc_0002408A	;Predicted (Code-scan)
 	LEA	loc_0002615E(PC), A2	;Predicted (Code-scan)
 	JSR	loc_0000188C	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	TST.b	$00FFF080	;Predicted (Code-scan)
 	BNE.w	loc_0002408A	;Predicted (Code-scan)
 	LEA	loc_0002434C(PC), A1	;Predicted (Code-scan)
-	JSR	loc_000089FA	;Predicted (Code-scan)
+	JSR	ObjSys_InitObjWithFunc	;Predicted (Code-scan)
 	BCS.w	loc_00023D94	;Predicted (Code-scan)
 	MOVE.l	A0, $2E(A1)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	BTST.b	#4, $7(A0)	;Predicted (Code-scan)
 	BEQ.w	loc_0002408A	;Predicted (Code-scan)
 	MOVEQ	#$00000070, D0	;Predicted (Code-scan)
 	JSR	loc_0001B1A2	;Predicted (Code-scan)
 	MOVE.w	#$0C00, $38(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	MOVE.b	$36(A0), D0	;Predicted (Code-scan)
 	MOVE.w	$38(A0), D1	;Predicted (Code-scan)
 	ANDI.b	#$7F, D0	;Predicted (Code-scan)
@@ -26832,17 +26737,17 @@ loc_00023CD2:
 	JSR	loc_0002390E(PC)	;Predicted (Code-scan)
 	JSR	loc_0002396E(PC)	;Predicted (Code-scan)
 	JSR	loc_000239F6(PC)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	JSR	loc_00023A4C(PC)	;Predicted (Code-scan)
 loc_00023D94:
 	BCLR.b	#4, $00FFA170
 	BCLR.b	#0, $00FFA049
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CMPI.b	#5, $00FFA105
 	BCS.w	loc_00023DD0
 	LEA	loc_00026172(PC), A2	;Predicted (Code-scan)
 	JSR	loc_0000188C	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	TST.b	$00FFF080	;Predicted (Code-scan)
 	BNE.w	loc_0002408A	;Predicted (Code-scan)
 loc_00023DD0:
@@ -26870,14 +26775,14 @@ loc_00023DD0:
 	BRA.w	loc_00023E4E
 loc_00023E2A:
 	MOVE.b	#$FF, $37(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	MOVE.w	#$0032, D0	;Predicted (Code-scan)
 	JSR	loc_00008AE2	;Predicted (Code-scan)
 	BSR.w	loc_00023FEA	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	BRA.w	loc_00023ECC	;Predicted (Code-scan)
 loc_00023E4E:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	SUBQ.w	#1, $28(A0)
 	BEQ.w	loc_00023ECC
 	JSR	loc_000047AC
@@ -26920,7 +26825,7 @@ loc_00023ECC:
 	MOVE.w	#3, D2
 	MOVE.w	#$8000, D5
 	JSR	loc_000258D8(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.w	D1
 	MOVE.b	$00FFA104, D0
 	JSR	loc_00003338
@@ -26937,7 +26842,7 @@ loc_00023ECC:
 	JSR	loc_00008AE2
 	JSR	loc_00023FCC(PC)
 	BSR.w	loc_00023FEA
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	$1E(A0), D0
 	JSR	loc_00008AE2
 	JSR	loc_00023FCC(PC)
@@ -26945,13 +26850,13 @@ loc_00023ECC:
 	JSR	loc_00008B02
 	MOVE.w	#7, D0
 	JSR	loc_00002160
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_0002408A
 	MOVE.l	#$0001AD22, $00FFF04C
 	JSR	loc_0001B190
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00023F88:
 	dc.b	$18, $64 ;0x0 (0x00023F88-0x00023F8A, Entry count: 0x2) [Unknown data]
 	dc.b	$1A
@@ -27229,7 +27134,7 @@ loc_0002435C:
 	MOVE.w	#$C184, $00FFA14C
 	MOVE.w	#$C000, $00FFA14A
 	JSR	loc_0000CC00
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_0002438C:
 	dc.b	$00, $05, $09, $0F, $00, $E0, $01, $30, $0A, $10, $00, $E8, $01, $08, $0B, $0B, $00, $F0, $00, $E0, $0C, $0C, $00, $F8, $00, $B8, $0D, $0D, $01, $00, $00, $90 ;0x0 (0x0002438C-0x00024416, Entry count: 0x8A) [Unknown data]
@@ -27254,7 +27159,7 @@ loc_0002443E:
 	MOVEA.l	A0, A2
 loc_0002444A:
 	LEA	loc_000245BA(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0002444A
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$77, $8(A1)
@@ -27270,7 +27175,7 @@ loc_0002444A:
 	MOVEA.l	A1, A2
 	DBF	D7, loc_0002444A
 	LEA	loc_00024646(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_000244CE
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$77, $8(A1)
@@ -27291,7 +27196,7 @@ loc_000244D0:
 	dc.w	$0018
 	dc.b	$00, $40, $00, $68, $00, $90, $00, $B8, $00, $E0 ;0x0 (0x000244D2-0x000244DC, Entry count: 0xA) [Unknown data]
 loc_000244DC:
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	MOVEA.l	$2E(A0), A1	;Predicted (Code-scan)
 	BTST.b	#3, $7(A1)	;Predicted (Code-scan)
 	BEQ.w	loc_0002408A	;Predicted (Code-scan)
@@ -27302,7 +27207,7 @@ loc_000244DC:
 	MOVE.w	#$8000, $1C(A0)	;Predicted (Code-scan)
 	MOVE.w	#$0180, $20(A0)	;Predicted (Code-scan)
 	MOVE.b	#$95, $6(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	JSR	loc_00008BE0	;Predicted (Code-scan)
 	MOVE.w	$E(A0), D0	;Predicted (Code-scan)
 	CMP.w	$2A(A0), D0	;Predicted (Code-scan)
@@ -27315,7 +27220,7 @@ loc_000244DC:
 	MOVE.w	#$8000, $1C(A0)	;Predicted (Code-scan)
 	MOVE.w	#$0180, $20(A0)	;Predicted (Code-scan)
 	MOVE.b	#$95, $6(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	JSR	loc_00008BE0	;Predicted (Code-scan)
 	MOVE.w	$E(A0), D0	;Predicted (Code-scan)
 	CMP.w	$2A(A0), D0	;Predicted (Code-scan)
@@ -27330,7 +27235,7 @@ loc_000244DC:
 	BNE.b	loc_00024592	;Predicted (Code-scan)
 	MOVE.b	$36(A0), $9(A0)	;Predicted (Code-scan)
 loc_00024592:
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
 loc_0002459A:
 	dc.b	$FF, $FF, $40, $00, $FF, $FF, $00, $00, $FF, $FE, $C0, $00, $FF, $FE, $80, $00, $FF, $FE, $40, $00, $FF, $FE, $00, $00, $FF, $FE, $00, $00, $FF, $FE, $00, $00 ;0x0 (0x0002459A-0x000245BA, Entry count: 0x20) [Unknown data]
@@ -27342,21 +27247,21 @@ loc_000245BA:
 	MOVE.w	$26(A0), D0	;Predicted (Code-scan)
 	CMP.w	$28(A0), D0	;Predicted (Code-scan)
 	BNE.w	loc_000244DC	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	MOVEA.l	$2E(A0), A1	;Predicted (Code-scan)
 	BTST.b	#2, $7(A1)	;Predicted (Code-scan)
 	BEQ.w	loc_0002408A	;Predicted (Code-scan)
 	MOVE.b	#$8A, $6(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	JSR	loc_00008BE0	;Predicted (Code-scan)
 	BCC.w	loc_0002408A	;Predicted (Code-scan)
 	MOVEA.l	$2E(A0), A1	;Predicted (Code-scan)
 	BSET.b	#3, $7(A1)	;Predicted (Code-scan)
 	CLR.b	$6(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
 loc_0002461A:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#5, $7(A1)
 	BEQ.w	loc_0002408A
@@ -27365,14 +27270,14 @@ loc_0002461A:
 	BNE.b	loc_0002463E
 	MOVE.b	$36(A0), $9(A0)
 loc_0002463E:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_00024646:
 	BTST.b	#0, $00FFA049
 	BEQ.w	loc_00024700
 	CMPI.b	#5, $00FFA105	;Predicted (Code-scan)
 	BCC.w	loc_00024700	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	MOVEA.l	$2E(A0), A1	;Predicted (Code-scan)
 	BTST.b	#3, $7(A1)	;Predicted (Code-scan)
 	BEQ.w	loc_0002408A	;Predicted (Code-scan)
@@ -27383,13 +27288,13 @@ loc_00024646:
 	MOVE.w	#$8000, $1C(A0)	;Predicted (Code-scan)
 	MOVE.w	#$0180, $20(A0)	;Predicted (Code-scan)
 	MOVE.b	#$95, $6(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	JSR	loc_00008BE0	;Predicted (Code-scan)
 	MOVE.w	$E(A0), D0	;Predicted (Code-scan)
 	CMP.w	$2A(A0), D0	;Predicted (Code-scan)
 	BCS.w	loc_0002408A	;Predicted (Code-scan)
 	MOVE.w	$2A(A0), $E(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	MOVEA.l	$2E(A0), A1	;Predicted (Code-scan)
 	BSET.b	#4, $7(A1)	;Predicted (Code-scan)
 	MOVE.w	$E(A0), $2A(A0)	;Predicted (Code-scan)
@@ -27397,21 +27302,21 @@ loc_00024646:
 	MOVE.w	#$8000, $1C(A0)	;Predicted (Code-scan)
 	MOVE.w	#$0180, $20(A0)	;Predicted (Code-scan)
 	MOVE.b	#$95, $6(A0)	;Predicted (Code-scan)
-	JSR	loc_00008AEC	;Predicted (Code-scan)
+	JSR	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
 	JSR	loc_00008BE0	;Predicted (Code-scan)
 	MOVE.w	$E(A0), D0	;Predicted (Code-scan)
 	CMP.w	$2A(A0), D0	;Predicted (Code-scan)
 	BCS.w	loc_0002408A	;Predicted (Code-scan)
 	MOVE.w	$2A(A0), $E(A0)	;Predicted (Code-scan)
 loc_00024700:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#5, $7(A1)
 	BEQ.w	loc_0002408A
 	CMPI.b	#5, $00FFA105
 	BCS.w	loc_00024758
 	LEA	loc_00024764(PC), A1	;Predicted (Code-scan)
-	JSR	loc_000089FA	;Predicted (Code-scan)
+	JSR	ObjSys_InitObjWithFunc	;Predicted (Code-scan)
 	BCS.b	loc_00024758	;Predicted (Code-scan)
 	MOVE.b	#$80, $6(A1)	;Predicted (Code-scan)
 	MOVE.b	$8(A0), $8(A1)	;Predicted (Code-scan)
@@ -27423,7 +27328,7 @@ loc_00024700:
 	SUBQ.b	#5, D0	;Predicted (Code-scan)
 	MOVE.b	loc_00024760(PC,D0.w), $9(A1)	;Predicted (Code-scan)
 loc_00024758:
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_00024760:
 	dc.b	$17, $18, $16, $16 ;0x0 (0x00024760-0x00024764, Entry count: 0x4) [Unknown data]
@@ -27596,7 +27501,7 @@ loc_00024C00:
 	dc.b	$47, $FA, $18, $F6, $EB, $49, $D6, $C1, $45, $F9, $00, $FF, $94, $00, $EB, $48, $D4, $C0, $72, $07, $24, $DB, $51, $C9, $FF, $FC, $4E, $75, $22, $68, $00, $2E ;0x0 (0x00024C08-0x00024C2E, Entry count: 0x26) [Unknown data]
 	dc.b	$4A, $29, $00, $06, $66, $12 ;0x20
 loc_00024C2E:
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_00024C34:
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#1, $7(A1)
@@ -27800,7 +27705,7 @@ loc_00024E86:
 	LEA	loc_000262CC, A2
 	JSR	loc_0000188C
 	MOVE.b	#1, $00FFF09A
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF080
 	BNE.w	loc_00024D2C
 	JSR	loc_00024E52(PC)
@@ -27816,7 +27721,7 @@ loc_00024E86:
 	MOVE.w	#2, D2
 	MOVE.w	#$E000, D5
 	JSR	loc_00025836(PC)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVEQ	#5, D7
 loc_00024EEA:
 	MOVE.w	D7, D0
@@ -27834,7 +27739,7 @@ loc_00024EF6:
 	MOVE.b	$26(A0), D0
 	JSR	loc_00024E2C(PC)
 	LEA	loc_0002515C(PC), A1
-	JSR	loc_000089FA
+	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_00024F64
 	MOVE.b	#$80, $6(A1)
 	MOVE.b	#$41, $8(A1)
@@ -27857,14 +27762,14 @@ loc_00024F64:
 	JSR	loc_0001B1A2
 	MOVE.w	#2, D0
 	JSR	loc_00002128
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_00024D2C
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#4, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$00FFF071, D1
 	OR.b	$00FFF077, D1
 	MOVE.b	D1, D0
@@ -27946,19 +27851,19 @@ loc_000250DE:
 	JSR	loc_0001B1A2
 	MOVE.b	#0, $6(A0)
 	MOVE.b	#$80, $7(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.w	#8, $2A(A0)
 loc_00025100:
 	MOVE.b	$26(A0), D0
 	JSR	loc_00024E08(PC)
 	MOVE.w	#2, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	MOVE.b	$26(A0), D0
 	JSR	loc_00024DE0(PC)
 	MOVE.w	#2, D0
 	JSR	loc_00008AE2
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	SUBQ.w	#1, $2A(A0)
 	BNE.b	loc_00025100
 	MOVE.b	$26(A0), D0
@@ -27968,7 +27873,7 @@ loc_00025100:
 	MOVEA.l	(A3,D0.w), A3
 	MOVE.b	$10(A3), $00FFA05A
 	CLR.b	rbBytecode_StopRun
-	JMP	loc_00008AB8
+	JMP	ObjSys_DeleteObjectA0
 loc_0002515C:
 	MOVEA.l	$2E(A0), A1
 	BTST.b	#7, $7(A1)
@@ -27997,7 +27902,7 @@ loc_000251A6:
 	RTS
 loc_000251B0:
 	MOVE.b	#$13, $9(A0)
-	JSR	loc_00008AEC
+	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_000251BE:
 	dc.b	$00, $02, $52, $A2, $00, $02, $52, $A2, $00, $02, $52, $CA, $00, $02, $52, $A2, $00, $02, $52, $A2, $00, $02, $52, $C4, $00, $02, $53, $18, $00, $02, $53, $48 ;0x0 (0x000251BE-0x000252A2, Entry count: 0xE4) [Unknown data]
@@ -28067,7 +27972,7 @@ loc_000251BE:
 	MOVE.w	#$1000, D2
 	JSR	loc_000010F0
 	LEA	loc_00024E86(PC), A1
-	JMP	loc_000089FA
+	JMP	ObjSys_InitObjWithFunc
 	dc.b	$11, $7C, $00, $80, $00, $06, $4E, $75 ;0x0 (0x000253F8-0x00025400, Entry count: 0x8) [Unknown data]
 loc_00025400:
 	MOVE.l	$12(A0), D0

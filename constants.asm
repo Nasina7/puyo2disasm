@@ -36,8 +36,8 @@ btnb_Down = $2
 btnb_Up = $1
 
 ; Ram Map
-rlBytecode_CurLocation = $00FFA050
-rbBytecode_Return = $00FFA054
+rlBytecode_PC = $00FFA050
+rbBytecode_Ret = $00FFA054
 rbBytecode_StopRun = $00FFA055
 rbBytecode_StopLoop = $00FFA056
 ;A056-A05F
