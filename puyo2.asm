@@ -102,7 +102,6 @@ HeaderChecksum:
 	dc.b    "J  " ; Region Support
 	dc.b	"             " ; Reserved
 Reset:
-	nop
 	TST.l	$00A10008
 	BNE.b	@loc_0000020F
 	TST.w	$00A1000C
