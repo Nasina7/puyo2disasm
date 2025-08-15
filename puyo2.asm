@@ -11,6 +11,7 @@
 
 	include "constants.asm"
 	include "macros.asm"
+	include "bytecode/macros.asm"
 StartOfRom:
 	dc.l	SystemStack
 	dc.l	Reset
@@ -101,6 +102,7 @@ HeaderChecksum:
 	dc.b    "J  " ; Region Support
 	dc.b	"             " ; Reserved
 Reset:
+	nop
 	TST.l	$00A10008
 	BNE.b	@loc_0000020F
 	TST.w	$00A1000C
@@ -1985,6 +1987,7 @@ loc_00001E18:
 	DBF	D1, loc_00001E18
 	MOVEM.l	(A7)+, D0/D1/A1
 	RTS
+loc_00001E24:
 	MOVE.b	#1, $00FFF040
 	MOVE.b	#1, $00FFF042
 	MOVE.b	#1, $00FFF044
@@ -2323,6 +2326,7 @@ loc_000023B2:
 	dc.b	$00 ;0x0 (0x000023C3-0x000023C4, Entry count: 0x1) [Unknown data]
 	dc.l	loc_000023B2
 	dc.b	$4A, $39, $00, $FF, $A1, $06, $66, $00, $FF, $E0 ;0x0 (0x000023C8-0x000023D2, Entry count: 0xA) [Unknown data]
+loc_000023D2:
 	MOVE.b	#1, $00FFA106
 	MOVE.w	#$1005, $00FFF07C
 	MOVE.l	#$0001AD22, $00FFF04C
@@ -3120,6 +3124,7 @@ loc_00003240:
 	dc.b	$0C, $04, $5E, $32, $45, $58, $49, $54, $20, $49, $53, $20, $49, $4E, $50, $55, $54, $20, $54, $45, $53, $54, $2E, $2E, $2E, $FF ;0x0 (0x00003240-0x0000325A, Entry count: 0x1A) [Unknown data]
 loc_0000325A:
 	dc.l	$534154FF, $FFFF0000, $48A201A0, $00000000, $4C554CFF, $FFFF0000, $4250015C, $00000000, $4D494EFF, $FFFF0000, $305E00CC, $00000000, $574954FF, $FFFF0000, $242C0089, $00000000, $4E4153FF, $FFFF0000, $19FA0098, $00000000 ;0x0 (0x0000325A-0x000032AA, Entry count: 0x50)
+loc_000032AA:
 	MOVE.b	$00FFA03E, $00FFA03F
 	CLR.l	$00FFA150
 	CLR.l	$00FFA154
@@ -3147,6 +3152,7 @@ loc_000032EC:
 loc_0000332A:
 	MOVEM.l	(A7)+, D0/D1
 	RTS
+loc_00003330:
 	CLR.b	$00FF9FF1
 	RTS
 loc_00003338:
@@ -3298,6 +3304,7 @@ loc_0000359E:
 	dc.b	$00, $03 ;0x0 (0x000035A0-0x000035A2, Entry count: 0x2) [Unknown data]
 	dc.w	$0004
 	dc.b	$00, $05, $00, $06 ;0x0 (0x000035A4-0x000035A8, Entry count: 0x4) [Unknown data]
+loc_000035A8:
 	CLR.w	$00FFA144
 	CLR.w	$00FFA140
 	CLR.w	$00FF8278
@@ -4741,6 +4748,7 @@ loc_00004A32:
 loc_00004A34:
 	dc.w	$0090, $0150, $0090, $0090, $0090, $0150, $0090 ;0x0 (0x00004A34-0x00004A42, Entry count: 0xE)
 	dc.b	$00, $90, $00, $90, $01, $50, $00, $90, $00, $90, $00, $90, $01, $50, $00, $90 ;0x0 (0x00004A42-0x00004A52, Entry count: 0x10) [Unknown data]
+loc_00004A52:
 	LEA	loc_00004A70(PC), A1
 	JSR	ObjSys_InitObjWithFunc
 	MOVE.w	#$0708, $26(A1)
@@ -4772,6 +4780,7 @@ loc_00004AC0:
 	MOVE.b	D0, rbBytecode_Ret
 	CLR.b	rbBytecode_StopRun
 	JMP	ObjSys_DeleteObjectA0
+loc_00004AD2:
 	LEA	loc_00004BEE(PC), A2
 	BSR.w	loc_00004BF6
 	CMPI.b	#1, $00FFA130
@@ -7368,6 +7377,7 @@ loc_0000695A:
 	SUBI.w	#1, $26(A0)
 	RTS
 	dc.b	$11, $7C, $00, $87, $00, $06, $61, $00, $21, $7A, $61, $00, $22, $6A, $65, $00, $21, $3E, $4E, $75 ;0x0 (0x0000696A-0x0000697E, Entry count: 0x14) [Unknown data]
+loc_0000697E:
 	MOVE.w	#$0101, $00FFA120
 	LEA	loc_00006992(PC), A1
 	BSR.w	ObjSys_InitObjWithFunc
@@ -7467,6 +7477,7 @@ loc_00006A74:
 	RTS	;Predicted (Code-scan)
 loc_00006AEA:
 	JMP	ObjSys_DeleteObjectA0
+loc_00006AF0:
 	CMPI.b	#2, $00FFA142
 	BEQ.b	loc_00006B62
 	BTST.b	#0, $00FFA13F	;Predicted (Code-scan)
@@ -8306,6 +8317,7 @@ loc_000077D8:
 	BNE.b	loc_000077BE
 	MOVEM.l	(A7)+, D2/D3/D5/A2
 	RTS
+loc_00007800:
 	MOVE.b	$00FFA130, D0
 	ANDI.b	#3, D0
 	BEQ.b	loc_0000783A
@@ -13236,6 +13248,7 @@ loc_0000CA30:
 	dc.b	$19 ;0x0 (0x0000CA30-0x0000CA31, Entry count: 0x1) [Unknown data]
 	dc.b	$1B
 	dc.b	$1D, $1F, $38, $23, $3A, $40, $27, $3C, $30, $21, $25, $2C, $29, $4B, $49, $44, $3E, $2B, $42, $32, $2E, $4C, $34, $46, $5A, $56, $52, $36, $54, $5C, $5C, $00 ;0x0 (0x0000CA32-0x0000CA52, Entry count: 0x20) [Unknown data]
+loc_0000CA52:
 	MOVE.w	#$C71E, D1
 	MOVE.w	#$E400, D2
 	BRA.b	loc_0000CA78
@@ -17844,6 +17857,7 @@ loc_000152CE:
 	MOVE.l	#$857D857D, VdpData
 	BRA.b	loc_000152C4
 	CLR.w	$00FFA05E
+loc_000152FE:
 	LEA	loc_0001530E(PC), A1
 	JMP	ObjSys_InitObjWithFunc
 loc_0001530E:
@@ -18389,7 +18403,7 @@ loc_00015B3A:
 	JMP	ObjSys_DeleteObjectA0
 
 Bytecode_Init:
-	MOVE.l	#Bytecode_Bootup, rlBytecode_PC
+	MOVE.l	#Bytecode_Table1, rlBytecode_PC
 	CLR.b	rbBytecode_Ret
 	CLR.b	rbBytecode_StopRun
 @Ret:
@@ -18434,8 +18448,8 @@ loc_00015B88:
 	dc.l	BytecodeOP_WriteRAMLong
 	dc.l	BytecodeOP_WriteRAMByte
 	dc.l	loc_00015C7E
-	dc.l	loc_00015D58
-	dc.l	loc_00015D32
+	dc.l	BytecodeOP_JumpRAMEqual
+	dc.l	BytecodeOP_JumpRAMNotEqual
 BytecodeOP_Stop:
 	SUBQ.l	#2, rlBytecode_PC
 	MOVE.b	#$FF, rbBytecode_StopLoop
@@ -18474,7 +18488,12 @@ loc_00015C5E:
 	SUBQ.l	#2, rlBytecode_PC
 	RTS
 loc_00015C7E:
-	dc.b	$55, $B9, $00, $FF, $A0, $50, $13, $FC, $00, $FF, $00, $FF, $A0, $56, $4A, $39, $00, $FF, $F0, $80, $67, $00, $FE, $F2, $55, $B9, $00, $FF, $A0, $50, $4E, $75 ;0x0 (0x00015C7E-0x00015C9E, Entry count: 0x20) [Unknown data]
+	subq.l  #2, rlBytecode_PC
+	move.b 	#-1, rbBytecode_StopLoop
+	tst.b   $00FFF080
+	beq.w   loc_00015B86
+	subq.l  #2, rlBytecode_PC
+	rts
 
 BytecodeOP_WriteRAMWord:
 	MOVEA.l	rlBytecode_PC, A0
@@ -18534,12 +18553,33 @@ BytecodeOP_JumpNE:
 	ADDQ.l	#2, rlBytecode_PC
 	RTS
 
-loc_00015D32:
-	dc.b	$20, $79, $00, $FF, $A0, $50, $48, $40, $30, $18, $12, $18, $52, $88, $22, $40, $30, $18, $23, $C8, $00, $FF, $A0, $50, $B2, $11, $66, $00, $FF, $AE, $54, $B9 ;0x0 (0x00015D32-0x00015D84, Entry count: 0x52) [Unknown data]
-	dc.b	$00, $FF, $A0, $50, $4E, $75
-loc_00015D58:
-	dc.b	$20, $79, $00, $FF, $A0, $50, $48, $40, $30, $18, $12, $18, $52, $88, $23, $C8, $00, $FF, $A0, $50, $22, $40, $30, $18, $23, $C8 ;0x20
-	dc.b	$00, $FF, $A0, $50, $B2, $11, $67, $00, $FF, $82, $54, $B9, $00, $FF, $A0, $50, $4E, $75 ;0x40
+BytecodeOP_JumpRAMNotEqual:
+	movea.l rlBytecode_PC, a0
+	swap    d0
+	move.w  (a0)+, d0
+	move.b  (a0)+, d1
+	addq.l  #1, a0
+	movea.l d0, a1
+	move.w (a0)+, d0
+	move.l a0, rlBytecode_PC
+	cmp.b (a1), d1
+	bne.w BytecodeOP_Jump
+	addq.l #2, rlBytecode_PC
+	rts
+BytecodeOP_JumpRAMEqual:
+	movea.l rlBytecode_PC, a0
+	swap    d0
+	move.w  (a0)+, d0
+	move.b  (a0)+, d1
+	addq.l  #1, a0
+	move.l  a0, rlBytecode_PC
+	movea.l d0, a1
+	move.w (a0)+, d0
+	move.l a0, rlBytecode_PC
+	cmp.b (a1), d1
+	beq.w BytecodeOP_Jump
+	addq.l #2, rlBytecode_PC
+	rts
 
 BytecodeOP_JumpTbl:
 	MOVEA.l	rlBytecode_PC, A0
@@ -18565,12 +18605,14 @@ loc_00015DB0:
 	MOVE.l	A1, rlBytecode_PC
 	MOVEA.l	D0, A2
 	JMP	loc_000018CA
+
 loc_00015DC8
 	BTST.l	#8, D0
 	BEQ.b	loc_00015DD4
 	JMP	loc_00002128
 loc_00015DD4:
 	JMP	loc_00002160
+
 loc_00015DDA:
 	MOVEA.l	rlBytecode_PC, A0
 	SWAP	D0
@@ -18578,10 +18620,11 @@ loc_00015DDA:
 	MOVE.l	A0, rlBytecode_PC
 	MOVEA.l	D0, A2
 	JSR	loc_00001DB0
+
 loc_00015DF2:
 	JMP	loc_0001B1A2
 loc_00015DF8:
-	dc.b	$4E, $F9, $00, $01, $B1, $A2 ;0x0 (0x00015DF8-0x00015DFE, Entry count: 0x6) [Unknown data]
+	JMP	loc_0001B1A2
 loc_00015DFE:
 	SUBQ.l	#2, rlBytecode_PC
 	JMP	loc_0001B2AC
@@ -18589,7 +18632,8 @@ loc_00015E0A:
 	SUBQ.l	#2, rlBytecode_PC
 	JMP	loc_0001B190
 loc_00015E16:
-	dc.b	$4E, $F9, $00, $01, $B1, $D2, $42, $79, $00, $FF, $A5, $00 ;0x0 (0x00015E16-0x00015E22, Entry count: 0xC) [Unknown data]
+	JMP loc_0001B1D2
+	CLR.w   $00FFA500
 loc_00015E22:
 	RTS
 loc_00015E24:
@@ -18700,15 +18744,20 @@ loc_0001605A:
 	MOVE.b	$00FFA049, $23(A2)	;Predicted (Code-scan)
 	MOVE.w	$00FFA104, $24(A2)	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
-Bytecode_Bootup:
+;Bytecode_Table1: (This label is inside table.asm)
 	include "bytecode/table.asm"
+	dc.b    $22, $79, $00, $FF, $A0, $50, $24, $59, $12, $19, $14, $19, $23, $C9, $00, $FF, $A0, $50, $83, $12, $C5, $12 ;0x20
 	rts
+loc_000166C6:
 	MOVE.b	$00FFA03E, $00FFA03F
 loc_000166D0:
 	RTS
+loc_000166D2:
 	dc.b	$52, $79, $00, $FF, $A1, $0A, $64, $F6, $33, $FC, $FF, $FF, $00, $FF, $A1, $0A, $4E, $75 ;0x0 (0x000166D2-0x000166E4, Entry count: 0x12) [Unknown data]
+loc_000166E4:
 	ADDQ.b	#1, $00FFA11A
 	RTS
+loc_000166EC:
 	dc.b	$42, $39, $00, $FF, $A0, $54, $4A, $39, $00, $FF, $AA, $A1, $67, $00, $FF, $D6, $13, $FC, $00, $01, $00, $FF, $A0, $54, $13, $FC, $00, $01, $00, $FF, $A1, $3E ;0x0 (0x000166EC-0x00016728, Entry count: 0x3C) [Unknown data]
 	dc.b	$42, $39, $00, $FF, $A1, $32, $08, $39, $00, $00, $00, $FF, $A0, $9C, $66, $00, $FF, $B4, $13, $FC, $00, $01, $00, $FF, $A1, $32, $4E, $75 ;0x20
 loc_00016728:
@@ -18750,13 +18799,16 @@ loc_00016778:
 	BSR.w	loc_0001688A	;Predicted (Code-scan)
 loc_000167DC:
 	MOVE.b	#1, $00FFA102
+loc_000167E4:
 	RTS
+loc_000167E6:
 	dc.b	$30, $39, $00, $FF, $A1, $54, $D1, $79, $00, $FF, $A0, $E6, $4E, $75 ;0x0 (0x000167E6-0x000167F4, Entry count: 0xE) [Unknown data]
 loc_000167F4:
 	CLR.b	$00FFA13F
 	MOVE.b	$00FFA132, D0
 	BSET.b	D0, $00FFA13F
 	RTS
+loc_00016808:
 	MOVE.b	#1, $00FFA102
 	BSR.w	loc_00016728
 	MOVEQ	#8, D0
@@ -18777,6 +18829,7 @@ loc_0001684C:
 	dc.b	$04, $0A, $0C ;0x0 (0x0001684D-0x00016850, Entry count: 0x3) [Unknown data]
 	dc.b	$11
 	dc.b	$13, $19, $06 ;0x0 (0x00016851-0x00016854, Entry count: 0x3) [Unknown data]
+loc_00016854:
 	CLR.l	$00FFA110
 	CMPI.b	#5, $00FF480E
 	BCS.b	loc_0001686A
@@ -18823,6 +18876,7 @@ loc_0001690C:
 	JMP	loc_0000225C
 loc_00016912:
 	dc.b	$0A, $07, $08, $0A, $07, $09, $07, $08 ;0x0 (0x00016912-0x0001691A, Entry count: 0x8) [Unknown data]
+loc_0001691A:
 	MOVE.b	$00FFA101, D0
 	JSR	loc_00013E06
 	JSR	loc_000018CA
@@ -18830,6 +18884,7 @@ loc_00016912:
 	CLR.w	$00FFA126
 	MOVE.b	$00FFA101, D0
 	JMP	loc_00012964
+loc_00016944:
 	MOVE.b	$00FFA05A, D0
 	BEQ.b	loc_00016978
 	MOVE.b	$00FFA05C, D0
@@ -18844,10 +18899,13 @@ loc_00016972:
 loc_00016978:
 	MOVE.b	D0, rbBytecode_Ret
 	RTS
+loc_00016980:
 	MOVE.b	$00FFA05A, rbBytecode_Ret
 	RTS
+loc_0001698C:
 	MOVE.b	$00FFA104, D0
 	JMP	loc_00014D42
+loc_00016998:
 	MOVE.b	#1, $00FFA102
 	MOVE.b	$00FFA05A, D0
 	MOVE.b	D0, rbBytecode_Ret
@@ -18865,11 +18923,13 @@ loc_000169D6:
 	MOVE.b	#2, $00FFA13E
 	MOVE.b	#3, $00FFA13F
 	RTS
+loc_000169EE:
 	MOVE.b	$00FFA130, D0
 	ANDI.b	#3, D0
 	MOVE.b	D0, $00FFA058
 	MOVE.b	$00FFA101, $00FFA059
 	RTS
+loc_00016A0A:
 	CLR.b	rbBytecode_Ret
 	MOVEQ	#0, D0
 	MOVE.b	$00FFA05A, D0
@@ -18887,8 +18947,11 @@ loc_00016A34:
 	RTS
 loc_00016A4A:
 	dc.b	$01, $06, $04, $0D, $02, $FF ;0x0 (0x00016A4A-0x00016A50, Entry count: 0x6)
+loc_00016A50:
 	RTS
+loc_00016A52:
 	RTS
+loc_00016A54:
 	CLR.b	rbBytecode_Ret
 	TST.b	$00FFA049
 	BMI.w	loc_00016A6C
@@ -18900,6 +18963,7 @@ loc_00016A6C:
 	BCC.w	loc_000166D0	;Predicted (Code-scan)
 	MOVE.b	#2, rbBytecode_Ret	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
+loc_00016A8A:
 	LEA	loc_00016B1A(PC), A2
 	JSR	loc_000018CA
 	MOVE.w	#$000D, D0
@@ -18983,6 +19047,7 @@ loc_00016B7A:
 loc_00016B9A:
 	dc.w	$082C, $082E, $0914, $0916, $0834, $0836, $0828, $082A, $0910, $0912, $0918, $091A ;0x0 (0x00016B9A-0x00016BB2, Entry count: 0x18)
 	dc.b	$08, $18, $08, $1A ;0x0 (0x00016BB2-0x00016BB6, Entry count: 0x4) [Unknown data]
+loc_00016BB6:
 	CLR.w	D1
 	MOVE.b	$00FFA105, D1
 	MOVE.b	$00FFA130, D0
@@ -19004,6 +19069,7 @@ loc_00016BE0:
 loc_00016C00:
 	dc.b	$00, $01, $0D, $02, $00, $01, $17, $02, $00, $01, $0F, $02, $00, $01, $0C, $02, $00, $01, $17, $02, $00, $01, $19, $02 ;0x0 (0x00016C00-0x00016C18, Entry count: 0x18)
 	dc.b	$00, $01, $12, $02 ;0x0 (0x00016C18-0x00016C1C, Entry count: 0x4) [Unknown data]
+loc_00016C1C:
 	MOVEQ	#1, D0
 	LEA	$00FF9420, A2
 	JSR	loc_00001E06
@@ -19097,6 +19163,7 @@ loc_00016D10:
 	dc.w	$6000
 	dc.b	$FF
 	dc.b	$FF ;0x0 (0x00016D17-0x00016D18, Entry count: 0x1) [Unknown data]
+loc_00016D18:
 	JSR	loc_00001092
 	LEA	$00FFC000, A2
 	MOVE.w	#$E000, D1
@@ -19109,6 +19176,7 @@ loc_00016D10:
 	MOVEQ	#$0000001C, D3
 	JSR	loc_00000F68
 	JMP	loc_00001092
+loc_00016D4C:
 	JSR	loc_00001092
 	MOVE.w	#$E000, D5
 	LEA	$00FFB000, A1
@@ -19143,6 +19211,7 @@ loc_00016DAA:
 	MOVE.w	#$CE00, D1
 	MOVE.w	#$0100, D2
 	JMP	loc_000010F0
+loc_00016DCE:
 	LEA	$00FFB000, A2
 	MOVE.w	#$C000, D1
 	MOVEQ	#$00000028, D2
@@ -19154,14 +19223,19 @@ loc_00016DAA:
 	MOVEQ	#$0000001C, D3
 	JSR	loc_00000F68
 	JMP	loc_00001092
+loc_00016DFC:
 	dc.b	$02, $39, $00, $40, $00, $FF, $A1, $70, $10, $39, $00, $FF, $A1, $3F, $02, $00, $00, $03, $0C, $00, $00, $03, $67, $0A, $00, $39, $00, $87, $00, $FF, $A1, $70 ;0x0 (0x00016DFC-0x00016E26, Entry count: 0x2A) [Unknown data]
 	dc.b	$60, $08, $00, $39, $00, $82, $00, $FF, $A1, $70 ;0x20
 loc_00016E26:
 	CLR.b	$00FFA176
 	RTS
+loc_00016E2E:
 	MOVE.b	#$80, $00FFA171
 	RTS
-	dc.b	$13, $FC, $00, $04, $00, $FF, $A1, $3E, $13, $FC, $00, $0F, $00, $FF, $A1, $3F, $4E, $75, $4E, $B9, $00, $00, $10, $92, $70, $00, $72, $00, $74, $10, $4E, $F9 ;0x0 (0x00016E38-0x000174CA, Entry count: 0x692) [Unknown data]
+loc_00016E38:
+	dc.b	$13, $FC, $00, $04, $00, $FF, $A1, $3E, $13, $FC, $00, $0F, $00, $FF, $A1, $3F, $4E, $75
+loc_00016E5C:
+	dc.b    $4E, $B9, $00, $00, $10, $92, $70, $00, $72, $00, $74, $10, $4E, $F9 ;0x0 (0x00016E38-0x000174CA, Entry count: 0x692) [Unknown data]
 	dc.b	$00, $00, $10, $F0, $4E, $B9, $00, $00, $0A, $6E, $4E, $B9, $00, $00, $0D, $6C, $70, $02, $4E, $B9, $00, $00, $0D, $C4, $4E, $B9, $00, $00, $18, $3E, $45, $FA ;0x20
 	dc.b	$00, $18, $4E, $B9, $00, $00, $18, $8C, $45, $FA, $00, $22, $43, $F9, $00, $FF, $D0, $40, $4E, $F9, $00, $00, $8A, $54, $80, $00, $08, $06, $A0, $00, $80, $00 ;0x40
 	dc.b	$09, $04, $20, $00, $00, $00, $09, $06, $C0, $00, $FF, $FF, $4A, $39, $00, $FF, $F0, $80, $66, $00, $F8, $24, $30, $3C, $85, $00, $32, $3C, $C0, $00, $34, $3C ;0x60
@@ -19214,6 +19288,7 @@ loc_00016E26:
 	dc.b	$20, $FF, $5A, $4F, $48, $2D, $44, $41, $49, $4D, $41, $4F, $48, $20, $20, $20, $20, $FF, $4D, $41, $4D, $4F, $4E, $4F, $20, $20, $20, $20, $20, $20, $20, $20 ;0x640
 	dc.b	$20, $FF, $53, $48, $45, $5A, $4F, $20, $57, $45, $47, $45, $59, $20, $20, $20, $20, $FF, $53, $41, $54, $41, $4E, $20, $20, $20, $20, $20, $20, $20, $20, $20 ;0x660
 	dc.b	$20, $FF, $4D, $41, $53, $4B, $45, $44, $20, $53, $41, $54, $41, $4E, $20, $20, $20, $FF ;0x680
+loc_000174CA:
 	MOVE.l	#$0001AD22, $00FFF04C
 	MOVE.w	#$1004, $00FFF07C
 	JSR	loc_0001B190
@@ -22080,38 +22155,8 @@ loc_0001C75E:
 	dc.w	$0000000D	;Predicted
 	dc.w	$00000004-2	;Predicted
 	dc.w	loc_00005F80
-	dc.b	$00, $01, $00, $05, $00, $01, $E2, $9E, $00, $05, $00, $01, $F7, $40 ;0x0 (0x0001CA2A-0x0001CA38, Entry count: 0xE) [Unknown data]
-	dc.w	$000F, $0004, $0005, $0000 ;0x0 (0x0001CA38-0x0001CA40, Entry count: 0x8)
-	dc.b	$0A, $64 ;0x0 (0x0001CA40-0x0001CA42, Entry count: 0x2) [Unknown data]
-	dc.w	$000E, $0104, $0000, $0011, $000E, $0000, $0003, $0005, $0000 ;0x0 (0x0001CA42-0x0001CA54, Entry count: 0x12)
-	dc.b	$89, $78, $00, $12, $00, $06, $00, $01 ;0x0 (0x0001CA54-0x0001CA5C, Entry count: 0x8) [Unknown data]
-	dc.w	$658C
-	dc.b	$00, $05, $00, $01, $E1, $FA, $00, $07, $00, $01, $CA, $A4, $00, $14, $00, $FF, $F0, $4C, $00, $02, $65, $00, $00, $05, $00, $00, $89, $78, $00, $05, $00, $00 ;0x0 (0x0001CA5E-0x0001CB70, Entry count: 0x112) [Unknown data]
-	dc.b	$1D, $76, $00, $0A, $00, $03, $00, $05, $00, $00, $0A, $6E, $00, $05, $00, $02, $0E, $CA, $00, $00, $00, $0E, $00, $F0, $00, $03, $00, $05, $00, $00, $89, $78 ;0x20
-	dc.b	$00, $06, $00, $01, $CA, $D8, $00, $14, $00, $FF, $F0, $4C, $00, $02, $65, $00, $00, $05, $00, $00, $89, $78, $00, $05, $00, $00, $1D, $76, $00, $0A, $00, $03 ;0x40
-	dc.b	$00, $05, $00, $00, $0A, $6E, $00, $05, $00, $02, $0D, $F0, $00, $00, $00, $0E, $00, $00, $00, $03, $00, $05, $00, $00, $89, $78, $00, $14, $00, $FF, $F0, $4C ;0x60
-	dc.b	$00, $01, $AD, $22, $00, $05, $00, $00, $89, $56, $00, $05, $00, $01, $6E, $5C, $00, $00, $00, $11, $00, $0E, $00, $20, $00, $03, $00, $12, $00, $14, $00, $FF ;0x80
-	dc.b	$F0, $4C, $00, $02, $65, $00, $00, $05, $00, $00, $89, $78, $00, $05, $00, $00, $1D, $76, $00, $0A, $00, $03, $00, $05, $00, $00, $0A, $6E, $00, $0B, $00, $02 ;0xA0
-	dc.b	$5F, $84, $00, $0D, $00, $02, $5F, $80, $00, $01, $00, $05, $00, $01, $E2, $9E, $00, $05, $00, $01, $F6, $18, $00, $0F, $00, $04, $00, $05, $00, $00, $0A, $64 ;0xC0
-	dc.b	$00, $0E, $01, $04, $00, $00, $00, $11, $00, $0E, $00, $00, $00, $03, $00, $05, $00, $00, $89, $78, $00, $12, $00, $06, $00, $01, $63, $7C, $00, $14, $00, $FF ;0xE0
-	dc.b	$F0, $4C, $00, $02, $65, $00, $00, $05, $00, $00, $89, $78, $00, $05, $00, $00, $1D, $76 ;0x100
-	dc.w	$000A, $0003, $0005, $0000 ;0x0 (0x0001CB70-0x0001CB78, Entry count: 0x8)
-	dc.b	$0A, $6E, $00, $05, $00, $01, $D8, $78 ;0x0 (0x0001CB78-0x0001CB80, Entry count: 0x8) [Unknown data]
-	dc.w	$0000, $0011, $000E, $0002, $0003, $0005, $0000 ;0x0 (0x0001CB80-0x0001CB8E, Entry count: 0xE)
-	dc.b	$89, $78, $00, $12, $00, $06, $00, $01 ;0x0 (0x0001CB8E-0x0001CB96, Entry count: 0x8) [Unknown data]
-	dc.w	$6134
-	dc.b	$00, $14, $00, $FF, $F0, $4C, $00, $02, $65, $00, $00, $05, $00, $00, $89, $78, $00, $05, $00, $00, $1D, $76 ;0x0 (0x0001CB98-0x0001CBAE, Entry count: 0x16) [Unknown data]
-	dc.w	$000A, $0006, $0005, $0000 ;0x0 (0x0001CBAE-0x0001CBB6, Entry count: 0x8)
-	dc.b	$0A, $6E, $00, $05, $00, $01, $E0, $5A ;0x0 (0x0001CBB6-0x0001CBBE, Entry count: 0x8) [Unknown data]
-	dc.w	$0000, $0011, $000E, $0002, $0003, $0005, $0000 ;0x0 (0x0001CBBE-0x0001CBCC, Entry count: 0xE)
-	dc.b	$89, $78, $00, $12, $00, $06, $00, $01 ;0x0 (0x0001CBCC-0x0001CBD4, Entry count: 0x8) [Unknown data]
-	dc.w	$6188
-	dc.b	$00, $14, $00, $FF, $F0, $4C, $00, $02, $65, $00, $00, $05, $00, $00, $89, $78, $00, $05, $00, $00, $1D, $76 ;0x0 (0x0001CBD6-0x0001CBEC, Entry count: 0x16) [Unknown data]
-	dc.w	$000A, $0004, $0005, $0000 ;0x0 (0x0001CBEC-0x0001CBF4, Entry count: 0x8)
-	dc.b	$0A, $6E, $00, $05, $00, $02, $53, $C4 ;0x0 (0x0001CBF4-0x0001CBFC, Entry count: 0x8) [Unknown data]
-	dc.w	$0000, $0011, $000E, $0002, $0003, $0005, $0000 ;0x0 (0x0001CBFC-0x0001CC0A, Entry count: 0xE)
-	dc.b	$89, $78, $00, $12, $00, $06, $00, $01 ;0x0 (0x0001CC0A-0x0001CC12, Entry count: 0x8) [Unknown data]
-	dc.w	$640E
+;Bytecode_Table2: (This label is inside table2.asm)
+	include "bytecode/table2.asm"
 	dc.b	$02, $00, $00, $1F, $E5, $48, $47, $F9, $00, $02, $5F, $A6, $24, $73, $00, $00, $4E, $F9, $00, $00, $18, $70 ;0x0 (0x0001CC14-0x0001CC2A, Entry count: 0x16) [Unknown data]
 loc_0001CC2A:
 	LEA	$00FFC000, A3
@@ -23455,6 +23500,7 @@ loc_0001E04C:
 	SUBQ.b	#3, $9(A0)
 loc_0001E058:
 	RTS
+loc_0001E05A:
 	JSR	loc_00000D6C
 	MOVE.w	#$8000, D0
 	MOVE.w	#$C000, D1
@@ -23522,7 +23568,9 @@ loc_0001E132:
 	dc.b	$00, $03, $61, $00, $00, $18, $45, $F9, $00, $A1, $00, $05, $48, $E7, $80, $00, $61, $00, $00, $0A, $4C, $DF, $00, $02, $80, $01, $4E, $75, $14, $BC, $00, $00 ;0x40
 	dc.b	$4E, $71, $4E, $71, $10, $12, $02, $00, $00, $0F, $14, $BC, $00, $40, $4E, $71, $4E, $71, $12, $12, $E9, $09, $02, $01, $00, $F0, $80, $01, $72, $00, $34, $3C ;0x60
 	dc.b	$00, $03, $E3, $09, $48, $E7, $80, $00, $02, $00, $00, $C0, $67, $04, $00, $01, $00, $01, $4C, $DF, $00, $01, $E5, $08, $51, $CA, $FF, $E8, $0C, $01, $00, $0D ;0x80
-	dc.b	$67, $06, $10, $3C, $00, $FF, $4E, $75, $42, $00, $4E, $75, $42, $39, $00, $FF, $A0, $54, $4E, $75, $4A, $39, $00, $FF, $A0, $58, $67, $F0, $13, $FC, $00, $01 ;0xA0
+	dc.b	$67, $06, $10, $3C, $00, $FF, $4E, $75, $42, $00, $4E, $75, $42, $39, $00, $FF, $A0, $54, $4E, $75
+loc_0001E1FA:
+	dc.b 	$4A, $39, $00, $FF, $A0, $58, $67, $F0, $13, $FC, $00, $01 ;0xA0
 	dc.b	$00, $FF, $A0, $54, $4E, $75, $10, $39, $00, $FF, $A1, $01, $0C, $00, $00, $1F, $64, $DA, $13, $FC, $00, $01, $00, $FF, $A0, $54, $4E, $75 ;0xC0
 loc_0001E210:
 	LEA	$00FFB000, A3
@@ -23566,6 +23614,7 @@ loc_0001E284:
 	ADDI.w	#$0010, D5
 	DBF	D7, loc_0001E284
 	RTS
+loc_0001E29E:
 	JSR	loc_00000D6C
 	ORI.b	#2, $00FFF00B
 	MOVE.w	#0, D0
@@ -24119,6 +24168,7 @@ loc_0001F71A:
 	MOVE.b	#1, rbBytecode_Ret	;Predicted (Code-scan)
 	CLR.b	rbBytecode_StopRun	;Predicted (Code-scan)
 	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
+loc_0001F740:
 	LEA	loc_0001F6B8(PC), A1
 	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0001F7D6
@@ -26464,6 +26514,7 @@ loc_000238A0:
 	dc.b	$02, $03 ;0x0 (0x000238A0-0x000238A2, Entry count: 0x2)
 	dc.b	$02
 	dc.b	$04, $0F, $00, $FE, $00, $0C, $00, $03, $01, $04, $02, $03, $01, $1E, $00, $FE, $00 ;0x0 (0x000238A3-0x000238B4, Entry count: 0x11) [Unknown data]
+loc_000238B4:
 	MOVE.l	#$00026500, $00FFF04C
 	MOVEQ	#4, D0
 	JSR	Bytecode_SetVDPMode
@@ -27962,6 +28013,7 @@ loc_000251BE:
 	dc.b	$18, $04, $19, $08, $10, $08, $0F, $FE, $00, $26, $00, $0A, $11, $24, $00, $0C, $11, $1E, $00, $08, $11, $08, $12, $04, $1A, $04, $1B, $04, $1A, $04, $1B, $04 ;0xA0
 	dc.b	$1A, $04, $1B, $04, $1A, $04, $1B, $08, $12, $08, $11, $FE, $00, $15, $00, $FE, $00, $04, $00, $03, $14, $08, $15, $03, $14, $FE, $00, $05, $02, $03, $14, $08 ;0xC0
 	dc.b	$15, $03, $14, $11, $00, $FE, $00, $05, $02, $03, $14, $08, $15, $03, $14, $12, $00, $FE, $00 ;0xE0
+loc_000253C4:
 	JSR	loc_00000D6C
 	MOVE.w	#$8000, D0
 	MOVE.w	#$C000, D1

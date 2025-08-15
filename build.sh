@@ -6,7 +6,7 @@ if ! [ -d "./out" ]; then
   mkdir out
 fi
 
-./tools/linux/vasmm68k_psi-x -Fbin -m68000 -no-opt -o out/puyo2built.bin puyo2.asm
+./tools/linux/clownassembler_asm68k /p puyo2.asm,out/puyo2built.bin
 ./tools/linux/puyomdtool fix out/puyo2built.bin
 
 echo

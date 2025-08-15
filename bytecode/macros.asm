@@ -11,9 +11,9 @@ BDELAY: macro frames
 	dc.w    frames
 	endm
 
-;BWPAL: macro
-;	dc.w    $0003
-;	endm
+BUNK1: macro dat
+	dc.w    $0003
+	endm
 
 BRAMW: macro location, value
 	dc.w    $0004
@@ -52,50 +52,48 @@ BVMODE: macro mode
 	dc.w    mode
 	endm
 	
-;BART: macro addr, data
-;	dc.w    $000B
-;	dc.w    addr
-;	dc.l    data
-;	endm
-	
-;BVDPC: macro command
-;	dc.w    $000C
-;	dc.w    command
-;	endm
-	
-;BPAL: macro palette, line
-;	dc.w    $000D
-;	dc.w    (((palette-palLookupTable)&$1FFF)<<3)|(line&$7)
-;	endm
-	
-;BPALF: macro palette, line, fade
-;	dc.w    $000E
-;	dc.w    (((palette-palLookupTable)&$1FFF)<<3)|(line&$7)
-;	dc.w    (fade<<8)|$00
-;	endm
-	
-;BSND: macro sound
-;	dc.w    $000F
-;	dc.w    sound
-;	endm
-	
-;BSNDC: macro sound
-;	dc.w    $0010
-;	dc.w    sound
-;	endm
-	
-;BMUSF: macro
-;	dc.w    $0011
-;	endm
-	
-;BSSND: macro
-;	dc.w    $0012
-;	endm
+BUNK2: macro ptr
+	dc.w 	$000B
+	dc.l    ptr
+	endm
 
-;BSNDC2: macro sound
-;	dc.w    $0013
-;	dc.w    sound
-;	endm
+BUNK3: macro
+	dc.w 	$000C
+    endm
+
+BUNK4: macro ptr
+	dc.w 	$000D
+	dc.l    ptr
+	endm
+
+BUNK5: macro dat
+	dc.w    $000E
+	dc.w    dat
+	endm
+
+; BUNK6 and BUNK7 do the exact same thing?
+BUNK6: macro dat
+	dc.w    $000F
+	dc.w    dat
+	endm
+
+BUNK7: macro dat
+	dc.w    $0010
+	dc.w    dat
+	endm
+
+BUNK8: macro dat
+	dc.w    $0011
+	endm
+
+BUNK9: macro dat
+	dc.w    $0012
+	endm
+
+BUNKA: macro dat
+	dc.w    $0013
+	dc.w    dat
+	endm
 
 BRAML: macro location, value
 	dc.w    $0014
@@ -106,5 +104,23 @@ BRAML: macro location, value
 BRAMB: macro location, value
 	dc.w    $0015
 	dc.l    location
-	dc.w    value<<8
+	dc.b    value, $00
 	endm
+
+BUNKB: macro dat
+	dc.w    $0016
+	endm
+
+BJREQ: macro ptr, val, func
+	dc.w	$0017
+	dc.l 	ptr
+	dc.b 	val, $00
+	dc.l	func
+    endm
+
+BJRNE: macro ptr, val, func
+	dc.w	$0018
+	dc.l 	ptr
+	dc.b 	val, $00
+	dc.l	func
+    endm

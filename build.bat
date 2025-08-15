@@ -6,7 +6,7 @@ echo(
 
 if not exist out\ mkdir out
 
-tools\windows\vasmm68k_psi-x.exe -Fbin -m68000 -no-opt -o out\puyo2built.bin puyo2.asm
+tools\windows\clownassembler_asm68k.exe /p puyo2.asm,out\puyo2built.bin
 tools\windows\puyomdtool.exe fix out\puyo2built.bin
 
 echo(
