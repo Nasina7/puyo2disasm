@@ -274,9 +274,9 @@ loc_0000043E:
 	DBF	D0, loc_0000043E	;Predicted (Code-scan)
 	BRA.w	loc_00000464	;Predicted (Code-scan)
 loc_00000448:
-	dc.l	$434F4D50
+	dc.l	"COMP"
 loc_0000044C:
-	dc.l	$494C4521
+	dc.l	"ILE!"
 loc_00000450:
 	LEA	$00FF4800, A0
 	MOVE.w	#$00FF, D0
@@ -312,9 +312,9 @@ loc_0000046C:
 	JSR	loc_00015E24
 	CLR.b	$00FFA01F
 	BRA.w	loc_00000A64
-	
+
 ErrorHandler:
-	rtr ; Error?  What Error?
+	rtr
 
 loc_000004F6:
 	TST.b	$00FFA025
@@ -3726,7 +3726,7 @@ loc_00003BAA:
 loc_00003BD8:
 	TST.b	$26(A0)
 	BEQ.b	loc_00003C22
-	MOVE.b	#$FFFF, D1 ; 16-bit value is intentional here.
+	bad_moveb_d1 $FFFF ; See macros.asm for more information
 	BRA.b	loc_00003BF0
 loc_00003BE4:
 	CMPI.b	#4, $26(A0)
@@ -11268,7 +11268,7 @@ loc_0000AABA:
 	MOVE.b	#1, $12(A1)
 	CMPI.b	#$10, D0
 	BCC.w	loc_0000AB30
-	MOVE.b	#$FFFF, $12(A1) ; 16-bit value is intentional here
+	bad_moveb_12a1 $FFFF ; See macros.asm for more information
 loc_0000AB30:
 	DBF	D0, loc_0000AABA
 	RTS
@@ -17855,8 +17855,8 @@ loc_000152CE:
 	JSR	loc_0000111A
 	MOVE.l	#$857D857D, VdpData
 	BRA.b	loc_000152C4
-	CLR.w	$00FFA05E
 loc_000152FE:
+	CLR.w	$00FFA05E
 	LEA	loc_0001530E(PC), A1
 	JMP	ObjSys_InitObjWithFunc
 loc_0001530E:
@@ -18409,7 +18409,7 @@ Bytecode_Init:
 	RTS
 Bytecode_Run:
 	TST.b	rbBytecode_StopRun
-	BNE.b	Bytecode_Init.Ret
+	BNE.b	Bytecode_Init@Ret
 @StepBytecode:
 	CLR.b	rbBytecode_StopLoop
 	MOVEA.l	rlBytecode_PC, A0
@@ -19233,9 +19233,10 @@ loc_00016E2E:
 	RTS
 loc_00016E38:
 	dc.b	$13, $FC, $00, $04, $00, $FF, $A1, $3E, $13, $FC, $00, $0F, $00, $FF, $A1, $3F, $4E, $75
-loc_00016E5C:
 	dc.b    $4E, $B9, $00, $00, $10, $92, $70, $00, $72, $00, $74, $10, $4E, $F9 ;0x0 (0x00016E38-0x000174CA, Entry count: 0x692) [Unknown data]
-	dc.b	$00, $00, $10, $F0, $4E, $B9, $00, $00, $0A, $6E, $4E, $B9, $00, $00, $0D, $6C, $70, $02, $4E, $B9, $00, $00, $0D, $C4, $4E, $B9, $00, $00, $18, $3E, $45, $FA ;0x20
+	dc.b	$00, $00, $10, $F0
+loc_00016E5C:
+	dc.b	$4E, $B9, $00, $00, $0A, $6E, $4E, $B9, $00, $00, $0D, $6C, $70, $02, $4E, $B9, $00, $00, $0D, $C4, $4E, $B9, $00, $00, $18, $3E, $45, $FA ;0x20
 	dc.b	$00, $18, $4E, $B9, $00, $00, $18, $8C, $45, $FA, $00, $22, $43, $F9, $00, $FF, $D0, $40, $4E, $F9, $00, $00, $8A, $54, $80, $00, $08, $06, $A0, $00, $80, $00 ;0x40
 	dc.b	$09, $04, $20, $00, $00, $00, $09, $06, $C0, $00, $FF, $FF, $4A, $39, $00, $FF, $F0, $80, $66, $00, $F8, $24, $30, $3C, $85, $00, $32, $3C, $C0, $00, $34, $3C ;0x60
 	dc.b	$08, $00, $4E, $B9, $00, $00, $10, $EC, $45, $F9, $00, $FF, $C0, $00, $32, $3C, $E0, $00, $74, $28, $76, $1C, $4E, $B9, $00, $00, $10, $12, $20, $3C, $00, $01 ;0x80
@@ -22050,110 +22051,7 @@ loc_0001C75E:
 	dc.b	$23, $23, $22, $20, $1F, $C9, $2A, $20, $1F, $5E, $23, $7E, $57, $B3, $C8, $23, $4E, $23, $46, $23, $7E, $D6, $02, $32, $22, $1F, $23, $23, $22, $20, $1F, $C9 ;0x140
 	dc.b	$3A, $09, $00, $BC, $20, $05, $3A, $08, $00, $BD, $C8, $7D, $07, $32, $00, $60, $7C, $32, $00, $60, $0F, $32, $00, $60, $0F, $32, $00, $60, $0F, $32, $00, $60 ;0x160
 	dc.b	$0F, $32, $00, $60, $0F, $32, $00, $60, $0F, $32, $00, $60, $0F, $32, $00, $60, $22, $08, $00, $C9, $00, $05, $00, $00, $89, $78, $00, $05, $00, $00, $1D, $76 ;0x180
-	dc.b	$00, $06, $00, $01, $C8, $F2, $00, $14, $00, $FF, $F0, $4C, $00, $02, $65, $00, $00, $05, $00, $00, $89, $78, $00, $05, $00, $00, $1D, $76 ;0x1A0
-	dc.w	$000A, $0003, $0005, $0000 ;0x0 (0x0001C91A-0x0001C922, Entry count: 0x8)
-	dc.b	$0A, $6E, $00, $05, $00, $02, $1C, $A6, $00, $05, $00, $00, $0A, $64 ;0x0 (0x0001C922-0x0001C930, Entry count: 0xE) [Unknown data]
-	dc.w	$000E, $0104, $0000, $0011, $000E, $0004, $0003, $0005, $0000 ;0x0 (0x0001C930-0x0001C942, Entry count: 0x12)
-	dc.b	$89, $78, $00, $12, $00, $08, $00, $01 ;0x0 (0x0001C942-0x0001C94A, Entry count: 0x8) [Unknown data]
-	dc.w	$610E
-	dc.b	$00, $05, $00, $00, $89, $78, $00, $05, $00, $00, $1D, $76 ;0x0 (0x0001C94C-0x0001C958, Entry count: 0xC) [Unknown data]
-	dc.w	$000A, $0003, $0005, $0000 ;0x0 (0x0001C958-0x0001C960, Entry count: 0x8)
-	dc.b	$0A, $6E, $00, $0B, $00, $02, $61, $92, $00, $0D, $00, $02 ;0x0 (0x0001C960-0x0001C96C, Entry count: 0xC) [Unknown data]
-	dc.w	loc_00006180-2
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	loc_0000249C	;Predicted
-	dc.w	$00000004-3	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	loc_000037A4-4	;Predicted
-	dc.w	$0000000F	;Predicted
-	dc.w	$00000008-2	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	loc_00000A64	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	$00000011	;Predicted
-	dc.w	$0000000E	;Predicted
-	dc.w	$00000004	;Predicted
-	dc.w	$00000004-1	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	loc_00008978	;Predicted
-	dc.w	$00000012	;Predicted
-	dc.w	$00000008-2	;Predicted
-	dc.w	$00000004-3	;Predicted
-	dc.w	loc_0000610E	; (Predicted offset)
-	dc.w	$00000014	;Predicted
-	dc.w	$000000FF	;Predicted
-	dc.w	$0000F04C	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	loc_00006500	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	loc_00008978	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	loc_00001D76	;Predicted
-	dc.w	$0000000A	;Predicted
-	dc.w	$00000004-1	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	loc_00000A6E	;Predicted
-	dc.w	$0000000B	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	loc_0000613A-4	;Predicted
-	dc.w	$0000000D	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	loc_00006134-2
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	loc_00000EFE-2	;Predicted
-	dc.w	$00000004-3	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	loc_00000FB8	;Predicted
-	dc.w	$0000000F	;Predicted
-	dc.w	$00000004-3	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	loc_00000A64	;Predicted
-	dc.w	$0000000E	;Predicted
-	dc.w	$00000104	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	$00000011	;Predicted
-	dc.w	$0000000E	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	$00000004-1	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	loc_00008978	;Predicted
-	dc.w	$00000012	;Predicted
-	dc.w	$00000008-2	;Predicted
-	dc.w	$00000004-3	;Predicted
-	dc.w	loc_00006322-2	; (Predicted offset)
-	dc.w	$00000014	;Predicted
-	dc.w	$000000FF	;Predicted
-	dc.w	$0000F04C	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	loc_00006500	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	loc_00008978	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	loc_00001D76	;Predicted
-	dc.w	$0000000A	;Predicted
-	dc.w	$00000004-1	;Predicted
-	dc.w	$00000008-3	;Predicted
-	dc.w	$00000000	;Predicted
-	dc.w	loc_00000A6E	;Predicted
-	dc.w	$0000000B	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	loc_00005F84	;Predicted
-	dc.w	$0000000D	;Predicted
-	dc.w	$00000004-2	;Predicted
-	dc.w	loc_00005F80
+	dc.b	$00, $06, $00, $01, $C8, $F2
 ;Bytecode_Table2: (This label is inside table2.asm)
 	include "bytecode/table2.asm"
 	dc.b	$02, $00, $00, $1F, $E5, $48, $47, $F9, $00, $02, $5F, $A6, $24, $73, $00, $00, $4E, $F9, $00, $00, $18, $70 ;0x0 (0x0001CC14-0x0001CC2A, Entry count: 0x16) [Unknown data]
@@ -22914,6 +22812,7 @@ loc_0001D868:
 	JSR	loc_0001D128(PC)
 	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
+loc_0001D878:
 	JSR	loc_00000D6C
 	MOVE.w	#0, D0
 	MOVE.w	#$C000, D1
@@ -23568,9 +23467,10 @@ loc_0001E132:
 	dc.b	$4E, $71, $4E, $71, $10, $12, $02, $00, $00, $0F, $14, $BC, $00, $40, $4E, $71, $4E, $71, $12, $12, $E9, $09, $02, $01, $00, $F0, $80, $01, $72, $00, $34, $3C ;0x60
 	dc.b	$00, $03, $E3, $09, $48, $E7, $80, $00, $02, $00, $00, $C0, $67, $04, $00, $01, $00, $01, $4C, $DF, $00, $01, $E5, $08, $51, $CA, $FF, $E8, $0C, $01, $00, $0D ;0x80
 	dc.b	$67, $06, $10, $3C, $00, $FF, $4E, $75, $42, $00, $4E, $75, $42, $39, $00, $FF, $A0, $54, $4E, $75
-loc_0001E1FA:
 	dc.b 	$4A, $39, $00, $FF, $A0, $58, $67, $F0, $13, $FC, $00, $01 ;0xA0
-	dc.b	$00, $FF, $A0, $54, $4E, $75, $10, $39, $00, $FF, $A1, $01, $0C, $00, $00, $1F, $64, $DA, $13, $FC, $00, $01, $00, $FF, $A0, $54, $4E, $75 ;0xC0
+	dc.b	$00, $FF, $A0, $54, $4E, $75
+loc_0001E1FA:
+	dc.b	$10, $39, $00, $FF, $A1, $01, $0C, $00, $00, $1F, $64, $DA, $13, $FC, $00, $01, $00, $FF, $A0, $54, $4E, $75 ;0xC0
 loc_0001E210:
 	LEA	$00FFB000, A3
 	MOVE.w	#$045F, D0
@@ -24098,6 +23998,7 @@ loc_0001F1E8:
 	RTS
 loc_0001F22A:
 	RTS	;Predicted (Code-scan)
+	; TODO: Code Disassembly
 	dc.b	$43, $FA, $FF, $90, $4E, $B9, $00, $00, $89, $FA, $65, $F2, $23, $48, $00, $2E, $13, $7C, $00, $80, $00, $06, $13, $7C, $00, $FF, $00, $07, $13, $68, $00, $08 ;0x0 (0x0001F22C-0x0001F6B8, Entry count: 0x48C) [Unknown data]
 	dc.b	$00, $08, $33, $68, $00, $20, $00, $20, $33, $68, $00, $0A, $00, $0A, $33, $7C, $08, $00, $00, $38, $24, $49, $10, $3C, $00, $03, $32, $28, $00, $0A, $34, $28 ;0x20
 	dc.b	$00, $0E, $04, $41, $00, $10, $4E, $BA, $FF, $74, $10, $3C, $00, $04, $32, $28, $00, $0A, $06, $41, $00, $20, $34, $28, $00, $0E, $06, $42, $00, $20, $4E, $BA ;0x40
@@ -24129,7 +24030,9 @@ loc_0001F22A:
 	dc.b	$33, $40, $00, $0A, $30, $28, $00, $0E, $06, $40, $00, $20, $33, $40, $00, $0E, $4E, $75, $30, $3C, $00, $01, $32, $3C, $00, $0C, $34, $3C, $00, $38, $36, $3C ;0x380
 	dc.b	$40, $00, $4E, $BA, $FF, $32, $32, $3C, $00, $06, $4E, $BA, $FE, $FC, $4E, $75, $30, $3C, $00, $01, $32, $3C, $00, $0C, $34, $3C, $00, $38, $36, $3C, $40, $00 ;0x3A0
 	dc.b	$4E, $BA, $FF, $14, $32, $3C, $00, $07, $4E, $BA, $FE, $DE, $4E, $75, $30, $3C, $00, $01, $32, $3C, $00, $0C, $34, $3C, $00, $38, $36, $3C, $40, $00, $4E, $BA ;0x3C0
-	dc.b	$FE, $F6, $32, $3C, $00, $08, $4E, $BA, $FE, $C0, $4E, $75, $10, $39, $00, $FF, $A1, $6B, $0C, $00, $00, $05, $64, $42, $43, $FA, $EE, $DE, $4E, $B9, $00, $00 ;0x3E0
+	dc.b	$FE, $F6, $32, $3C, $00, $08, $4E, $BA, $FE, $C0, $4E, $75
+loc_0001F618:
+	dc.b	$10, $39, $00, $FF, $A1, $6B, $0C, $00, $00, $05, $64, $42, $43, $FA, $EE, $DE, $4E, $B9, $00, $00 ;0x3E0
 	dc.b	$89, $FA, $65, $00, $00, $32, $13, $7C, $00, $FF, $00, $07, $24, $49, $43, $FA, $ED, $58, $4E, $B9, $00, $00, $89, $FA, $65, $00, $00, $1C, $23, $4A, $00, $2E ;0x400
 	dc.b	$43, $FA, $F0, $E0, $4E, $B9, $00, $00, $89, $FA, $65, $00, $00, $0A, $23, $4A, $00, $2E, $4E, $BA, $ED, $94, $60, $00, $01, $22, $43, $FA, $00, $46, $4E, $B9 ;0x420
 	dc.b	$00, $00, $89, $FA, $65, $38, $33, $7C, $01, $80, $00, $26, $13, $7C, $00, $FF, $00, $07, $24, $49, $42, $39, $00, $FF, $A0, $54, $43, $FA, $ED, $0C, $4E, $B9 ;0x440
@@ -24395,18 +24298,23 @@ loc_0002041C:
 	dc.b	$03, $0B, $03, $0C, $FF, $00, $00, $02, $0D, $7C, $05, $37, $05, $38, $FF, $00, $00, $02, $0D, $86, $03, $3B, $03, $3C, $FF, $00, $00, $02, $0D, $90, $43, $FA ;0x960
 	dc.b	$00, $32, $4E, $B9, $00, $00, $89, $FA, $65, $26, $13, $7C, $00, $80, $00, $06, $13, $68, $00, $08, $00, $08, $13, $6A, $00, $01, $00, $09, $33, $68, $00, $0A ;0x980
 	dc.b	$00, $0A, $33, $68, $00, $0E, $00, $0E, $23, $4A, $00, $32, $23, $48, $00, $2E, $4E, $75, $22, $68, $00, $2E, $08, $29, $00, $00, $00, $07, $67, $00, $01, $1A ;0x9A0
-	dc.b	$4E, $B9, $00, $00, $8B, $34, $31, $69, $00, $0A, $00, $0A, $31, $69, $00, $0E, $00, $0E, $4E, $75, $4E, $B9, $00, $00, $0D, $6C, $33, $FC, $01, $00, $00, $FF ;0x9C0
+	dc.b	$4E, $B9, $00, $00, $8B, $34, $31, $69, $00, $0A, $00, $0A, $31, $69, $00, $0E, $00, $0E, $4E, $75
+loc_00020DF0:
+	dc.b	$4E, $B9, $00, $00, $0D, $6C, $33, $FC, $01, $00, $00, $FF ;0x9C0
 	dc.b	$F0, $B0, $33, $FC, $00, $B0, $00, $FF, $F0, $B2, $13, $FC, $00, $01, $00, $FF, $F0, $69, $30, $3C, $00, $00, $32, $3C, $C0, $00, $34, $3C, $10, $00, $4E, $B9 ;0x9E0
 	dc.b	$00, $00, $10, $EC, $43, $FA, $EC, $6C, $4E, $F9, $00, $00, $89, $FA, $45, $FA, $51, $46, $4E, $B9, $00, $00, $18, $70, $4E, $B9, $00, $00, $8A, $EC, $4A, $39 ;0xA00
 	dc.b	$00, $FF, $F0, $80, $66, $00, $00, $B8, $20, $3C, $48, $49, $00, $00, $4E, $B9, $00, $00, $1D, $D6, $45, $F9, $00, $FF, $B0, $00, $30, $3C, $C0, $00, $32, $3C ;0xA20
 	dc.b	$00, $27, $34, $3C, $00, $1B, $3A, $3C, $01, $00, $4E, $BA, $49, $CE, $45, $F9, $00, $FF, $B8, $C0, $30, $3C, $E0, $00, $32, $3C, $00, $27, $34, $3C, $00, $1B ;0xA40
 	dc.b	$3A, $3C, $21, $00, $4E, $BA, $49, $B4, $10, $3C, $00, $0E, $4E, $B9, $00, $01, $B1, $A2, $30, $3C, $00, $40, $4E, $B9, $00, $00, $21, $28, $4E, $B9, $00, $00 ;0xA60
 	dc.b	$8A, $EC, $4A, $39, $00, $FF, $F0, $48, $66, $00, $00, $54, $4E, $B9, $00, $00, $8A, $EC, $30, $3C, $00, $F0, $4E, $B9, $00, $00, $8A, $E2, $4E, $B9, $00, $00 ;0xA80
-	dc.b	$8A, $EC, $42, $39, $00, $FF, $A0, $55, $4E, $F9, $00, $00, $8A, $B8, $4E, $B9, $00, $00, $0D, $6C, $43, $FA, $FF, $58, $4E, $F9, $00, $00, $89, $FA, $4E, $B9 ;0xAA0
+	dc.b	$8A, $EC, $42, $39, $00, $FF, $A0, $55, $4E, $F9, $00, $00, $8A, $B8
+loc_00020ECA:
+	dc.b	$4E, $B9, $00, $00, $0D, $6C, $43, $FA, $FF, $58, $4E, $F9, $00, $00, $89, $FA, $4E, $B9 ;0xAA0
 	dc.b	$00, $00, $8A, $EC, $10, $39, $00, $FF, $F0, $71, $02, $00, $00, $70, $66, $02, $4E, $75, $42, $39, $00, $FF, $A0, $55 ;0xAC0
 loc_00020EF4:
 	JMP	ObjSys_DeleteObjectA0
-	dc.b	$4E, $75 ;0x0 (0x00020EFA-0x00020EFC, Entry count: 0x2) [Unknown data]
+	RTS
+loc_00020EFC:
 	JSR	loc_00000D6C
 	LEA	$00FFF0B0, A1
 	MOVE.w	#$0100, (A1)
@@ -24453,6 +24361,7 @@ loc_00020F2C:
 	MOVE.w	#1, D2
 	MOVE.w	#$E000, D5
 	BRA.w	loc_000257E6
+loc_00020FB8:
 	LEA	loc_00021750(PC), A1
 	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_0002101E
@@ -25304,6 +25213,7 @@ loc_00021C06:
 	JSR	ObjSys_UpdateObjNextOpTimer
 	CLR.b	rbBytecode_StopRun
 	JMP	ObjSys_DeleteObjectA0
+loc_00021CA6:
 	JSR	loc_00000D6C
 	MOVE.w	#0, D0
 	MOVE.w	#$C000, D1
@@ -25387,6 +25297,7 @@ loc_0002214A:
 	dc.b	$00, $26, $33, $7C, $00, $02, $00, $28, $23, $7C, $00, $02, $00, $00, $00, $12, $43, $FA, $FF, $86, $4E, $B9, $00, $00, $89, $FA, $65, $34, $33, $7C, $00, $E0 ;0x300
 	dc.b	$00, $26, $33, $7C, $00, $01, $00, $28, $23, $7C, $00, $01, $80, $00, $00, $12, $43, $FA, $FF, $66, $4E, $B9, $00, $00, $89, $FA, $65, $14, $33, $7C, $01, $40 ;0x320
 	dc.b	$00, $26, $33, $7C, $00, $01, $00, $28, $23, $7C, $00, $01, $00, $00, $00, $12, $4E, $75 ;0x340
+loc_0002249C:
 	JSR	loc_00000D6C
 	MOVE.w	#$8000, D0
 	MOVE.w	#$C000, D1
@@ -26422,6 +26333,7 @@ loc_0002360E:
 	dc.b	$00, $38, $4E, $BA, $1D, $02, $48, $42, $D4, $68, $00, $1E, $31, $42, $00, $0A, $54, $68, $00, $36, $0C, $68, $01, $60, $00, $0E, $64, $00, $FF, $54, $4E, $75 ;0x120
 	dc.b	$3E, $3C, $00, $0F, $43, $FA, $FF, $4A, $4E, $B9, $00, $00, $90, $5C, $65, $1A, $13, $7C, $00, $6C, $00, $08, $33, $7C, $20, $00, $00, $1C, $33, $7C, $FF, $FF ;0x140
 	dc.b	$00, $20, $23, $48, $00, $2E, $51, $CF, $FF, $DC, $4E, $75 ;0x160
+loc_000237A0:
 	LEA	loc_00022FA6(PC), A1
 	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_000225FC
@@ -28343,7 +28255,7 @@ loc_00025B06:
 	MOVE.w	$00FFF014, D6
 loc_00025B0C:
 	MOVE.b	(A1)+, D1
-	CMPI.b	#$FFFF, D1 ; 16-bit value is intentional here
+	bad_cmpib_d1 $FFFF ; See macros.asm for more information
 	BEQ.b	loc_00025B74
 	CMPI.b	#$2E, D1
 	BEQ.b	loc_00025B26
@@ -34856,7 +34768,7 @@ loc_000468BE:
 	MOVE.b	D0, $15(A0)	;Predicted (Code-scan)
 	BRA.w	loc_000468EC	;Predicted (Code-scan)
 loc_000468CC:
-	SUBI.b	#$FFEF, D0 ; 16-bit value is intentional here
+	bad_subib_d0 $FFEF
 	BEQ.b	loc_000468D8	;Predicted (Code-scan)
 	BCC.b	loc_000468DC	;Predicted (Code-scan)
 	SUBQ.l	#1, A1	;Predicted (Code-scan)
