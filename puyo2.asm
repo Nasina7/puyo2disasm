@@ -731,7 +731,7 @@ loc_00000C30:
 	ADDI.b	#$40, D0
 	MOVE.b	D0, D3
 	ASL.b	#1, D3
-	MOVE.w	loc_00000C6C(PC,D3.w), D2
+	MOVE.w	SignedSinWithMul@SineTable(PC,D3.w), D2
 	MULU.w	D1, D2
 	OR.b	D0, D0
 	BPL.b	loc_00000C4A
@@ -739,25 +739,26 @@ loc_00000C30:
 loc_00000C4A:
 	MOVEM.w	(A7)+, D0/D3
 	RTS
-loc_00000C50:
+
+SignedSinWithMul:
 	MOVEM.w	D0, -(A7)
 	ANDI.w	#$007F, D0
 	ASL.w	#1, D0
-	MOVE.w	loc_00000C6C(PC,D0.w), D2
+	MOVE.w	@SineTable(PC,D0.w), D2
 	MULU.w	D1, D2
 	MOVEM.w	(A7)+, D0
 	OR.b	D0, D0
-	BPL.b	loc_00000C6A
+	BPL.b	@IsPositive
 	NEG.l	D2
-loc_00000C6A:
+@IsPositive:
 	RTS
-loc_00000C6C:
+@SineTable:
 	dc.w	$0000, $0006, $000D, $0013, $0019, $001F, $0026, $002C, $0032, $0038, $003E, $0044, $004A, $0050, $0056, $005C, $0062, $0068, $006D, $0073, $0079, $007E, $0084, $0089, $008E, $0093, $0098, $009D, $00A2, $00A7, $00AC, $00B1 ;0x0 (0x00000C6C-0x00000D0A, Entry count: 0x9E)
 	dc.w	$00B5, $00B9, $00BE, $00C2, $00C6, $00CA, $00CE, $00D1, $00D5, $00D8, $00DC, $00DF, $00E2, $00E5, $00E7, $00EA, $00ED, $00EF, $00F1, $00F3, $00F5, $00F7, $00F8, $00FA, $00FB, $00FC, $00FD, $00FE, $00FF, $00FF, $0100, $0100 ;0x20
 	dc.w	$0100, $0100, $0100, $00FF, $00FF, $00FE, $00FD, $00FC, $00FB, $00FA, $00F8, $00F7, $00F5, $00F3, $00F1 ;0x40
-loc_00000D0A:
 	dc.w	$00EF, $00ED, $00EA, $00E7, $00E5, $00E2, $00DF, $00DC, $00D8, $00D5, $00D1, $00CE, $00CA, $00C6, $00C2, $00BE, $00B9, $00B5, $00B1, $00AC, $00A7, $00A2, $009D, $0098, $0093, $008E, $0089, $0084, $007E, $0079, $0073, $006D ;0x0 (0x00000D0A-0x00000D6C, Entry count: 0x62)
 	dc.w	$0068, $0062, $005C, $0056, $0050, $004A, $0044, $003E, $0038, $0032, $002C, $0026, $001F, $0019, $0013, $000D, $0006 ;0x20
+
 loc_00000D6C:
 	MOVE.w	#$01FF, D0
 	LEA	$00FFF100, A1
@@ -814,7 +815,7 @@ loc_00000DD6:
 loc_00000E28:
 	dc.w	$0040
 	dc.w	$0080
-	dc.b	$01, $00 ;0x0 (0x00000E2C-0x00000E2E, Entry count: 0x2) [Unknown data]
+	dc.w	$0100
 	dc.w	$0100
 loc_00000E30:
 	dc.l	loc_00000E4C
@@ -878,9 +879,15 @@ loc_00000EFE:
 	ADDQ.b	#1, $00FFF061
 	ADD.w	D2, $00FFF062
 	RTS
-	dc.b	$48, $44, $38, $39, $00, $FF, $F0, $16, $53, $44, $48, $44, $60, $06 ;0x0 (0x00000F5A-0x00000F68, Entry count: 0xE) [Unknown data]
+unk_00000F5A:
+	SWAP	D4
+	MOVE.W 	$00FFF016, D4
+	SUBQ.W  #1, D4
+	SWAP    D4
+	BRA.b   loc_00000F6E
 loc_00000F68:
 	MOVE.l	#$FFFF0000, D4
+loc_00000F6E:
 	SUBQ.w	#1, D3
 loc_00000F70:
 	CMPI.b	#$20, $00FFF061
@@ -930,7 +937,9 @@ loc_00000FB8:
 	ADD.w	D4, D1
 	DBF	D3, loc_00000F70
 	RTS
-	dc.b	$4A, $42, $6B, $00, $00, $40 ;0x0 (0x0000100C-0x00001012, Entry count: 0x6) [Unknown data]
+unk_0000100C:
+	TST.W 	D2
+	BMI.w 	loc_00001050
 loc_00001012:
 	SUBQ.w	#1, D2
 	SUBQ.w	#1, D3
@@ -951,7 +960,8 @@ loc_00001034:
 	ADD.w	$00FFF014, D1
 	DBF	D3, loc_00001016
 	RTS
-	dc.b	$02, $42, $7F, $FF ;0x0 (0x00001050-0x00001054, Entry count: 0x4) [Unknown data]
+loc_00001050:
+	ANDI.W 	#$7FFF, D2
 loc_00001054:
 	SUBQ.w	#1, D2
 	SUBQ.w	#1, D3
@@ -3925,7 +3935,7 @@ loc_00003E84:
 	MOVE.b	$26(A0), D0
 	ORI.b	#$80, D0
 	MOVE.w	#$0800, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$16(A0), D2
 	MOVE.w	D2, $E(A0)
@@ -5124,7 +5134,7 @@ loc_00004F50:
 	MOVE.w	#$1000, D1
 	ASL.b	#3, D0
 	ADDI.b	#$80, D0
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	D3, D2
 	MOVE.w	$32(A1), D0
@@ -5364,7 +5374,7 @@ loc_0000525A:
 	LEA	$00FFF0B0, A2
 loc_00005270:
 	ANDI.b	#$7F, D0
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	MOVE.w	D2, (A2,D3.w)
 	ADDI.b	#$20, D0
@@ -6983,7 +6993,7 @@ loc_00006466:
 	MOVEA.l	$2E(A0), A1
 	MOVE.b	$36(A0), D0
 	MOVE.w	#$1000, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$A(A1), D2
 	MOVE.w	D2, $A(A0)
@@ -7228,7 +7238,7 @@ loc_000067A6:
 	MOVE.b	$28(A0), D0
 	LSL.b	#2, D0
 	ORI.b	#$80, D0
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$20(A0), D2
 	MOVE.w	D2, $E(A0)
@@ -7360,7 +7370,7 @@ loc_000068E0:
 	ADDI.w	#$0280, D0
 	MOVE.w	D0, D1
 	MOVE.b	D3, D0
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	MOVE.l	D2, $12(A1)
 	ADDI.b	#5, D0
 	JSR	loc_00000C30
@@ -8429,7 +8439,7 @@ loc_00007A32:
 	LSL.b	#3, D1
 	OR.b	D1, D0
 	MOVE.w	#$4000, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	D2, $A(A0)
 	SUBQ.w	#1, $26(A0)
@@ -8508,7 +8518,7 @@ loc_00007B4E:
 	MOVE.b	$27(A0), D0
 	LSL.b	#2, D0
 	MOVE.w	#$2000, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$20(A0), D2
 	MOVE.w	D2, $E(A0)
@@ -8544,7 +8554,7 @@ loc_00007C02:
 	LSL.b	#2, D1
 	OR.b	D1, D0
 	MOVE.w	#$6000, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	D2, $A(A0)
 	SUBQ.w	#1, $26(A0)
@@ -8821,7 +8831,7 @@ loc_0000805E:
 	ANDI.b	#7, D0
 	ADD.b	D6, D0
 	MOVE.l	D2, D6
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	MOVE.l	D2, $12(A1)
 	JSR	loc_00000C30
 	MOVE.l	D2, $16(A1)
@@ -8989,7 +8999,7 @@ loc_00008662:
 	ANDI.b	#7, D0
 	ADD.b	D6, D0
 	MOVE.l	D2, D6
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	MOVE.l	D2, $12(A1)
 	JSR	loc_00000C30
 	MOVE.l	D2, $16(A1)
@@ -11283,7 +11293,7 @@ loc_0000AB58:
 	JSR	loc_00008B34
 	MOVE.b	$36(A0), D0
 	MOVE.w	$38(A0), D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$1E(A0), D2
 	MOVE.w	D2, $A(A0)
@@ -11360,7 +11370,7 @@ loc_0000ACCE:
 	MOVE.b	$36(A0), D0
 	ORI.b	#$80, D0
 	MOVE.w	#$1000, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$20(A0), D2
 	MOVE.w	D2, $E(A0)
@@ -11621,7 +11631,7 @@ loc_0000B0AA:
 	ADD.b	$8(A1,D7.w), D0
 	ORI.b	#$80, D0
 	MOVE.w	#$0600, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$E(A0), D2
 	MOVE.w	D2, $00FFFC60
@@ -11777,7 +11787,7 @@ loc_0000B2CA:
 	BCS.b	loc_0000B314
 	MOVE.b	$36(A0), D0
 	MOVE.w	#$1000, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$1E(A0), D2
 	MOVE.w	D2, $A(A0)
@@ -12466,7 +12476,7 @@ loc_0000BD72:
 	MOVE.b	D3, D0
 	LSL.b	#5, D0
 	MOVE.w	#$0100, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	MOVE.l	D2, $12(A1)
 	JSR	loc_00000C30
 	MOVE.l	D2, $16(A1)
@@ -13545,7 +13555,7 @@ loc_0000CE3C:
 	ANDI.b	#$5F, D0
 	ADDI.b	#$90, D0
 	MOVE.l	#$0000CEDC, $32(A1)
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	MOVE.l	D2, $16(A1)
 	ASL.l	#4, D2
 	SWAP	D2
@@ -13693,7 +13703,7 @@ loc_0000D20C:
 	MOVE.b	$36(A0), D0
 	ORI.b	#$80, D0
 	MOVE.w	$38(A0), D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$20(A0), D2
 	MOVE.w	D2, $E(A0)
@@ -14084,7 +14094,7 @@ loc_0000DA6A:
 loc_0000DEAA:
 	dc.l	loc_0000EF58	;Predicted
 	dc.l	loc_0000ECFE
-	dc.l	loc_0000E066-2	;Predicted
+	dc.l	loc_0000E064	;Predicted
 	dc.l	loc_0000EF94
 	dc.l	loc_0000F14C
 	dc.l	loc_0000EE36
@@ -14202,8 +14212,9 @@ loc_0000DFFA:
 	dc.l	$02150316	;Predicted
 	dc.l	$0215F114	;Predicted
 	dc.l	$FF000000	;Predicted
-	dc.l	$E0540000	;Predicted
-loc_0000E066:
+	dc.w	$E054
+loc_0000E064:
+	dc.w 	$0000
 	dc.l	$E08C0000	;Predicted
 	dc.l	$E09C0000	;Predicted
 	dc.l	$E0B00000	;Predicted
@@ -16587,7 +16598,7 @@ loc_00012B14:
 loc_00012B4C:
 	ANDI.b	#$7F, D0
 	MOVEM.l	D0, -(A7)
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	MOVEM.l	(A7)+, D0
 	SWAP	D2
 	MOVE.w	D2, (A1)+
@@ -16703,7 +16714,7 @@ loc_00012D02:
 	MOVE.b	#$80, $6(A0)
 	JSR	loc_00012CDE(PC)
 	MOVE.b	#1, $7(A0)
-	LEA	loc_0001484A-2(PC), A2
+	LEA	loc_00014848(PC), A2
 	JSR	loc_00014164(PC)
 	LEA	loc_00014852(PC), A2
 	JSR	loc_00014164(PC)
@@ -17185,7 +17196,7 @@ loc_000144E0:
 	MOVE.b	$36(A0), D0
 	ORI.b	#$80, D0
 	MOVE.w	$38(A0), D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$20(A0), D2
 	MOVE.w	D2, $E(A0)
@@ -17381,6 +17392,7 @@ loc_000147EC:
 	dc.b	$FF
 	dc.b	$00 ;0x0 (0x000147F5-0x000147F6, Entry count: 0x1) [Unknown data]
 	dc.l	loc_000147EC
+
 	dc.l	$45FA0006	;Predicted
 	dc.l	$6000F992	;Predicted
 	dc.l	$05040505	;Predicted
@@ -17401,10 +17413,11 @@ loc_00014816:
 	dc.l	$4EBAF928	;Predicted
 	dc.l	$45FA0030	;Predicted
 	dc.l	$4EBAF920	;Predicted
-	dc.l	$4E75F000	;Predicted
-loc_0001484A:
+	dc.w	$4E75
+loc_00014848:
+	dc.w 	$F000
 	dc.l	$0606FF00	; (Predicted offset)
-	dc.l	loc_0001484A-2
+	dc.l	loc_00014848
 loc_00014852:
 	dc.b	$F0
 	dc.b	$00
@@ -17958,7 +17971,7 @@ loc_00015490:
 	NEG.b	D1
 loc_0001549C:
 	ASL.w	#8, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$E(A0), D2
 	MOVE.w	D2, $00FFFC60
@@ -18010,7 +18023,7 @@ loc_00015574:
 	MOVE.b	$36(A0), D0
 	ADD.b	(A1,D7.w), D0
 	MOVE.w	$2A(A0), D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$E(A0), D2
 	SUBQ.w	#4, D2
@@ -18108,7 +18121,7 @@ loc_000156DC:
 	ADDQ.b	#1, $38(A0)
 	MOVE.b	$38(A0), D0
 	MOVE.w	#$C400, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	LSR.l	#8, D2
 	SUB.w	D2, D1
 	MOVE.b	$36(A0), D0
@@ -18330,7 +18343,7 @@ loc_00015A1C:
 	ANDI.b	#$1F, D0
 	ADD.b	$36(A0), D0
 	MOVE.w	#$E000, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	ADD.l	D2, $A(A0)
 	ASR.l	#5, D2
 	NEG.l	D2
@@ -18362,7 +18375,7 @@ loc_00015A1C:
 	ADD.b	D2, D0
 	ANDI.w	#$03FF, D1
 	ADDI.w	#$0300, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	ASR.l	#1, D2
 	MOVE.l	D2, $12(A0)
 	JSR	loc_00000C30
@@ -23291,7 +23304,7 @@ loc_0001DEC6:
 	JSR	loc_00000C04
 	ANDI.b	#7, D0
 	ADD.b	D2, D0
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	MOVE.l	D2, $12(A1)
 	JSR	loc_00000C30
 	MOVE.l	D2, $16(A1)
@@ -24818,7 +24831,7 @@ loc_0002164A:
 	JSR	loc_00000C04
 	ANDI.b	#7, D0
 	ADD.b	D6, D0
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	MOVE.l	D2, $12(A1)
 	JSR	loc_00000C30
 	MOVE.l	D2, $16(A1)
@@ -24986,7 +24999,7 @@ loc_000218EC:
 	LEA	$00FFF0B0, A1
 	ANDI.b	#$7F, D0
 	MOVEM.l	D0, -(A7)
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	MOVEM.l	(A7)+, D0
 	SWAP	D2
 	MOVE.w	D2, (A1)+
@@ -25037,7 +25050,7 @@ loc_000219A4:
 	MOVE.b	$36(A0), D0
 	ORI.b	#$80, D0
 	MOVE.w	#$1000, D1
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$20(A0), D2
 	MOVE.w	D2, $E(A0)
@@ -25066,7 +25079,7 @@ loc_00021A48:
 	MOVE.b	$36(A0), D0
 	MOVE.w	$38(A0), D1
 	ANDI.b	#$7F, D0
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	ADD.w	$20(A0), D2
 	MOVE.w	D2, $E(A0)
@@ -25839,7 +25852,7 @@ loc_00022D04:
 	MOVE.b	$36(A0), D0
 	MOVE.w	$38(A0), D1
 	ANDI.b	#$7F, D0
-	JSR	loc_00000C50
+	JSR	SignedSinWithMul
 	SWAP	D2
 	MOVE.w	D2, $E(A0)
 	ADDI.b	#$64, $36(A0)
@@ -26688,7 +26701,7 @@ loc_00023CD2:
 	MOVE.b	$36(A0), D0	;Predicted (Code-scan)
 	MOVE.w	$38(A0), D1	;Predicted (Code-scan)
 	ANDI.b	#$7F, D0	;Predicted (Code-scan)
-	JSR	loc_00000C50	;Predicted (Code-scan)
+	JSR	SignedSinWithMul	;Predicted (Code-scan)
 	SWAP	D2	;Predicted (Code-scan)
 	MOVE.w	D2, $00FFF0B0	;Predicted (Code-scan)
 	MOVE.b	#1, $00FFF069	;Predicted (Code-scan)
@@ -28811,17 +28824,17 @@ loc_00026450:
 	dc.l	loc_00026466
 loc_00026456:
 	dc.b	$00, $00, $C6, $9A ;0x0 (0x00026456-0x0002645A, Entry count: 0x4) [Unknown data]
-	dc.w	loc_00000D0A-1	;Predicted
+	dc.w	$0D09
 	dc.w	$0000B0B4
 loc_0002645E:
 	dc.w	$00000000	;Predicted
 	dc.w	$0000C69A	;Predicted
-	dc.w	loc_00000D0A-1	;Predicted
+	dc.w	$0D09
 	dc.w	$0000B1CC
 loc_00026466:
 	dc.w	$00000000	;Predicted
 	dc.w	$0000C69A	;Predicted
-	dc.w	loc_00000D0A-1	;Predicted
+	dc.w	$0D09
 	dc.w	$0000B2E4
 loc_0002646E:
 	dc.l	loc_00026482
