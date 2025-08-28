@@ -9344,8 +9344,6 @@ loc_00008A6C:
 	DBF	D0, loc_00008A6C
 	MOVEM.l	(A7)+, D0/A1
 	RTS
-; Not fully certain this is what this is, but it's a good guess
-; based on usage through the repo
 loc_00008A78:
 	MOVEM.l	A0/D0, -(A7)
 	LEA	$00FFD100, A0
