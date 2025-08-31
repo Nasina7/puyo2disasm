@@ -8,6 +8,8 @@
 ; Note: This file is encoded in Shift-JIS format.  If the below line looks like Japanese text, then
 ;		the encoding has been set up correctly.
 ;“ú–{Œê
+fShiftTest = 0
+
 
 	include "constants.asm"
 	include "macros.asm"
@@ -101,6 +103,11 @@ HeaderChecksum:
 	dc.b    "                                        " ; Reserved
 	dc.b    "J  " ; Region Support
 	dc.b	"             " ; Reserved
+	if fShiftTest == 1
+		align	$200000, $01
+		nop
+		nop
+	endif
 Reset:
 	TST.l	$00A10008
 	BNE.b	@loc_0000020F
@@ -314,7 +321,11 @@ loc_0000046C:
 	BRA.w	loc_00000A64
 
 ErrorHandler:
-	rtr
+	if fShiftTest == 0
+		rtr
+	else
+		bra.s	ErrorHandler
+	endif
 
 loc_000004F6:
 	TST.b	$00FFA025
@@ -2430,8 +2441,8 @@ loc_000023C8:
 loc_000023D2:
 	MOVE.b	#1, $00FFA106
 	MOVE.w	#$1005, $00FFF07C
-	MOVE.l	#$0001AD22, $00FFF04C
-	MOVE.l	#$00019460, $00FFF028
+	MOVE.l	#loc_0001AD22, $00FFF04C
+	MOVE.l	#loc_00019460, $00FFF028
 	JSR	loc_00015E24
 	CLR.b	$00FFA026
 	MOVE.b	#$FF, $00FFA025
@@ -2505,7 +2516,7 @@ loc_000024EC:
 loc_00002506:
 	MOVE.b	#1, $8(A0)
 	MOVE.b	#0, $9(A0)
-	MOVE.l	#$000023B2, $32(A0)
+	MOVE.l	#loc_000023B2, $32(A0)
 	CLR.l	$00FFA1AC
 	CLR.l	$00FFA1B0
 	CLR.b	$D(A0)
@@ -3103,7 +3114,7 @@ loc_00002FE8:
 	TST.b	$00FFF080
 	BNE.w	loc_000023B0
 loc_00002FF2:
-	MOVE.l	#$0000309C, $32(A0)
+	MOVE.l	#loc_0000309C, $32(A0)
 	CLR.b	$22(A0)
 	MOVE.b	$9(A0), $8(A0)
 	JSR	loc_00000C04
@@ -3143,6 +3154,7 @@ loc_00003074:
 	dc.w	$0014, $0078, $001E, $0064, $0028, $0050, $0096, $003C ;0x0 (0x00003074-0x00003084, Entry count: 0x10)
 loc_00003084:
 	dc.w	$E212, $E23A, $E4A6, $E712, $E73A, $E9A6, $EC12, $EC3A, $E4CE, $E9CE, $E47E, $E97E ;0x0 (0x00003084-0x0000309C, Entry count: 0x18)
+loc_0000309C:
 	dc.b	$02
 	dc.b	$02 ;0x0 (0x0000309D-0x0000309E, Entry count: 0x1) [Unknown data]
 	dc.b	$01
@@ -3272,7 +3284,7 @@ loc_00003338:
 	MOVE.b	loc_0000338E(PC,D0.w), $00FFA101
 	CMPI.b	#7, $00FFA105
 	BNE.b	loc_00003382
-	CMPI.l	#$0002BF20, $00FFA158	;Predicted (Code-scan)
+	CMPI.l	#$0002BF20, $00FFA158	;Predicted (Code-scan); TODO: Shiftability
 	BCS.b	loc_00003382	;Predicted (Code-scan)
 	TST.b	$00FFA0EF	;Predicted (Code-scan)
 	BNE.b	loc_00003382	;Predicted (Code-scan)
@@ -5663,7 +5675,7 @@ loc_00005430:
 	MOVE.w	D2, $A(A1)	;Predicted (Code-scan)
 	MOVE.w	D3, $E(A1)	;Predicted (Code-scan)
 	MOVE.b	$2A(A0), $2A(A1)	;Predicted (Code-scan)
-	MOVE.l	#$000054D4, $32(A1)	;Predicted (Code-scan)
+	MOVE.l	#loc_000054D4, $32(A1)	;Predicted (Code-scan)
 loc_00005466:
 	MOVEM.l	(A7)+, D0/D2/D3/A1	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
@@ -6743,7 +6755,7 @@ loc_00005EC4:
 	LEA	loc_00005F66, A1
 	BSR.w	ObjSys_InitObjWithFunc
 	MOVE.l	A0, $2E(A1)
-	MOVE.l	#$00005F5C, $32(A1)
+	MOVE.l	#loc_00005F5C, $32(A1)
 	MOVE.b	$2A(A0), $2A(A1)
 	MOVE.b	D0, $8(A1)
 	MOVE.w	#2, $1A(A1)
@@ -6755,14 +6767,14 @@ loc_00005EC4:
 	LEA	loc_00006394, A1
 	BSR.w	ObjSys_InitObjWithFunc
 	MOVE.l	A2, $2E(A1)
-	MOVE.l	#$00005F44, $32(A1)
+	MOVE.l	#loc_00005F44, $32(A1)
 	MOVE.b	$2A(A0), $2A(A1)
 	MOVE.b	D1, $8(A1)
 	MOVE.l	A1, $36(A2)
 	ORI.b	#2, $7(A0)
 	ANDI	#$FFFE, SR
 	RTS
-; Shiftability Pass Pt 1 Stop Point
+loc_00005F34:
 	dc.b	$01
 	dc.b	$02 ;0x0 (0x00005F35-0x00005F36, Entry count: 0x1) [Unknown data]
 	dc.b	$00
@@ -6779,8 +6791,10 @@ loc_00005EC4:
 	dc.b	$03 ;0x0 (0x00005F41-0x00005F42, Entry count: 0x1) [Unknown data]
 	dc.b	$00
 	dc.b	$00 ;0x0 (0x00005F43-0x00005F44, Entry count: 0x1) [Unknown data]
+loc_00005F44:
 	dc.b	$FE
 	dc.b	$00 ;0x0 (0x00005F45-0x00005F46, Entry count: 0x1) [Unknown data]
+loc_00005F46:
 	dc.b	$01
 	dc.b	$02 ;0x0 (0x00005F47-0x00005F48, Entry count: 0x1) [Unknown data]
 	dc.b	$00
@@ -6847,7 +6861,7 @@ loc_00005FAC:
 	RTS
 loc_00005FF0:
 	BSR.w	loc_000034AC
-	MOVE.l	#$00005F34, $32(A0)
+	MOVE.l	#loc_00005F34, $32(A0)
 loc_00005FFC:
 	CLR.b	$22(A0)
 	BSR.w	ObjSys_UpdateObjNextOpTimer
@@ -7051,11 +7065,11 @@ loc_00006266:
 	MOVE.w	#$FFFF, $20(A0)	;Predicted (Code-scan)
 	BRA.w	loc_000061BC	;Predicted (Code-scan)
 loc_00006270:
-	MOVE.l	#$00005F46, $32(A0)
+	MOVE.l	#loc_00005F46, $32(A0)
 	RTS
 loc_0000627A:
 	MOVEA.l	$36(A0), A1
-	MOVE.l	#$00005F34, $32(A1)
+	MOVE.l	#loc_00005F34, $32(A1)
 	RTS
 loc_00006288:
 	MOVEA.l	$36(A0), A1
@@ -7183,7 +7197,7 @@ loc_000063BC:
 	RTS
 loc_0000641E:
 	BSR.w	loc_000034AC
-	MOVE.l	#$00005F34, $32(A0)
+	MOVE.l	#loc_00005F34, $32(A0)
 loc_0000642A:
 	BSR.w	ObjSys_UpdateObjNextOpTimer
 	BSR.w	loc_00008B34
@@ -7289,11 +7303,16 @@ loc_00006574:
 loc_00006576:
 	dc.w	$0148
 loc_00006578:
-	dc.l	$00017ADE
+	dc.l	loc_00017ADE
 	dc.w	$0120
 	dc.w	$011C
-	dc.l	$00017ADE
-	dc.b	$01, $20, $01, $1C, $00, $01, $7A, $F8, $01, $20, $00, $E8, $00, $01, $7A, $DE ;0x0 (0x00006584-0x00006594, Entry count: 0x10) [Unknown data]
+	dc.l	loc_00017ADE
+	dc.w	$0120
+	dc.w	$011C
+	dc.l	loc_00017AF8
+	dc.w	$0120
+	dc.w	$00E8
+	dc.l	loc_00017ADE
 loc_00006594:
 	TST.b	$2C(A0)
 	BEQ.b	loc_0000659E
@@ -7603,7 +7622,12 @@ loc_0000695A:
 	BCS.w	ObjSys_DeleteObjectA0
 	SUBI.w	#1, $26(A0)
 	RTS
-	dc.b	$11, $7C, $00, $87, $00, $06, $61, $00, $21, $7A, $61, $00, $22, $6A, $65, $00, $21, $3E, $4E, $75 ;0x0 (0x0000696A-0x0000697E, Entry count: 0x14) [Unknown data]
+loc_0000696A:
+	move.b	#$87, $6(A0)
+	bsr.w	ObjSys_UpdateObjNextOpTimer
+	bsr.w	loc_00008BE0
+	bcs.w	ObjSys_DeleteObjectA0
+	rts
 loc_0000697E:
 	MOVE.w	#$0101, $00FFA120
 	LEA	loc_00006992(PC), A1
@@ -7620,7 +7644,7 @@ loc_000069AC:
 	CMPI.b	#1, $00FFA130
 	BEQ.w	loc_000069D6
 	CLR.b	$22(A0)
-	MOVE.l	#$000069DC, $32(A0)
+	MOVE.l	#loc_000069DC, $32(A0)
 	BTST.b	#0, $7(A0)
 	BNE.w	loc_0000668E
 	BSR.w	ObjSys_UpdateObjNextOpTimer
@@ -7812,8 +7836,19 @@ loc_00006C8C:
 	ADDI.w	#8, D5
 	MOVE.w	D5, $C(A1)
 	RTS
-	dc.b	$43, $F9, $00, $00, $6C, $D0, $4E, $B9, $00, $00, $89, $FA, $64, $00, $00, $04, $4E, $75, $23, $48, $00, $2E, $13, $46, $00, $0E, $33, $45, $00, $0A, $06, $45 ;0x0 (0x00006CA2-0x00006CD0, Entry count: 0x2E) [Unknown data]
-	dc.b	$00, $08, $33, $45, $00, $0C, $13, $7C, $00, $FF, $00, $07, $4E, $75 ;0x20
+loc_00006CA2:
+	lea		loc_00006CD0, A1
+	jsr		ObjSys_InitObjWithFunc
+	bcc.w	loc_00006CB4
+	rts
+loc_00006CB4:
+	move.l	A0, $2E(A1)
+	move.b	D6, $E(A1)
+	move.w	D5, $A(A1)
+	addi.w	#8, D5
+	move.w	D5, $C(A1)
+	move.b	#-1, $7(A1)
+	rts
 loc_00006CD0:
 	MOVEA.l	$2E(A0), A1
 	CLR.l	D2
@@ -8080,10 +8115,13 @@ loc_00007094:
 	MOVEA.l	loc_000070A8(PC,D0.w), A1
 	JMP	(A1)
 loc_000070A8:
-	dc.l	$000070B8
-	dc.l	$000070BA
-	dc.b	$00, $00, $71, $18, $00, $00, $71, $18 ;0x0 (0x000070B0-0x000070B8, Entry count: 0x8) [Unknown data]
+	dc.l	loc_000070B8
+	dc.l	loc_000070BA
+	dc.l	loc_00007118
+	dc.l	loc_00007118
+loc_000070B8:
 	RTS
+loc_000070BA:
 	CLR.w	D1
 	MOVE.b	$00FFA105, D1
 	MULU.w	#$000A, D1
@@ -8110,8 +8148,23 @@ loc_000070DC:
 	dc.w	$0000
 	dc.b	$00, $0C ;0x0 (0x00007110-0x00007112, Entry count: 0x2) [Unknown data]
 	dc.w	$0000
-	dc.b	$00, $00, $00, $0C, $22, $68, $00, $32, $42, $41, $12, $28, $00, $2B, $E5, $09, $02, $01, $00, $38, $33, $7B, $10, $16, $00, $08, $13, $7B, $10, $12, $00, $0A ;0x0 (0x00007114-0x00007154, Entry count: 0x40) [Unknown data]
-	dc.b	$20, $3B, $10, $06, $60, $00, $03, $C6, $00, $00, $00, $00, $FF, $FF, $00, $00, $00, $00, $9C, $40, $00, $28, $00, $00, $00, $01, $5F, $90, $00, $24, $01, $00 ;0x20
+	dc.b	$00, $00, $00, $0C
+loc_00007118:
+	movea.l	$32(A0), A1
+	clr.w	D1
+	move.b	$2B(A0), D1
+	lsl.b	#2, D1
+	andi.b	#$38, D1
+	move.w	loc_00007140(PC, D1.w), $8(A1)
+	move.b	loc_00007142(PC, D1.w), $A(A1)
+	move.l	loc_0000713C(PC, D1.w), D0
+	bra.w	loc_00007500
+loc_0000713C:
+	dc.l	$00000000
+loc_00007140:
+	dc.w	$FFFF
+loc_00007142:
+	dc.b	$00, $00, $00, $00, $9C, $40, $00, $28, $00, $00, $00, $01, $5F, $90, $00, $24, $01, $00 ;0x20
 loc_00007154:
 	ADD.l	D0, $E(A0)
 	TST.w	$E(A0)
@@ -8605,7 +8658,7 @@ loc_0000792E:
 	MOVE.b	$2A(A0), D0
 	ADDI.b	#$1C, D0
 	MOVE.b	D0, $8(A1)
-	MOVE.l	#$00007CBE, $32(A1)
+	MOVE.l	#loc_00007CBE, $32(A1)
 	MOVE.w	$00FFA166, $A(A1)
 	MOVE.w	$00FFA164, $E(A1)
 	MOVE.b	$9(A0), $2B(A1)
@@ -8718,7 +8771,7 @@ loc_00007B08:
 	BSR.w	loc_00007C9A
 	CMPI.b	#3, $2C(A0)
 	BEQ.b	loc_00007B3E
-	MOVE.l	#$00007CD0, $32(A0)
+	MOVE.l	#loc_00007CD0, $32(A0)
 	BRA.w	loc_00007C2E
 loc_00007B3E:
 	MOVE.l	#$00060000, D0
@@ -8779,7 +8832,7 @@ loc_00007C02:
 	BCC.w	loc_000034AA
 	BSR.w	loc_00007C9A
 loc_00007C26:
-	MOVE.l	#$00007CD0, $32(A0)
+	MOVE.l	#loc_00007CD0, $32(A0)
 loc_00007C2E:
 	MOVEM.l	A0, -(A7)
 	MOVEA.l	$2E(A0), A0
@@ -8847,6 +8900,7 @@ loc_00007CBE:
 	dc.b	$FF
 	dc.b	$00 ;0x0 (0x00007CCB-0x00007CCC, Entry count: 0x1) [Unknown data]
 	dc.l	loc_00007CBE
+loc_00007CD0:
 	dc.b	$02
 	dc.b	$00 ;0x0 (0x00007CD1-0x00007CD2, Entry count: 0x1) [Unknown data]
 	dc.b	$01
@@ -8896,16 +8950,93 @@ loc_00007D38:
 	BSR.w	loc_00008B34
 	BCS.w	ObjSys_DeleteObjectA0
 	RTS
-	dc.b	$22, $68, $00, $2E, $30, $29, $00, $02, $80, $69, $00, $0A, $67, $00, $00, $D0, $31, $7C, $00, $E8, $00, $0E, $10, $28, $00, $2A, $06, $00, $00, $1C, $11, $40 ;0x0 (0x00007D4A-0x00007E78, Entry count: 0x12E) [Unknown data]
-	dc.b	$00, $08, $21, $7C, $00, $00, $7C, $BE, $00, $32, $42, $68, $00, $26, $4E, $B9, $00, $00, $8A, $EC, $4E, $B9, $00, $00, $8B, $34, $30, $28, $00, $26, $D0, $40 ;0x20
-	dc.b	$32, $00, $48, $41, $D0, $40, $32, $00, $4A, $28, $00, $2A, $66, $02, $48, $41, $4A, $39, $00, $FF, $A1, $44, $66, $18, $48, $E7, $40, $00, $30, $28, $00, $1E ;0x40
-	dc.b	$90, $41, $31, $40, $00, $0A, $4E, $B9, $00, $00, $8E, $2E, $4C, $DF, $00, $02, $4A, $39, $00, $FF, $A1, $45, $66, $12, $48, $41, $30, $28, $00, $1E, $D0, $41 ;0x60
-	dc.b	$31, $40, $00, $0A, $4E, $B9, $00, $00, $8E, $2E, $0C, $68, $00, $20, $00, $26, $64, $0C, $52, $68, $00, $26, $04, $68, $00, $03, $00, $0E, $4E, $75, $4A, $28 ;0x80
-	dc.b	$00, $2C, $66, $2C, $48, $E7, $00, $80, $4A, $39, $00, $FF, $A1, $44, $66, $0A, $41, $F9, $00, $FF, $D0, $80, $61, $00, $DD, $B4, $4A, $39, $00, $FF, $A1, $45 ;0xA0
-	dc.b	$66, $0A, $41, $F9, $00, $FF, $D0, $C0, $61, $00, $DD, $A2, $4C, $DF, $01, $00, $52, $28, $00, $2C, $0C, $28, $00, $10, $00, $2C, $65, $00, $FB, $64, $4E, $B9 ;0xC0
-	dc.b	$00, $00, $8A, $EC, $22, $68, $00, $2E, $4A, $11, $6B, $12, $10, $29, $00, $01, $B0, $28, $00, $2B, $67, $00, $FB, $4A, $4E, $F9, $00, $00, $8A, $B8, $30, $29 ;0xE0
-	dc.b	$00, $02, $42, $91, $4A, $39, $00, $FF, $A1, $44, $66, $06, $D1, $79, $00, $FF, $D0, $94, $30, $29, $00, $0A, $42, $A9, $00, $08, $4A, $39, $00, $FF, $A1, $45 ;0x100
-	dc.b	$66, $06, $D1, $79, $00, $FF, $D0, $D4, $4E, $F9, $00, $00, $8A, $B8 ;0x120
+loc_00007D4A:
+	movea.l	$2E(A0), A1
+	move.w	$2(A1), D0
+	or.w	$A(A1), D0
+	beq.w	loc_00007E28
+	move.w	#$E8, $E(A0)
+	move.b	$2A(A0), D0
+	addi.b	#$1C, D0
+	move.b	D0, $8(A0)
+	move.l	#loc_00007CBE, $32(A0)
+	clr.w	$26(A0)
+	jsr		ObjSys_UpdateObjNextOpTimer
+	jsr		loc_00008B34
+	move.w	$26(A0), D0
+	add.w	D0, D0
+	move.w	D0, D1
+	swap 	D1
+	add.w	D0, D0
+	move.w	D0, D1
+	tst.b	$2A(A0)
+	bne.b	loc_00007D9A
+	swap 	D1
+loc_00007D9A:
+	tst.b	$00FFA144
+	bne.b	loc_00007DBA
+	movem.l	D1, -(A7)
+	move.w	$1E(A0), D0
+	sub.w	D1, D0
+	move.w	D0, $A(A0)
+	jsr		loc_00008E2E
+	movem.l	(A7)+, D1
+loc_00007DBA:
+	tst.b	$00FFA145
+	bne.b	loc_00007DD4
+	swap	D1
+	move.w	$1E(A0), D0
+	add.w	D1, D0
+	move.w	D0, $A(A0)
+	jsr		loc_00008E2E
+loc_00007DD4:
+	cmpi.w	#$20, $26(A0)
+	bcc.b	loc_00007DE8
+	addq.w	#1, $26(A0)
+	subi.w	#3, $E(A0)
+	rts
+loc_00007DE8:
+	tst.b	$2C(A0)
+	bne.b	loc_00007E1A
+	movem.l	A0, -(A7)
+	tst.b	$00FFA144
+	bne.b	loc_00007E04
+	lea		($00FFD080), A0
+	bsr.w	loc_00005BB6
+loc_00007E04:
+	tst.b	$00FFA145
+	bne.b	loc_00007E16
+	lea		($00FFD0C0), A0
+	bsr.w	loc_00005BB6
+loc_00007E16:
+	movem.l	(A7)+, A0
+loc_00007E1A:
+	addq.b	#1, $2C(A0)
+	cmpi.b	#$10, $2C(A0)
+	bcs.w	loc_0000798A
+loc_00007E28:
+	jsr		ObjSys_UpdateObjNextOpTimer
+	movea.l	$2E(A0), A1
+	tst.b	(A1)
+	bmi.b	loc_00007E48
+	move.b	$1(A1), D0
+	cmp.b	$2B(A0), D0
+	beq.w	loc_0000798A
+	jmp		ObjSys_DeleteObjectA0
+loc_00007E48:
+	move.w	$2(A1), D0
+	clr.l	(A1)
+	tst.b	$00FFA144
+	bne.b	loc_00007E5C
+	add.w	D0, $00FFD094
+loc_00007E5C:
+	move.w	$A(A1), D0
+	clr.l	$8(A1)
+	tst.b	$00FFA145
+	bne.b	loc_00007E72
+	add.w	D0, $00FFD0D4
+loc_00007E72:
+	jmp		ObjSys_DeleteObjectA0
 loc_00007E78:
 	ADDI.w	#$0010, $E(A0)
 	MOVE.b	#$0A, $8(A0)
@@ -9015,14 +9146,24 @@ loc_00007FEE:
 	dc.b	$0B
 	dc.b	$09, $0E, $10, $10, $0C, $07, $0A, $02, $08, $0F, $0F, $02, $05, $08, $01, $0C, $10, $06, $07, $11, $01, $08, $07, $07, $00 ;0x0 (0x00007FF7-0x00008010, Entry count: 0x19) [Unknown data]
 loc_00008010:
-	dc.l	$00008058
-	dc.b	$00, $00, $81, $6E, $00, $00, $81, $02, $00, $00, $82, $DC, $00, $00, $83, $2A ;0x0 (0x00008014-0x00008024, Entry count: 0x10) [Unknown data]
-	dc.l	$00008396
-	dc.b	$00, $00, $83, $EA, $00, $00, $81, $F2, $00, $00, $84, $80 ;0x0 (0x00008028-0x00008034, Entry count: 0xC) [Unknown data]
-	dc.l	$00008554
-	dc.b	$00, $00, $85, $E4 ;0x0 (0x00008038-0x0000803C, Entry count: 0x4) [Unknown data]
-	dc.l	$0000865C
-	dc.b	$00, $00, $86, $EA, $00, $00, $87, $4E, $00, $00, $34, $AA, $00, $00, $87, $8A, $00, $00, $88, $56, $00, $00, $88, $D8 ;0x0 (0x00008040-0x00008058, Entry count: 0x18) [Unknown data]
+	dc.l	loc_00008058
+	dc.l	loc_0000816E
+	dc.l	loc_00008102
+	dc.l	loc_000082DC
+	dc.l	loc_0000832A
+	dc.l	loc_00008396
+	dc.l	loc_000083EA
+	dc.l	loc_000081F2
+	dc.l	loc_00008480
+	dc.l	loc_00008554
+	dc.l	loc_000085E4
+	dc.l	loc_0000865C
+	dc.l	loc_000086EA
+	dc.l	loc_0000874E
+	dc.l	loc_000034AA
+	dc.l	loc_0000878A
+	dc.l	loc_00008856
+	dc.l	loc_000088D8
 loc_00008058:
 	MOVEQ	#3, D3
 	MOVE.w	#$0400, D1
@@ -9041,7 +9182,7 @@ loc_0000805E:
 	SWAP	D2
 	MOVE.w	#$4000, $1C(A1)
 	MOVE.w	#$FFFF, $20(A1)
-	MOVE.l	#$000080F6, $32(A1)
+	MOVE.l	#loc_000080F6, $32(A1)
 	MOVE.b	D3, D6
 	ROR.b	#4, D6
 	ADDI.b	#$64, D6
@@ -9068,6 +9209,7 @@ loc_000080CE:
 	BSR.w	loc_00008BE0
 	BCS.w	ObjSys_DeleteObjectA0
 	RTS
+loc_000080F6:
 	dc.b	$01
 	dc.b	$06 ;0x0 (0x000080F7-0x000080F8, Entry count: 0x1) [Unknown data]
 	dc.b	$03
@@ -9079,20 +9221,119 @@ loc_000080CE:
 	dc.b	$04
 	dc.b	$06 ;0x0 (0x000080FF-0x00008100, Entry count: 0x1) [Unknown data]
 	dc.b	$FE
-	dc.b	$00, $43, $FA, $00, $46, $61, $00, $0F, $54, $65, $00, $B3, $9E, $13, $7C, $00, $08, $00, $08, $4E, $B9, $00, $00, $0C, $04, $02, $40, $00, $07, $50, $00, $13 ;0x0 (0x00008101-0x000082B2, Entry count: 0x1B1) [Unknown data]
-	dc.b	$40, $00, $09, $33, $42, $00, $0A, $48, $42, $33, $42, $00, $0E, $48, $42, $33, $7C, $10, $00, $00, $1C, $33, $7C, $FF, $FE, $00, $16, $33, $7C, $FF, $FF, $00 ;0x20
-	dc.b	$20, $33, $7C, $00, $30, $00, $26, $4E, $75, $30, $3C, $00, $04, $61, $00, $09, $92, $61, $00, $09, $98, $11, $7C, $00, $85, $00, $06, $61, $00, $0A, $82, $53 ;0x40
-	dc.b	$68, $00, $26, $66, $00, $B3, $44, $4E, $F9, $00, $00, $8A, $B8, $70, $20, $32, $3C, $01, $80, $76, $03, $43, $FA, $00, $48, $61, $00, $0E, $E0, $65, $3E, $13 ;0x60
-	dc.b	$7C, $00, $06, $00, $08, $13, $7C, $00, $0F, $00, $09, $33, $42, $00, $0A, $48, $42, $33, $42, $00, $0E, $48, $42, $33, $7C, $00, $18, $00, $26, $2C, $02, $4E ;0x80
-	dc.b	$B9, $00, $00, $0C, $50, $23, $42, $00, $12, $4E, $B9, $00, $00, $0C, $30, $23, $42, $00, $16, $24, $06, $06, $00, $00, $40, $51, $CB, $FF, $BA, $4E, $75, $30 ;0xA0
-	dc.b	$3C, $00, $04, $61, $00, $09, $1C, $61, $00, $09, $22, $11, $7C, $00, $83, $00, $06, $4E, $B9, $00, $00, $8B, $E0, $53, $68, $00, $26, $66, $00, $B2, $CC, $30 ;0xC0
-	dc.b	$3C, $00, $04, $61, $00, $08, $FC, $61, $00, $09, $02, $4E, $F9, $00, $00, $8A, $B8, $43, $FA, $00, $BE, $61, $00, $0E, $64, $65, $00, $B2, $AE, $13, $7C, $00 ;0xE0
-	dc.b	$08, $00, $08, $10, $39, $00, $FF, $A0, $69, $02, $40, $00, $E0, $E6, $48, $23, $7B, $00, $30, $00, $32, $33, $42, $00, $0A, $48, $42, $33, $42, $00, $0E, $48 ;0x100
-	dc.b	$42, $33, $7C, $10, $00, $00, $1C, $33, $7C, $FF, $FE, $00, $16, $33, $7C, $FF, $FF, $00, $20, $13, $7C, $00, $05, $00, $06, $33, $7C, $00, $40, $00, $26, $4E ;0x120
-	dc.b	$75, $00, $00, $82, $62, $00, $00, $82, $68, $00, $00, $82, $76, $00, $00, $82, $84, $00, $00, $82, $9A, $00, $00, $82, $A4, $00, $00, $82, $A8, $00, $00, $82 ;0x140
-	dc.b	$AE, $20, $05, $40, $01, $FE, $00, $03, $01, $03, $02, $03, $03, $03, $04, $FF, $00, $00, $00, $82, $68, $04, $01, $04, $04, $04, $03, $04, $02, $FF, $00, $00 ;0x160
-	dc.b	$00, $82, $76, $03, $06, $03, $00, $03, $06, $03, $00, $03, $06, $03, $00, $03, $06, $14, $00, $FF, $00, $00, $00, $82, $84, $02, $00, $02, $07, $FF, $00, $00 ;0x180
-	dc.b	$00, $82, $9A, $40, $03, $FE, $00, $20, $01, $40, $05, $FE, $00, $40, $00, $FE, $00 ;0x1A0
+	dc.b	$00
+loc_00008102:
+	LEA	loc_0000814A(PC), A1
+	BSR.w	loc_0000905C
+	BCS.w	loc_000034AA	;Predicted (Code-scan)
+	MOVE.b	#8, $8(A1)	;Predicted (Code-scan)
+	JSR	loc_00000C04	;Predicted (Code-scan)
+	ANDI.w	#7, D0	;Predicted (Code-scan)
+	ADDQ.b	#8, D0	;Predicted (Code-scan)
+	MOVE.b	D0, $9(A1)	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	D2, $E(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	#$1000, $1C(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFE, $16(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFF, $20(A1)	;Predicted (Code-scan)
+	MOVE.w	#$0030, $26(A1)	;Predicted (Code-scan)
+	RTS	;Predicted (Code-scan)
+loc_0000814A:
+	MOVE.w	#4, D0
+	BSR.w	loc_00008AE2
+	BSR.w	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
+	MOVE.b	#$85, $6(A0)	;Predicted (Code-scan)
+	BSR.w	loc_00008BE0	;Predicted (Code-scan)
+	SUBQ.w	#1, $26(A0)	;Predicted (Code-scan)
+	BNE.w	loc_000034AA	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
+loc_0000816E:
+	MOVEQ	#$00000020, D0
+	MOVE.w	#$0180, D1
+	MOVEQ	#3, D3
+loc_00008176:
+	LEA	loc_000081C0(PC), A1	;Predicted (Code-scan)
+	BSR.w	loc_0000905C	;Predicted (Code-scan)
+	BCS.b	loc_000081BE	;Predicted (Code-scan)
+	MOVE.b	#6, $8(A1)	;Predicted (Code-scan)
+	MOVE.b	#$0F, $9(A1)	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	D2, $E(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	#$0018, $26(A1)	;Predicted (Code-scan)
+	MOVE.l	D2, D6	;Predicted (Code-scan)
+	JSR	SignedSinWithMul	;Predicted (Code-scan)
+	MOVE.l	D2, $12(A1)	;Predicted (Code-scan)
+	JSR	loc_00000C30	;Predicted (Code-scan)
+	MOVE.l	D2, $16(A1)	;Predicted (Code-scan)
+	MOVE.l	D6, D2	;Predicted (Code-scan)
+	ADDI.b	#$40, D0	;Predicted (Code-scan)
+	DBF	D3, loc_00008176	;Predicted (Code-scan)
+loc_000081BE:
+	RTS	;Predicted (Code-scan)
+loc_000081C0:
+	MOVE.w	#4, D0
+	BSR.w	loc_00008AE2
+	BSR.w	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
+	MOVE.b	#$83, $6(A0)	;Predicted (Code-scan)
+	JSR	loc_00008BE0	;Predicted (Code-scan)
+	SUBQ.w	#1, $26(A0)	;Predicted (Code-scan)
+	BNE.w	loc_000034AA	;Predicted (Code-scan)
+	MOVE.w	#4, D0	;Predicted (Code-scan)
+	BSR.w	loc_00008AE2	;Predicted (Code-scan)
+	BSR.w	ObjSys_UpdateObjNextOpTimer	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
+loc_000081F2:
+	LEA	loc_000082B2(PC), A1
+	BSR.w	loc_0000905C
+	BCS.w	loc_000034AA	;Predicted (Code-scan)
+	MOVE.b	#8, $8(A1)	;Predicted (Code-scan)
+	MOVE.b	$00FFA069, D0	;Predicted (Code-scan)
+	ANDI.w	#$00E0, D0	;Predicted (Code-scan)
+	LSR.w	#3, D0	;Predicted (Code-scan)
+	MOVE.l	loc_00008242(PC,D0.w), $32(A1)	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	D2, $E(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	#$1000, $1C(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFE, $16(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFF, $20(A1)	;Predicted (Code-scan)
+	MOVE.b	#5, $6(A1)	;Predicted (Code-scan)
+	MOVE.w	#$0040, $26(A1)	;Predicted (Code-scan)
+	RTS	;Predicted (Code-scan)
+loc_00008242:
+	dc.l	loc_00008262
+	dc.l	loc_00008268
+	dc.l	loc_00008276
+	dc.l	loc_00008284
+	dc.l	loc_0000829A
+	dc.l	loc_000082A4
+	dc.l	loc_000082A8
+	dc.l	loc_000082AE
+loc_00008262:
+	dc.b	$20, $05, $40, $01, $FE, $00
+loc_00008268:
+	dc.b	$03, $01, $03, $02, $03, $03, $03, $04, $FF, $00
+	dc.l	loc_00008268
+loc_00008276:
+	dc.b	$04, $01, $04, $04, $04, $03, $04, $02, $FF, $00
+	dc.l	loc_00008276
+loc_00008284:
+	dc.b	$03, $06, $03, $00, $03, $06, $03, $00, $03, $06, $03, $00, $03, $06, $14, $00, $FF, $00
+	dc.l	loc_00008284
+loc_0000829A:
+	dc.b	$02, $00, $02, $07, $FF, $00
+	dc.l	loc_0000829A
+loc_000082A4:
+	dc.b	$40, $03, $FE, $00
+loc_000082A8:
+	dc.b	$20, $01, $40, $05, $FE, $00
+loc_000082AE:
+	dc.b	$40, $00, $FE, $00 ;0x60
 loc_000082B2:
 	MOVEQ	#4, D0
 	BSR.w	loc_00008AE2
@@ -9104,27 +9345,71 @@ loc_000082B2:
 	SUBQ.w	#1, $26(A0)
 	BNE.w	loc_000034AA
 	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
-	dc.b	$43, $FA, $FF, $D4, $61, $00, $0D, $7A, $65, $00, $B1, $C4, $13, $7C, $00, $08, $00, $08, $13, $7C, $00, $05, $00, $06, $23, $7C, $00, $00, $83, $22, $00, $32 ;0x0 (0x000082DC-0x00008396, Entry count: 0xBA) [Unknown data]
-	dc.b	$33, $42, $00, $0A, $48, $42, $33, $42, $00, $0E, $48, $42, $33, $7C, $0C, $00, $00, $1C, $33, $7C, $FF, $FE, $00, $16, $33, $7C, $FF, $FF, $00, $20, $33, $7C ;0x20
-	dc.b	$00, $30, $00, $26, $4E, $75, $12, $10, $06, $11, $40, $12, $FE, $00, $43, $FA, $FF, $86, $61, $00, $0D, $2C, $65, $00, $B1, $76, $13, $7C, $00, $08, $00, $08 ;0x40
-	dc.b	$33, $42, $00, $0A, $48, $42, $33, $42, $00, $0E, $48, $42, $4E, $B9, $00, $00, $0C, $04, $49, $FA, $00, $32, $72, $01, $08, $00, $00, $01, $67, $06, $49, $FA ;0x60
-	dc.b	$00, $30, $55, $41, $23, $4C, $00, $32, $33, $41, $00, $12, $02, $40, $00, $3F, $06, $40, $00, $20, $33, $40, $00, $26, $33, $7C, $FF, $FF, $00, $16, $13, $7C ;0x80
-	dc.b	$00, $03, $00, $06, $4E, $75, $04, $14, $04, $15, $FF, $00, $00, $00, $83, $82, $04, $16, $04, $17, $FF, $00, $00, $00, $83, $8C ;0xA0
+loc_000082DC:
 	LEA	loc_000082B2(PC), A1
 	BSR.w	loc_0000905C
-	BCS.w	loc_000034AA
-	MOVE.b	#8, $8(A1)
-	MOVE.l	#$000083DC, $32(A1)
-	MOVE.w	D2, $A(A1)
-	SWAP	D2
-	MOVE.w	D2, $E(A1)
-	SWAP	D2
-	MOVE.w	#$2000, $1C(A1)
-	MOVE.w	#$FFFF, $16(A1)
-	MOVE.w	#0, $20(A1)
-	MOVE.b	#5, $6(A1)
-	MOVE.w	#$0060, $26(A1)
-	RTS
+	BCS.w	loc_000034AA	;Predicted (Code-scan)
+	MOVE.b	#8, $8(A1)	;Predicted (Code-scan)
+	MOVE.b	#5, $6(A1)	;Predicted (Code-scan)
+	MOVE.l	#loc_00008322, $32(A1)	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	D2, $E(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	#$0C00, $1C(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFE, $16(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFF, $20(A1)	;Predicted (Code-scan)
+	MOVE.w	#$0030, $26(A1)	;Predicted (Code-scan)
+	RTS	;Predicted (Code-scan)
+loc_00008322:
+	dc.b	$12, $10, $06, $11, $40, $12, $FE, $00
+loc_0000832A:
+	LEA	loc_000082B2(PC), A1
+	BSR.w	loc_0000905C
+	BCS.w	loc_000034AA	;Predicted (Code-scan)
+	MOVE.b	#8, $8(A1)	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	D2, $E(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	JSR	loc_00000C04	;Predicted (Code-scan)
+	LEA	loc_00008382(PC), A4	;Predicted (Code-scan)
+	MOVEQ	#1, D1	;Predicted (Code-scan)
+	BTST.l	#1, D0	;Predicted (Code-scan)
+	BEQ.b	loc_00008360	;Predicted (Code-scan)
+	LEA	loc_0000838C(PC), A4	;Predicted (Code-scan)
+	SUBQ.w	#2, D1	;Predicted (Code-scan)
+loc_00008360:
+	MOVE.l	A4, $32(A1)	;Predicted (Code-scan)
+	MOVE.w	D1, $12(A1)	;Predicted (Code-scan)
+	ANDI.w	#$003F, D0	;Predicted (Code-scan)
+	ADDI.w	#$0020, D0	;Predicted (Code-scan)
+	MOVE.w	D0, $26(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFF, $16(A1)	;Predicted (Code-scan)
+	MOVE.b	#3, $6(A1)	;Predicted (Code-scan)
+	RTS	;Predicted (Code-scan)
+loc_00008382:
+	dc.b	$04, $14, $04, $15, $FF, $00
+	dc.l	loc_00008382
+loc_0000838C:
+	dc.b	$04, $16, $04, $17, $FF, $00
+	dc.l	loc_0000838C
+loc_00008396:
+	LEA	loc_000082B2(PC), A1
+	BSR.w	loc_0000905C
+	BCS.w	loc_000034AA	;Predicted (Code-scan)
+	MOVE.b	#8, $8(A1)	;Predicted (Code-scan)
+	MOVE.l	#$000083DC, $32(A1)	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	D2, $E(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	#$2000, $1C(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFF, $16(A1)	;Predicted (Code-scan)
+	MOVE.w	#0, $20(A1)	;Predicted (Code-scan)
+	MOVE.b	#5, $6(A1)	;Predicted (Code-scan)
+	MOVE.w	#$0060, $26(A1)	;Predicted (Code-scan)
+	RTS	;Predicted (Code-scan)
 loc_000083DC:
 	dc.b	$02
 	dc.b	$18 ;0x0 (0x000083DD-0x000083DE, Entry count: 0x1) [Unknown data]
@@ -9137,19 +9422,98 @@ loc_000083DC:
 	dc.b	$FF
 	dc.b	$00 ;0x0 (0x000083E5-0x000083E6, Entry count: 0x1) [Unknown data]
 	dc.l	loc_000083DC
-	dc.b	$43, $FA, $FE, $C6, $61, $00, $0C, $6C, $65, $00, $B0, $B6, $13, $7C, $00, $08, $00, $08, $10, $32, $40, $00, $02, $00, $00, $70, $E4, $08, $23, $7B, $00, $30 ;0x0 (0x000083EA-0x00008554, Entry count: 0x16A) [Unknown data]
-	dc.b	$00, $32, $33, $42, $00, $0A, $48, $42, $33, $42, $00, $0E, $48, $42, $33, $7C, $04, $00, $00, $1C, $33, $7C, $FF, $FF, $00, $16, $33, $7C, $FF, $FF, $00, $20 ;0x20
-	dc.b	$13, $7C, $00, $05, $00, $06, $33, $7C, $00, $36, $00, $26, $4E, $75, $00, $00, $84, $58, $00, $00, $84, $60, $00, $00, $84, $58, $00, $00, $84, $68, $00, $00 ;0x40
-	dc.b	$84, $70, $00, $00, $84, $78, $00, $00, $84, $58, $00, $00, $84, $58, $20, $1C, $04, $1D, $04, $1E, $FE, $00, $20, $1F, $04, $20, $04, $21, $FE, $00, $20, $22 ;0x60
-	dc.b	$04, $23, $04, $24, $FE, $00, $20, $25, $04, $26, $04, $27, $FE, $00, $20, $28, $04, $29, $04, $2A, $FE, $00, $43, $FA, $00, $46, $61, $00, $0B, $D6, $65, $00 ;0x80
-	dc.b	$B0, $20, $10, $32, $40, $00, $E8, $08, $02, $00, $00, $07, $13, $40, $00, $08, $13, $7C, $00, $05, $00, $09, $13, $7C, $00, $05, $00, $06, $33, $42, $00, $0A ;0xA0
-	dc.b	$48, $42, $33, $42, $00, $0E, $48, $42, $23, $7C, $FF, $FF, $80, $00, $00, $16, $33, $7C, $00, $60, $00, $26, $33, $7C, $00, $80, $00, $28, $4E, $75, $61, $00 ;0xC0
-	dc.b	$07, $16, $65, $00, $05, $EA, $31, $68, $00, $0A, $00, $1E, $31, $68, $00, $0E, $00, $20, $10, $28, $00, $36, $32, $28, $00, $28, $4E, $B9, $00, $00, $0C, $50 ;0xE0
-	dc.b	$48, $42, $36, $02, $4E, $B9, $00, $00, $0C, $30, $48, $42, $48, $E7, $30, $00, $D4, $68, $00, $1E, $31, $42, $00, $0A, $D6, $68, $00, $20, $31, $43, $00, $0E ;0x100
-	dc.b	$4E, $B9, $00, $00, $8E, $2E, $4C, $DF, $00, $0C, $44, $42, $44, $43, $D4, $68, $00, $1E, $31, $42, $00, $0A, $D6, $68, $00, $20, $31, $43, $00, $0E, $4E, $B9 ;0x120
-	dc.b	$00, $00, $8E, $2E, $31, $68, $00, $1E, $00, $0A, $31, $68, $00, $20, $00, $0E, $06, $28, $00, $10, $00, $36, $06, $68, $00, $80, $00, $28, $53, $68, $00, $26 ;0x140
-	dc.b	$66, $00, $AF, $5E, $4E, $F9, $00, $00, $8A, $B8 ;0x160
+loc_000083EA:
+	LEA	loc_000082B2(PC), A1
+	BSR.w	loc_0000905C
+	BCS.w	loc_000034AA	;Predicted (Code-scan)
+	MOVE.b	#8, $8(A1)	;Predicted (Code-scan)
+	MOVE.b	(A2,D4.w), D0	;Predicted (Code-scan)
+	ANDI.b	#$70, D0	;Predicted (Code-scan)
+	LSR.b	#2, D0	;Predicted (Code-scan)
+	MOVE.l	loc_00008438(PC,D0.w), $32(A1)	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	D2, $E(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	#$0400, $1C(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFF, $16(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFF, $20(A1)	;Predicted (Code-scan)
+	MOVE.b	#5, $6(A1)	;Predicted (Code-scan)
+	MOVE.w	#$0036, $26(A1)	;Predicted (Code-scan)
+	RTS	;Predicted (Code-scan)
+loc_00008438:
+	dc.l	loc_00008458
+	dc.l	loc_00008460
+	dc.l	loc_00008458
+	dc.l	loc_00008468
+	dc.l	loc_00008470
+	dc.l	loc_00008478
+	dc.l	loc_00008458
+	dc.l	loc_00008458
+loc_00008458:
+	dc.b	$20, $1C, $04, $1D, $04, $1E, $FE, $00
+loc_00008460:
+	dc.b	$20, $1F, $04, $20, $04, $21, $FE, $00
+loc_00008468:
+	dc.b	$20, $22, $04, $23, $04, $24, $FE, $00
+loc_00008470:
+	dc.b	$20, $25, $04, $26, $04, $27, $FE, $00 ;0x20
+loc_00008478:
+	dc.b	$20, $28, $04, $29, $04, $2A, $FE, $00
+loc_00008480:
+	LEA	loc_000084C8(PC), A1
+	BSR.w	loc_0000905C
+	BCS.w	loc_000034AA	;Predicted (Code-scan)
+	MOVE.b	(A2,D4.w), D0	;Predicted (Code-scan)
+	LSR.b	#4, D0	;Predicted (Code-scan)
+	ANDI.b	#7, D0	;Predicted (Code-scan)
+	MOVE.b	D0, $8(A1)	;Predicted (Code-scan)
+	MOVE.b	#5, $9(A1)	;Predicted (Code-scan)
+	MOVE.b	#5, $6(A1)	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	D2, $E(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.l	#$FFFF8000, $16(A1)	;Predicted (Code-scan)
+	MOVE.w	#$0060, $26(A1)	;Predicted (Code-scan)
+	MOVE.w	#$0080, $28(A1)	;Predicted (Code-scan)
+	RTS	;Predicted (Code-scan)
+loc_000084C8:
+	BSR.w	loc_00008BE0
+	BCS.w	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
+	MOVE.w	$A(A0), $1E(A0)	;Predicted (Code-scan)
+	MOVE.w	$E(A0), $20(A0)	;Predicted (Code-scan)
+	MOVE.b	$36(A0), D0	;Predicted (Code-scan)
+	MOVE.w	$28(A0), D1	;Predicted (Code-scan)
+	JSR	SignedSinWithMul	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	D2, D3	;Predicted (Code-scan)
+	JSR	loc_00000C30	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVEM.l	D3/D2, -(A7)	;Predicted (Code-scan)
+	ADD.w	$1E(A0), D2	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A0)	;Predicted (Code-scan)
+	ADD.w	$20(A0), D3	;Predicted (Code-scan)
+	MOVE.w	D3, $E(A0)	;Predicted (Code-scan)
+	JSR	loc_00008E2E	;Predicted (Code-scan)
+	MOVEM.l	(A7)+, D2/D3	;Predicted (Code-scan)
+	NEG.w	D2	;Predicted (Code-scan)
+	NEG.w	D3	;Predicted (Code-scan)
+	ADD.w	$1E(A0), D2	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A0)	;Predicted (Code-scan)
+	ADD.w	$20(A0), D3	;Predicted (Code-scan)
+	MOVE.w	D3, $E(A0)	;Predicted (Code-scan)
+	JSR	loc_00008E2E	;Predicted (Code-scan)
+	MOVE.w	$1E(A0), $A(A0)	;Predicted (Code-scan)
+	MOVE.w	$20(A0), $E(A0)	;Predicted (Code-scan)
+	ADDI.b	#$10, $36(A0)	;Predicted (Code-scan)
+	ADDI.w	#$0080, $28(A0)	;Predicted (Code-scan)
+	SUBQ.w	#1, $26(A0)	;Predicted (Code-scan)
+	BNE.w	loc_000034AA	;Predicted (Code-scan)
+	JMP	ObjSys_DeleteObjectA0	;Predicted (Code-scan)
+loc_00008554:
 	LEA	loc_0000859A(PC), A1
+loc_00008558:
 	BSR.w	loc_0000905C
 	BCS.w	loc_000034AA
 	MOVE.b	(A2,D4.w), D0
@@ -9187,10 +9551,41 @@ loc_0000859A:
 	NEG.l	D0
 	MOVE.l	D0, $16(A0)
 	RTS
-	dc.b	$36, $3C, $00, $03, $32, $3C, $01, $00, $43, $FA, $FA, $E0, $61, $00, $0A, $6A, $65, $64, $10, $32, $40, $00, $E8, $08, $02, $00, $00, $07, $13, $40, $00, $08 ;0x0 (0x000085E4-0x0000865C, Entry count: 0x78) [Unknown data]
-	dc.b	$13, $7C, $00, $06, $00, $09, $33, $42, $00, $0A, $48, $42, $33, $42, $00, $0E, $48, $42, $33, $7C, $20, $00, $00, $1C, $33, $7C, $FF, $FF, $00, $20, $23, $7C ;0x20
-	dc.b	$00, $00, $80, $F6, $00, $32, $1C, $03, $EB, $06, $06, $06, $00, $48, $4E, $B9, $00, $00, $0C, $04, $02, $00, $00, $0F, $D0, $06, $2C, $02, $4E, $B9, $00, $00 ;0x40
-	dc.b	$0C, $50, $23, $42, $00, $12, $4E, $B9, $00, $00, $0C, $30, $23, $42, $00, $16, $24, $06, $51, $CB, $FF, $94, $4E, $75 ;0x60
+loc_000085E4:
+	MOVE.w	#3, D3
+	MOVE.w	#$0100, D1
+loc_000085EC:
+	LEA	loc_000080CE(PC), A1	;Predicted (Code-scan)
+	BSR.w	loc_0000905C	;Predicted (Code-scan)
+	BCS.b	loc_0000865A	;Predicted (Code-scan)
+	MOVE.b	(A2,D4.w), D0	;Predicted (Code-scan)
+	LSR.b	#4, D0	;Predicted (Code-scan)
+	ANDI.b	#7, D0	;Predicted (Code-scan)
+	MOVE.b	D0, $8(A1)	;Predicted (Code-scan)
+	MOVE.b	#6, $9(A1)	;Predicted (Code-scan)
+	MOVE.w	D2, $A(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	D2, $E(A1)	;Predicted (Code-scan)
+	SWAP	D2	;Predicted (Code-scan)
+	MOVE.w	#$2000, $1C(A1)	;Predicted (Code-scan)
+	MOVE.w	#$FFFF, $20(A1)	;Predicted (Code-scan)
+	MOVE.l	#$000080F6, $32(A1)	;Predicted (Code-scan)
+	MOVE.b	D3, D6	;Predicted (Code-scan)
+	ASL.b	#5, D6	;Predicted (Code-scan)
+	ADDI.b	#$48, D6	;Predicted (Code-scan)
+	JSR	loc_00000C04	;Predicted (Code-scan)
+	ANDI.b	#$0F, D0	;Predicted (Code-scan)
+	ADD.b	D6, D0	;Predicted (Code-scan)
+	MOVE.l	D2, D6	;Predicted (Code-scan)
+	JSR	SignedSinWithMul	;Predicted (Code-scan)
+	MOVE.l	D2, $12(A1)	;Predicted (Code-scan)
+	JSR	loc_00000C30	;Predicted (Code-scan)
+	MOVE.l	D2, $16(A1)	;Predicted (Code-scan)
+	MOVE.l	D6, D2	;Predicted (Code-scan)
+	DBF	D3, loc_000085EC	;Predicted (Code-scan)
+loc_0000865A:
+	RTS	;Predicted (Code-scan)
+loc_0000865C:
 	MOVEQ	#1, D3
 	MOVE.w	#$0300, D1
 loc_00008662:
@@ -9233,26 +9628,170 @@ loc_000086CC:
 	BSR.w	loc_00008BE0
 	BCC.w	loc_000034AA
 	JMP	ObjSys_DeleteObjectA0
-	dc.b	$43, $FA, $00, $2C, $61, $00, $09, $6C, $65, $00, $AD, $B6, $13, $7C, $00, $08, $00, $08, $23, $7C, $00, $00, $83, $DC, $00, $32, $33, $42, $00, $0A, $48, $42 ;0x0 (0x000086EA-0x00008956, Entry count: 0x26C) [Unknown data]
-	dc.b	$33, $42, $00, $0E, $48, $42, $33, $7C, $00, $50, $00, $26, $4E, $75, $70, $04, $61, $00, $03, $C6, $61, $00, $03, $CC, $61, $00, $04, $10, $11, $7C, $00, $80 ;0x20
-	dc.b	$00, $06, $0C, $28, $00, $1E, $00, $27, $64, $0C, $08, $28, $00, $00, $00, $27, $67, $04, $42, $28, $00, $06, $53, $68, $00, $26, $66, $00, $AD, $64, $4E, $F9 ;0x40
-	dc.b	$00, $00, $8A, $B8, $43, $FA, $FB, $62, $61, $00, $09, $08, $65, $00, $AD, $52, $10, $32, $40, $00, $E8, $08, $02, $00, $00, $07, $13, $40, $00, $08, $13, $7C ;0x60
-	dc.b	$00, $06, $00, $09, $33, $42, $00, $0A, $48, $42, $33, $42, $00, $0E, $48, $42, $33, $7C, $00, $18, $00, $26, $23, $7C, $00, $00, $80, $F6, $00, $32, $4E, $75 ;0x80
-	dc.b	$76, $02, $32, $3C, $01, $00, $43, $FA, $00, $6A, $61, $00, $08, $C6, $65, $60, $13, $7C, $00, $18, $00, $08, $13, $7C, $00, $0E, $00, $09, $33, $42, $00, $0A ;0xA0
-	dc.b	$33, $42, $00, $1E, $48, $42, $33, $42, $00, $0E, $48, $42, $33, $7C, $04, $00, $00, $1C, $42, $69, $00, $20, $23, $7C, $00, $00, $88, $4A, $00, $32, $1C, $03 ;0xC0
-	dc.b	$E6, $1E, $06, $06, $00, $58, $4E, $B9, $00, $00, $0C, $04, $02, $00, $00, $0F, $D0, $06, $2C, $02, $4E, $B9, $00, $00, $0C, $50, $23, $42, $00, $12, $4E, $B9 ;0xE0
-	dc.b	$00, $00, $0C, $30, $E2, $82, $23, $42, $00, $16, $24, $06, $51, $CB, $FF, $98, $4E, $75, $30, $3C, $00, $04, $61, $00, $02, $E0, $61, $00, $02, $E6, $11, $7C ;0x100
-	dc.b	$00, $87, $00, $06, $61, $00, $03, $1E, $61, $00, $03, $20, $65, $00, $02, $A0, $31, $68, $00, $1E, $00, $0A, $61, $00, $03, $BE, $65, $00, $02, $92, $31, $68 ;0x120
-	dc.b	$00, $0A, $00, $1E, $10, $28, $00, $36, $32, $3C, $04, $00, $4E, $B9, $00, $00, $0C, $50, $48, $42, $D5, $68, $00, $0A, $06, $28, $00, $0A, $00, $36, $4E, $75 ;0x140
-	dc.b	$06, $0E, $06, $0D, $30, $0C, $03, $0D, $04, $0E, $FE, $00, $76, $03, $32, $3C, $02, $00, $43, $FA, $F8, $70, $61, $00, $07, $FA, $65, $5C, $13, $7C, $00, $18 ;0x160
-	dc.b	$00, $08, $13, $7C, $00, $13, $00, $09, $33, $42, $00, $0A, $48, $42, $33, $42, $00, $0E, $48, $42, $33, $7C, $10, $00, $00, $1C, $33, $7C, $FF, $FF, $00, $20 ;0x180
-	dc.b	$23, $7C, $00, $00, $88, $C4, $00, $32, $1C, $03, $E8, $1E, $06, $06, $00, $60, $4E, $B9, $00, $00, $0C, $04, $02, $00, $00, $0F, $D0, $06, $2C, $02, $4E, $B9 ;0x1A0
-	dc.b	$00, $00, $0C, $50, $23, $42, $00, $12, $4E, $B9, $00, $00, $0C, $30, $23, $42, $00, $16, $24, $06, $51, $CB, $FF, $9C, $4E, $75, $01, $0F, $02, $10, $03, $11 ;0x1C0
-	dc.b	$06, $12, $08, $13, $04, $12, $04, $11, $03, $10, $04, $0F, $FE, $00, $43, $FA, $00, $06, $60, $00, $FC, $7A, $31, $7C, $FF, $FF, $00, $16, $11, $7C, $00, $87 ;0x1E0
-	dc.b	$00, $06, $11, $7C, $00, $02, $00, $26, $21, $7C, $00, $00, $89, $52, $00, $32, $70, $08, $61, $00, $01, $E4, $61, $00, $01, $EA, $61, $00, $02, $2E, $61, $00 ;0x200
-	dc.b	$02, $D6, $65, $00, $01, $AA, $4A, $28, $00, $26, $67, $00, $AB, $94, $4A, $68, $00, $16, $6B, $00, $AB, $8C, $0C, $68, $01, $48, $00, $0E, $65, $00, $AB, $82 ;0x220
-	dc.b	$53, $28, $00, $26, $20, $28, $00, $16, $E2, $88, $44, $80, $21, $40, $00, $16, $21, $7C, $00, $00, $89, $48, $00, $32, $42, $28, $00, $22, $4E, $75, $03, $0F ;0x240
-	dc.b	$01, $0E, $06, $10, $01, $0E, $FE, $00, $01, $08, $FE, $00 ;0x260
+loc_000086EA:
+	lea		loc_00008718(PC), A1
+	bsr.w	loc_0000905C
+	bcs.w	loc_000034AA
+	move.b	#8, $8(A1)
+	move.l	#loc_000083DC, $32(A1)
+	move.w	D2, $A(A1)
+	swap	D2
+	move.w	D2, $E(A1)
+	swap 	D2
+	move.w	#$50, $26(A1)
+	rts
+loc_00008718:
+	moveq	#4, D0
+	bsr.w	loc_00008AE2
+	bsr.w	ObjSys_UpdateObjNextOpTimer
+	bsr.w	loc_00008B34
+	move.b	#$80, $6(A0)
+	cmpi.b	#$1E, $27(A0)
+	bcc.b	loc_00008740
+	btst.b	#0, $27(a0)
+	beq.b	loc_00008740
+	clr.b	$6(A0)
+loc_00008740:
+	subq.w	#1, $26(A0)
+	bne.w	loc_000034AA
+	jmp		ObjSys_DeleteObjectA0
+loc_0000874E:
+	lea		loc_000082B2(PC), A1
+	bsr.w	loc_0000905C
+	bcs.w	loc_000034AA
+	move.b	(A2, D4.w), D0 ; ????
+	lsr.b	#4, D0
+	andi.b	#7, D0
+	move.b 	D0, $8(A1)
+	move.b	#6, $9(A1)
+	move.w	D2, $A(A1)
+	swap 	D2
+	move.w	D2, $E(A1)
+	swap D2
+	move.w	#$18, $26(A1)
+	move.l	#loc_000080F6, $32(A1)
+	rts
+loc_0000878A:
+	moveq	#2, D3
+	move.w	#$100, D1
+loc_00008790:
+	lea		loc_000087FC(PC), A1
+	bsr.w	loc_0000905C
+	bcs.b	loc_000087FA
+	move.b	#$18, $8(A1)
+	move.b	#$E, $9(A1)
+	move.w	D2, $A(A1)
+	move.w	D2, $1E(A1)
+	swap	D2
+	move.w	D2, $E(A1)
+	swap	D2
+	move.w	#$400, $1C(A1)
+	clr.w	$20(A1)
+	move.l	#loc_0000884A, $32(A1)
+	move.b	D3, D6
+	ror.b	#3, D6
+	addi.b	#$58, D6
+	jsr		loc_00000C04
+	andi.b	#$F, D0
+	add.b	D6, D0
+	move.l	D2, D6
+	jsr		SignedSinWithMul
+	move.l	D2, $12(A1)
+	jsr		loc_00000C30
+	asr.l	#1, D2
+	move.l	D2, $16(A1)
+	move.l	D6, D2
+	dbf		D3, loc_00008790
+loc_000087FA:
+	rts
+loc_000087FC:
+	move.w	#4, D0
+	bsr.w	loc_00008AE2
+	bsr.w	ObjSys_UpdateObjNextOpTimer
+	move.b	#$87, $6(A0)
+	bsr.w	loc_00008B2E
+	bsr.w	loc_00008B34
+	bcs.w	ObjSys_DeleteObjectA0
+	move.w	$1E(A0), $A(A0)
+	bsr.w	loc_00008BE0
+	bcs.w	ObjSys_DeleteObjectA0
+	move.w	$A(A0), $1E(A0)
+	move.b	$36(A0), D0
+	move.w	#$400, D1
+	jsr		SignedSinWithMul
+	swap 	D2
+	add.w	D2, $A(A0)
+	addi.b	#$A, $36(A0)
+	rts
+loc_0000884A:
+	dc.b	$06, $0E, $06, $0D, $30, $0C, $03, $0D, $04, $0E, $FE, $00
+loc_00008856:
+	moveq	#3, D3
+	move.w	#$200, D1
+loc_0000885C:
+	lea		loc_000080CE(PC), A1
+	bsr.w	loc_0000905C
+	bcs.b	loc_000088C2
+	move.b	#$18, $8(A1)
+	move.b	#$13, $9(A1)
+	move.w	D2, $A(A1)
+	swap	D2
+	move.w	D2, $E(A1)
+	swap D2
+	move.w	#$1000, $1C(A1)
+	move.w	#-1, $20(A1)
+	move.l	#loc_000088C4, $32(A1)
+	move.b	D3, D6
+	ror.b	#4, D6
+	addi.b	#$60, D6
+	jsr		loc_00000C04
+	andi.b	#$F, D0
+	add.b	D6, D0
+	move.l	D2, D6
+	jsr		SignedSinWithMul
+	move.l	D2, $12(A1)
+	jsr		loc_00000C30
+	move.l	D2, $16(A1)
+	move.l	D6, D2
+	dbf		D3, loc_0000885C
+loc_000088C2:
+	rts
+loc_000088C4:
+	dc.b	$01, $0F, $02, $10, $03, $11 ;0x1C0
+	dc.b	$06, $12, $08, $13, $04, $12, $04, $11, $03, $10, $04, $0F, $FE, $00
+loc_000088D8:
+	lea		loc_000088E0(PC), A1 ; Is this correct??????
+	bra.w	loc_00008558
+loc_000088E0:
+	move.w	#-1, $16(A0)
+	move.b	#$87, $6(A0)
+	move.b	#2, $26(A0)
+	move.l	#loc_00008952, $32(A0)
+	moveq	#8, D0
+	bsr.w	loc_00008AE2
+	bsr.w	ObjSys_UpdateObjNextOpTimer
+	bsr.w	loc_00008B34
+	bsr.w	loc_00008BE0
+	bcs.w	ObjSys_DeleteObjectA0
+	tst.b	$26(A0)
+	beq.w	loc_000034AA
+	tst.w	$16(A0)
+	bmi.w	loc_000034AA
+	cmpi.w	#$0148, $E(A0)
+	bcs.w	loc_000034AA
+	subq.b	#1, $26(A0)
+	move.l	$16(A0), D0
+	lsr.l	#1, D0
+	neg.l	D0
+	move.l	D0, $16(A0)
+	move.l	#loc_00008948, $32(A0)
+	clr.b	$22(A0)
+	rts
+loc_00008948:
+	dc.b	$03, $0F ;0x240
+	dc.b	$01, $0E, $06, $10, $01, $0E, $FE, $00
+loc_00008952:
+	dc.b	$01, $08, $FE, $00 ;0x260
 loc_00008956:
 	MOVE.w	#$03FF, D1
 	LEA	$00FFD000, A1
@@ -9744,6 +10283,7 @@ loc_00008FAA:
 	MOVE.w	D5, $00FFF022
 loc_00008FCA:
 	RTS
+; Shiftability Pass 1 Stop Point
 	dc.b	$3C, $1A, $53, $46, $3A, $39, $00, $FF, $F0, $22, $6B, $00, $00, $70, $26, $79, $00, $FF, $F0, $24, $49, $F9, $00, $FF, $F0, $30, $4B, $F3, $50, $00, $30, $12 ;0x0 (0x00008FCC-0x0000904A, Entry count: 0x7E) [Unknown data]
 	dc.b	$D0, $43, $3A, $83, $30, $2A, $00, $06, $D0, $42, $3B, $40, $00, $06, $30, $2A, $00, $04, $D0, $41, $3B, $40, $00, $04, $30, $2A, $00, $02, $3B, $40, $00, $02 ;0x20
 	dc.b	$42, $44, $18, $00, $30, $34, $40, $00, $66, $0A, $19, $B9, $00, $FF, $F0, $2C, $40, $02, $60, $08, $17, $B9, $00, $FF, $F0, $2C, $00, $03, $39, $85, $40, $00 ;0x40
@@ -11719,7 +12259,7 @@ loc_0000AE58:
 	BCS.b	loc_0000AEF8
 	ADDQ.w	#1, D3
 	MOVE.l	A0, $2E(A1)
-	MOVE.l	#$0000B15E, $32(A1)
+	MOVE.l	#loc_0000B15E, $32(A1)
 	MOVE.b	#$FF, $8(A1)
 	ADDI.w	#$0C00, D0
 	MOVE.w	D0, $2A(A1)
@@ -11887,6 +12427,7 @@ loc_0000B150:
 	MOVEA.l	$2E(A0), A1
 	SUBI.w	#1, $26(A1)
 	BRA.w	ObjSys_DeleteObjectA0
+loc_0000B15E:
 	dc.b	$04
 	dc.b	$00 ;0x0 (0x0000B15F-0x0000B160, Entry count: 0x1) [Unknown data]
 	dc.b	$03
@@ -11994,7 +12535,7 @@ loc_0000B2A2:
 	BNE.w	loc_0000B29C
 	TST.b	$27(A0)
 	BNE.b	loc_0000B2CA
-	MOVE.l	#$0000B318, $32(A0)
+	MOVE.l	#loc_0000B318, $32(A0)
 	MOVE.w	$8(A0), $28(A0)
 	MOVE.b	#6, $8(A0)
 	MOVE.b	#$11, $9(A0)
@@ -13772,7 +14313,7 @@ loc_0000CE3C:
 	ADDI.w	#$0240, D1
 	ANDI.b	#$5F, D0
 	ADDI.b	#$90, D0
-	MOVE.l	#$0000CEDC, $32(A1)
+	MOVE.l	#loc_0000CEDC, $32(A1)
 	JSR	SignedSinWithMul
 	MOVE.l	D2, $16(A1)
 	ASL.l	#4, D2
@@ -13790,6 +14331,7 @@ loc_0000CED0:
 loc_0000CED2:
 	dc.b	$00, $00, $00, $00, $0A, $06, $03, $02 ;0x0 (0x0000CED2-0x0000CEDA, Entry count: 0x8)
 	dc.b	$01, $00 ;0x0 (0x0000CEDA-0x0000CEDC, Entry count: 0x2) [Unknown data]
+loc_0000CEDC:
 	dc.b	$06
 	dc.b	$0E ;0x0 (0x0000CEDD-0x0000CEDE, Entry count: 0x1) [Unknown data]
 	dc.b	$06
@@ -13798,6 +14340,7 @@ loc_0000CED2:
 	dc.b	$0C ;0x0 (0x0000CEE1-0x0000CEE2, Entry count: 0x1) [Unknown data]
 	dc.b	$FE
 	dc.b	$00 ;0x0 (0x0000CEE3-0x0000CEE4, Entry count: 0x1) [Unknown data]
+loc_0000CEE4:
 	dc.b	$03
 	dc.b	$0C ;0x0 (0x0000CEE5-0x0000CEE6, Entry count: 0x1) [Unknown data]
 	dc.b	$01
@@ -13815,7 +14358,7 @@ loc_0000CEEC:
 	BCS.b	loc_0000CF0E
 	RTS
 loc_0000CF0E:
-	MOVE.l	#$0000CEE4, $32(A0)
+	MOVE.l	#loc_0000CEE4, $32(A0)
 	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	BCS.b	loc_0000CF26
@@ -13825,11 +14368,12 @@ loc_0000CF26:
 loc_0000CF2C:
 	TST.b	$00FFA101
 	BNE.b	loc_0000CF3E
-	MOVE.l	#$0000CF44, $32(A0)	;Predicted (Code-scan)
+	MOVE.l	#loc_0000CF44, $32(A0)	;Predicted (Code-scan)
 	RTS	;Predicted (Code-scan)
 loc_0000CF3E:
 	CLR.l	$32(A0)
 	RTS
+loc_0000CF44:
 	dc.b	$4A, $39, $00, $FF, $A1, $46, $66, $06, $12, $3C, $00, $03, $60, $04, $12, $3C, $00, $01, $52, $28, $00, $2D, $10, $28, $00, $2D, $C0, $01, $66, $30, $4A, $28 ;0x0 (0x0000CF44-0x0000CFB6, Entry count: 0x72) [Unknown data]
 	dc.b	$00, $2C, $6B, $06, $45, $FA, $00, $2A, $60, $06, $45, $F9, $00, $FF, $95, $00, $47, $F9, $00, $FF, $94, $60, $72, $01, $4E, $B9, $00, $00, $1E, $46, $64, $0A ;0x20
 	dc.b	$13, $FC, $00, $01, $00, $FF, $F0, $46, $4E, $75, $46, $28, $00, $2C, $4E, $75, $00, $00, $00, $00, $21, $08, $31, $8C, $52, $94, $10, $10, $01, $00, $73, $9C ;0x40
@@ -13888,6 +14432,7 @@ loc_0000D016:
 	dc.b	$00, $7F, $48, $E7, $80, $00, $4E, $B9, $00, $00, $0C, $50, $4C, $DF, $00, $01, $48, $42, $D4, $68, $00, $20, $31, $42, $00, $0E, $06, $28, $00, $64, $00, $36 ;0x100
 	dc.b	$04, $68, $00, $40, $00, $38, $65, $02, $4E, $75, $4E, $B9, $00, $00, $8A, $EC, $4E, $F9, $00, $00, $8B, $34, $0A, $05, $05, $06, $14, $05, $05, $06, $05, $05 ;0x120
 	dc.b	$05, $06, $05, $05, $FE, $00 ;0x140
+loc_0000D1A4:
 	dc.b	$00
 	dc.b	$09 ;0x0 (0x0000D1A5-0x0000D1A6, Entry count: 0x1) [Unknown data]
 	dc.b	$FE
@@ -13945,7 +14490,7 @@ loc_0000D25E:
 loc_0000D266:
 	MOVE.b	#$10, $9(A0)
 	RTS
-	MOVE.l	#$0000D1A4, $32(A0)
+	MOVE.l	#loc_0000D1A4, $32(A0)
 	MOVE.b	#$BF, $6(A0)
 	MOVE.b	#$76, $8(A0)
 	MOVE.b	#$0A, $9(A0)
@@ -13986,7 +14531,7 @@ loc_0000D266:
 	MOVE.w	#$010C, $A(A1)
 	MOVE.w	#$00FE, $20(A1)
 	MOVE.w	#$0800, $38(A1)
-	MOVE.l	#$0000D1A4, $32(A1)
+	MOVE.l	#loc_0000D1A4, $32(A1)
 	MOVE.l	A0, $2E(A1)
 loc_0000D344:
 	JSR	ObjSys_UpdateObjNextOpTimer
@@ -14052,8 +14597,12 @@ loc_0000D402:
 	dc.b	$8B, $34, $10, $28, $00, $36, $00, $00, $00, $80, $32, $28, $00, $38, $4E, $B9, $00, $00, $0C, $50, $48, $42, $D4, $68, $00, $20, $31, $42, $00, $0E, $58, $28 ;0x60
 	dc.b	$00, $36, $4E, $75, $4E, $B9, $00, $00, $8A, $EC, $4A, $39, $00, $FF, $A1, $40, $66, $02, $4E, $75, $30, $3C, $00, $0A, $4E, $B9, $00, $00, $8A, $E2, $4E, $B9 ;0x80
 	dc.b	$00, $00, $8A, $EC, $0C, $39, $00, $FF, $00, $FF, $A1, $46, $66, $02, $4E, $75, $0C, $39, $00, $04, $00, $FF, $A1, $46, $67, $08, $4E, $B9, $00, $00, $8A, $EC ;0xA0
-	dc.b	$4E, $75, $21, $7C, $00, $00, $D4, $DE, $00, $32, $21, $7C, $00, $00, $D4, $E8, $00, $26, $60, $00, $00, $B0, $14, $01, $14, $00, $FF, $00, $00, $00, $D4, $DE ;0xC0
-	dc.b	$00, $03, $00, $00, $00, $03, $00, $20, $00, $03, $00, $40, $00, $03, $00, $60 ;0xE0
+	dc.b	$4E, $75, $21, $7C, $00, $00, $D4, $DE, $00, $32, $21, $7C, $00, $00, $D4, $E8, $00, $26, $60, $00, $00, $B0
+loc_0000D4DE:
+	dc.b	$14, $01, $14, $00, $FF, $00, $00, $00, $D4, $DE ;0xC0
+	dc.b	$00, $03, $00, $00, $00, $03, $00, $20
+loc_0000D4F0:
+	dc.b	$00, $03, $00, $40, $00, $03, $00, $60 ;0xE0
 loc_0000D4F8:
 	dc.b	$00, $00, $00, $00, $51, $8C, $22, $1C, $11, $9C, $03, $1C, $00, $9C, $00, $18, $31, $8C, $53, $14, $02, $8C, $02, $04, $01, $80, $73, $0C, $72, $0C, $73, $9C ;0x0 (0x0000D4F8-0x0000D578, Entry count: 0x80) [Unknown data]
 	dc.b	$00, $00, $00, $00, $51, $8C, $22, $1C, $11, $9C, $00, $18, $00, $9C, $03, $1C, $31, $8C, $53, $14, $02, $8C, $02, $04, $01, $80, $73, $0C, $72, $0C, $73, $9C ;0x20
@@ -14107,8 +14656,8 @@ loc_0000D600:
 	JSR	ObjSys_UpdateObjNextOpTimer
 	RTS
 loc_0000D612:
-	MOVE.l	#$0000D4DE, $32(A0)	;Predicted (Code-scan)
-	MOVE.l	#$0000D4F0, $26(A0)	;Predicted (Code-scan)
+	MOVE.l	#loc_0000D4DE, $32(A0)	;Predicted (Code-scan)
+	MOVE.l	#loc_0000D4F0, $26(A0)	;Predicted (Code-scan)
 	BRA.w	loc_0000D58C	;Predicted (Code-scan)
 	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFA140
@@ -18933,7 +19482,7 @@ loc_00015F3E:
 	RTS	;Predicted (Code-scan)
 loc_00015F46:
 	MOVEM.l	D0, -(A7)	;Predicted (Code-scan)
-	MOVE.l	#$0001AD22, $00FFF04C	;Predicted (Code-scan)
+	MOVE.l	#loc_0001AD22, $00FFF04C	;Predicted (Code-scan)
 	CLR.b	$00FF9FF1	;Predicted (Code-scan)
 	JSR	loc_0001B190	;Predicted (Code-scan)
 	JSR	loc_00000A6E	;Predicted (Code-scan)
@@ -19520,7 +20069,7 @@ loc_00016E5C:
 	dc.b	$20, $FF, $53, $48, $45, $5A, $4F, $20, $57, $45, $47, $45, $59, $20, $20, $20, $20, $FF, $53, $41, $54, $41, $4E, $20, $20, $20, $20, $20, $20, $20, $20, $20 ;0x660
 	dc.b	$20, $FF, $4D, $41, $53, $4B, $45, $44, $20, $53, $41, $54, $41, $4E, $20, $20, $20, $FF ;0x680
 loc_000174CA:
-	MOVE.l	#$0001AD22, $00FFF04C
+	MOVE.l	#loc_0001AD22, $00FFF04C
 	MOVE.w	#$1004, $00FFF07C
 	JSR	loc_0001B190
 	JSR	loc_00000A6E
@@ -19888,7 +20437,7 @@ loc_00017A1E:
 	MOVE.w	$26(A0), D0
 	ADD.w	D0, D0
 	MOVE.w	(A2,D0.w), $2A(A0)
-	MOVE.l	#$00017AD0, $32(A0)
+	MOVE.l	#loc_00017AD0, $32(A0)
 	JSR	loc_00000C04
 	ANDI.w	#7, D0
 	ADDQ.w	#4, D0
@@ -19941,6 +20490,7 @@ loc_00017AD0:
 	dc.b	$FF
 	dc.b	$00 ;0x0 (0x00017AD9-0x00017ADA, Entry count: 0x1) [Unknown data]
 	dc.l	loc_00017AD0
+loc_00017ADE:
 	dc.b	$06
 	dc.b	$09 ;0x0 (0x00017ADF-0x00017AE0, Entry count: 0x1) [Unknown data]
 	dc.b	$04
@@ -19966,7 +20516,9 @@ loc_00017AD0:
 	dc.b	$01
 	dc.b	$09 ;0x0 (0x00017AF5-0x00017AF6, Entry count: 0x1) [Unknown data]
 	dc.b	$FE
-	dc.b	$00, $00, $09, $FE, $00 ;0x0 (0x00017AF7-0x00017AFC, Entry count: 0x5) [Unknown data]
+	dc.b	$00
+loc_00017AF8:
+	dc.b	$00, $09, $FE, $00 ;0x0 (0x00017AF7-0x00017AFC, Entry count: 0x5) [Unknown data]
 loc_00017AFC:
 	dc.l	loc_00017B88
 	dc.l	loc_00017B94
@@ -22477,7 +23029,7 @@ loc_0001CEBA:
 	MOVE.w	#2, $26(A1)
 	MOVE.w	#$FFFE, $28(A1)
 	MOVE.w	#3, $2A(A1)
-	MOVE.l	#$0001CEAC, $32(A1)
+	MOVE.l	#loc_0001CEAC, $32(A1)
 	MOVE.w	A0, $2E(A1)
 	LEA	loc_0001CF7A(PC), A1
 	JSR	ObjSys_InitObjWithFunc
@@ -22485,7 +23037,7 @@ loc_0001CEBA:
 	MOVE.w	#$00A2, $26(A1)
 	MOVE.w	#2, $28(A1)
 	MOVE.w	#7, $2A(A1)
-	MOVE.l	#$0001CEAC, $32(A1)
+	MOVE.l	#loc_0001CEAC, $32(A1)
 	MOVE.w	A0, $2E(A1)
 	LEA	loc_0001CF7A(PC), A1
 	JSR	ObjSys_InitObjWithFunc
@@ -22493,7 +23045,7 @@ loc_0001CEBA:
 	MOVE.w	#$01C2, $26(A1)
 	MOVE.w	#$FFFE, $28(A1)
 	MOVE.w	#7, $2A(A1)
-	MOVE.l	#$0001CEAC, $32(A1)
+	MOVE.l	#loc_0001CEAC, $32(A1)
 	MOVE.w	A0, $2E(A1)
 	LEA	loc_0001CF7A(PC), A1
 	JSR	ObjSys_InitObjWithFunc
@@ -22501,7 +23053,7 @@ loc_0001CEBA:
 	MOVE.w	#$02E2, $26(A1)
 	MOVE.w	#2, $28(A1)
 	MOVE.w	#4, $2A(A1)
-	MOVE.l	#$0001CEAC, $32(A1)
+	MOVE.l	#loc_0001CEAC, $32(A1)
 	MOVE.w	A0, $2E(A1)
 loc_0001CF72:
 	JSR	ObjSys_UpdateObjNextOpTimer
@@ -22952,6 +23504,8 @@ loc_0001D692:
 	dc.b	$FF
 	dc.b	$00 ;0x0 (0x0001D69F-0x0001D6A0, Entry count: 0x1) [Unknown data]
 	dc.l	loc_0001D692
+loc_0001D6A4:
+	; TODO: Shiftability
 	dc.w	$0002, $0980, $0002, $09A0, $0002, $09C0, $0002, $09E0, $0002, $0A00, $0002, $0A20 ;0x0 (0x0001D6A4-0x0001D6BC, Entry count: 0x18)
 	LEA	loc_00026262, A2
 	JSR	loc_00001870
@@ -22975,8 +23529,8 @@ loc_0001D692:
 	LEA	loc_00024C34(PC), A1
 	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001D742
-	MOVE.l	#$0001D692, $32(A1)
-	MOVE.l	#$0001D6A4, $26(A1)
+	MOVE.l	#loc_0001D692, $32(A1)
+	MOVE.l	#loc_0001D6A4, $26(A1)
 	MOVE.l	A0, $2E(A1)
 	MOVE.b	#2, $7(A0)
 loc_0001D742:
@@ -23272,6 +23826,7 @@ loc_0001DBE8:
 	dc.l	$00FFB25E
 	dc.l	$00FFB264
 	dc.l	$00FFB26A
+loc_0001DBF4:
 	dc.b	$03
 	dc.b	$17 ;0x0 (0x0001DBF5-0x0001DBF6, Entry count: 0x1) [Unknown data]
 	dc.b	$03
@@ -23376,13 +23931,13 @@ loc_0001DCC4:
 	MOVE.b	#$17, $9(A1)
 	MOVE.w	(A3)+, $A(A1)
 	MOVE.w	#$00F8, $E(A1)
-	MOVE.l	#$0001DBF4, $32(A1)
+	MOVE.l	#loc_0001DBF4, $32(A1)
 	MOVE.l	A0, $2E(A1)
 	LEA	loc_0001DB96(PC), A1
 	JSR	ObjSys_InitObjWithFunc
 	BCS.b	loc_0001DD50
 	MOVE.w	(A3)+, $A(A1)
-	MOVE.l	#$0001DB88, $32(A1)
+	MOVE.l	#loc_0001DB88, $32(A1)
 	MOVE.l	A0, $2E(A1)
 	LEA	loc_0001DC28(PC), A1
 	JSR	ObjSys_InitObjWithFunc
@@ -23427,7 +23982,7 @@ loc_0001DD70:
 	MOVE.b	$8(A2), $8(A1)
 	MOVE.b	#0, $9(A1)
 	MOVE.w	#$013C, $E(A1)
-	MOVE.l	#$0001DD58, $32(A1)
+	MOVE.l	#loc_0001DD58, $32(A1)
 	MOVE.l	A2, $2E(A1)
 	RTS
 loc_0001DD96:
@@ -23484,7 +24039,7 @@ loc_0001DE62:
 	CMP.b	$26(A0), D0
 	BEQ.b	loc_0001DE90
 	CLR.b	$22(A0)
-	MOVE.l	#$0001DD58, $32(A0)
+	MOVE.l	#loc_0001DD58, $32(A0)
 	MOVE.b	#4, $9(A0)
 	RTS
 loc_0001DE90:
@@ -23515,7 +24070,7 @@ loc_0001DEC6:
 	MOVE.w	$E(A0), $E(A1)
 	MOVE.w	#$4000, $1C(A1)
 	MOVE.w	#$FFFF, $20(A1)
-	MOVE.l	#$0001DF52, $32(A1)
+	MOVE.l	#loc_0001DF52, $32(A1)
 	MOVE.b	D3, D2
 	ROR.b	#4, D2
 	ADDI.b	#$64, D2
@@ -23529,11 +24084,12 @@ loc_0001DEC6:
 	DBF	D3, loc_0001DEC6
 loc_0001DF2A:
 	CLR.b	$22(A0)
-	MOVE.l	#$0001DF48, $32(A0)
+	MOVE.l	#loc_0001DF48, $32(A0)
 	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	BCS.w	loc_0001DD52
 	RTS
+loc_0001DF48:
 	dc.b	$05
 	dc.b	$06 ;0x0 (0x0001DF49-0x0001DF4A, Entry count: 0x1) [Unknown data]
 	dc.b	$03
@@ -23544,6 +24100,7 @@ loc_0001DF2A:
 	dc.b	$09 ;0x0 (0x0001DF4F-0x0001DF50, Entry count: 0x1) [Unknown data]
 	dc.b	$FE
 	dc.b	$00 ;0x0 (0x0001DF51-0x0001DF52, Entry count: 0x1) [Unknown data]
+loc_0001DF52:
 	dc.b	$01
 	dc.b	$09 ;0x0 (0x0001DF53-0x0001DF54, Entry count: 0x1) [Unknown data]
 	dc.b	$03
@@ -23585,7 +24142,7 @@ loc_0001DF9A:
 	MOVE.b	$8(A2), $8(A1)
 	MOVE.b	#$11, $9(A1)
 	MOVE.w	#$0100, $E(A1)
-	MOVE.l	#$0001DF8A, $32(A1)
+	MOVE.l	#loc_0001DF8A, $32(A1)
 	MOVE.l	A2, $2E(A1)
 	RTS
 loc_0001DFC0:
@@ -23772,7 +24329,7 @@ loc_0001E2F0:
 	MOVE.w	#$0160, $20(A0)
 	MOVE.b	#$46, $8(A0)
 	MOVE.b	#1, $9(A0)
-	MOVE.l	#$0001E360, $32(A0)
+	MOVE.l	#loc_0001E360, $32(A0)
 	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008BE0
 	CMPI.w	#$0090, $E(A0)
@@ -23828,7 +24385,7 @@ loc_0001E394:
 	MOVE.w	$A(A0), $A(A1)
 	MOVE.w	$E(A0), $E(A1)
 	MOVE.b	$8(A0), $8(A1)
-	MOVE.l	#$0001E3EA, $32(A1)
+	MOVE.l	#loc_0001E3EA, $32(A1)
 	MOVE.l	A0, $2E(A1)
 loc_0001E3DC:
 	JSR	ObjSys_UpdateObjNextOpTimer
@@ -25206,7 +25763,7 @@ loc_000218EC:
 	MOVE.b	#$70, D0
 	JSR	loc_0001B1A2
 	MOVE.w	#0, $A(A0)
-	MOVE.l	#$00021974, $32(A0)
+	MOVE.l	#loc_00021974, $32(A0)
 	MOVE.b	#1, $8(A0)
 	MOVE.b	#0, $9(A0)
 	MOVE.w	#$0A00, $38(A0)
@@ -25654,8 +26211,8 @@ loc_00022682:
 	LEA	loc_00024C34(PC), A1
 	JSR	ObjSys_InitObjWithFunc
 	BCS.w	loc_000235FA
-	MOVE.l	#$000227B8, $32(A1)
-	MOVE.l	#$00022840, $26(A1)
+	MOVE.l	#loc_000227B8, $32(A1)
+	MOVE.l	#loc_00022840, $26(A1)
 	MOVE.l	A0, $2E(A1)
 	LEA	loc_000261C6(PC), A2
 	JSR	loc_00001870
@@ -25694,6 +26251,7 @@ loc_00022682:
 	MOVEA.l	$2E(A0), A1
 	ORI.b	#1, $7(A1)
 	JMP	ObjSys_DeleteObjectA0
+loc_000227B8:
 	dc.b	$F1
 	dc.b	$01 ;0x0 (0x000227B9-0x000227BA, Entry count: 0x1) [Unknown data]
 	dc.b	$F0
@@ -25738,15 +26296,20 @@ loc_00022682:
 	dc.b	$05 ;0x0 (0x000227E1-0x000227E2, Entry count: 0x1) [Unknown data]
 	dc.b	$F1
 	dc.b	$01, $F2, $00, $08, $00, $F1, $01, $F0, $00, $01, $02, $02, $04, $00, $07, $01, $02, $00, $05, $F2, $00, $08, $00, $FF, $00, $00, $02, $27, $B8 ;0x0 (0x000227E3-0x00022800, Entry count: 0x1D) [Unknown data]
+loc_00022800:
 	dc.w	$0001, $01E0, $0001, $0320, $0001, $02E0 ;0x0 (0x00022800-0x0002280C, Entry count: 0xC)
 	dc.b	$00, $01, $03, $00 ;0x0 (0x0002280C-0x00022810, Entry count: 0x4) [Unknown data]
 	dc.w	$0001, $0560, $0000, $01C0 ;0x0 (0x00022810-0x00022818, Entry count: 0x8)
 	dc.b	$00, $00, $02, $E0 ;0x0 (0x00022818-0x0002281C, Entry count: 0x4) [Unknown data]
-	dc.w	$0000, $0300, $0001, $0220, $0001, $0340, $0001, $02E0 ;0x0 (0x0002281C-0x0002282C, Entry count: 0x10)
+	dc.w	$0000, $0300
+loc_00022820:
+	dc.w	$0001, $0220, $0001, $0340, $0001, $02E0 ;0x0 (0x0002281C-0x0002282C, Entry count: 0x10)
 	dc.b	$00, $01, $03, $00 ;0x0 (0x0002282C-0x00022830, Entry count: 0x4) [Unknown data]
 	dc.w	$0001, $0560, $0000, $01C0 ;0x0 (0x00022830-0x00022838, Entry count: 0x8)
 	dc.b	$00, $00, $02, $E0 ;0x0 (0x00022838-0x0002283C, Entry count: 0x4) [Unknown data]
-	dc.w	$0000, $0300, $0001, $01E0, $0001, $0320, $0001, $02E0 ;0x0 (0x0002283C-0x0002284C, Entry count: 0x10)
+	dc.w	$0000, $0300
+loc_00022840:
+	dc.w	$0001, $01E0, $0001, $0320, $0001, $02E0 ;0x0 (0x0002283C-0x0002284C, Entry count: 0x10)
 	dc.b	$00, $01, $03, $00 ;0x0 (0x0002284C-0x00022850, Entry count: 0x4) [Unknown data]
 	dc.w	$0001, $0560, $0000, $0240 ;0x0 (0x00022850-0x00022858, Entry count: 0x8)
 	dc.b	$00, $00, $02, $E0 ;0x0 (0x00022858-0x0002285C, Entry count: 0x4) [Unknown data]
@@ -26113,7 +26676,7 @@ loc_00022D82:
 	MOVE.w	#$FF20, (A2)
 	MOVE.b	#1, $00FFF069
 loc_00022DD4:
-	MOVE.l	#$0002383C, $32(A0)
+	MOVE.l	#loc_0002383C, $32(A0)
 	JSR	ObjSys_UpdateObjNextOpTimer
 	JSR	loc_00008B34
 	BCS.w	loc_00022E4C
@@ -26160,14 +26723,14 @@ loc_00022E5C:
 	MOVE.w	#$FF20, (A2)
 	MOVE.b	#1, $00FFF069
 loc_00022E94:
-	MOVE.l	#$000237E8, $32(A0)
+	MOVE.l	#loc_000237E8, $32(A0)
 	JSR	ObjSys_UpdateObjNextOpTimer
 	BTST.b	#0, $7(A0)
 	BNE.b	loc_00022EB4
 	JSR	loc_00008B34
 	BRA.w	loc_00022DEC
 loc_00022EB4:
-	MOVE.l	#$00023814, $32(A0)
+	MOVE.l	#loc_00023814, $32(A0)
 	JSR	loc_00008B34
 	JSR	loc_00022DEC(PC)
 	JSR	ObjSys_UpdateObjNextOpTimer
@@ -26234,8 +26797,8 @@ loc_00022FA6:
 	JSR	loc_00008A78
 	BCS.w	loc_000235FA
 	ORI.b	#2, $7(A0)
-	MOVE.l	#$000227B8, $32(A1)
-	MOVE.l	#$00022800, $26(A1)
+	MOVE.l	#loc_000227B8, $32(A1)
+	MOVE.l	#loc_00022800, $26(A1)
 	MOVE.l	A0, $2E(A1)
 	MOVE.w	#7, D0
 	JSR	loc_00002128
@@ -26310,8 +26873,8 @@ loc_00022FA6:
 	LEA	loc_00024C34(PC), A1
 	JSR	loc_00008A78
 	BCS.w	loc_000235FA
-	MOVE.l	#$000227B8, $32(A1)
-	MOVE.l	#$00022820, $26(A1)
+	MOVE.l	#loc_000227B8, $32(A1)
+	MOVE.l	#loc_00022820, $26(A1)
 	MOVE.l	A0, $2E(A1)
 	MOVE.w	#7, D0
 	JSR	loc_00002128
@@ -26319,7 +26882,7 @@ loc_00022FA6:
 	TST.b	$00FFF048
 	BNE.w	loc_000237BE
 	MOVE.w	#0, $A(A0)
-	MOVE.l	#$00023894, $32(A0)
+	MOVE.l	#loc_00023894, $32(A0)
 	MOVE.b	#2, $8(A0)
 	MOVE.b	#0, $9(A0)
 	JSR	ObjSys_UpdateObjNextOpTimer
@@ -26465,7 +27028,7 @@ loc_000233D4:
 	MOVE.b	#3, $9(A1)
 	MOVE.w	#$00B0, $A(A1)
 	MOVE.w	#$00B8, $26(A1)
-	MOVE.l	#$000229BC, $32(A1)
+	MOVE.l	#loc_000229BC, $32(A1)
 	JSR	loc_00022A26(PC)
 	LEA	loc_00022990(PC), A1
 	JSR	ObjSys_InitObjWithFunc
@@ -26473,7 +27036,7 @@ loc_000233D4:
 	MOVE.b	#3, $9(A1)
 	MOVE.w	#$0120, $A(A1)
 	MOVE.w	#$00B8, $26(A1)
-	MOVE.l	#$000229BC, $32(A1)
+	MOVE.l	#loc_000229BC, $32(A1)
 	JSR	loc_00022A26(PC)
 	LEA	loc_00022990(PC), A1
 	JSR	ObjSys_InitObjWithFunc
@@ -26481,7 +27044,7 @@ loc_000233D4:
 	MOVE.b	#7, $9(A1)
 	MOVE.w	#$0160, $A(A1)
 	MOVE.w	#$00A0, $26(A1)
-	MOVE.l	#$000229D6, $32(A1)
+	MOVE.l	#loc_000229D6, $32(A1)
 	JSR	loc_00022A26(PC)
 loc_000234E2:
 	LEA	loc_0002360E(PC), A1
@@ -26617,6 +27180,7 @@ loc_000237E8:
 	dc.b	$FF
 	dc.b	$00 ;0x0 (0x0002380F-0x00023810, Entry count: 0x1) [Unknown data]
 	dc.l	loc_000237E8
+loc_00023814:
 	dc.l	$14070208	; (Predicted offset)
 	dc.l	$02090203	; (Predicted offset)
 	dc.l	$02040206	; (Predicted offset)
@@ -26627,6 +27191,7 @@ loc_000237E8:
 	dc.l	$03090303	; (Predicted offset)
 	dc.l	$03040306	; (Predicted offset)
 	dc.l	$1E00FE00	; (Predicted offset)
+loc_0002383C:
 	dc.l	$01070108	; (Predicted offset)
 	dc.l	$01090103	; (Predicted offset)
 	dc.l	$01040106	; (Predicted offset)
@@ -26649,6 +27214,7 @@ loc_000237E8:
 	dc.l	$03090303	; (Predicted offset)
 	dc.l	$03040306	; (Predicted offset)
 	dc.l	$1E00FE00	; (Predicted offset)
+loc_00023894:
 	dc.l	$02000201	; (Predicted offset)
 	dc.l	$0202FF00	; (Predicted offset)
 	dc.l	loc_000238A0
@@ -26657,7 +27223,7 @@ loc_000238A0:
 	dc.b	$02
 	dc.b	$04, $0F, $00, $FE, $00, $0C, $00, $03, $01, $04, $02, $03, $01, $1E, $00, $FE, $00 ;0x0 (0x000238A3-0x000238B4, Entry count: 0x11) [Unknown data]
 loc_000238B4:
-	MOVE.l	#$00026500, $00FFF04C
+	MOVE.l	#loc_00026500, $00FFF04C
 	MOVEQ	#4, D0
 	JSR	Bytecode_SetVDPMode
 	JSR	loc_00000D6C
@@ -26825,7 +27391,9 @@ loc_00023B22:
 	dc.b	$00, $00, $8A, $EC, $4E, $B9, $00, $00, $8B, $E0, $65, $00, $FF, $D4, $4E, $75, $70, $7E, $4E, $B9, $00, $01, $B1, $A2, $4E, $B9, $00, $00, $8A, $EC, $22, $68 ;0x20
 	dc.b	$00, $2E, $08, $E9, $00, $02, $00, $07, $4E, $B9, $00, $00, $8B, $34, $65, $B6, $4E, $75 ;0x40
 loc_00023B7C:
-	dc.b	$4E, $B9, $00, $00, $8B, $34, $65, $D6, $4E, $75, $3C, $04, $08, $05, $05, $04, $05, $06, $00, $07, $FF, $00, $00, $02, $3B, $96, $07, $07, $04, $06, $18, $04 ;0x0 (0x00023B7C-0x00023B9E, Entry count: 0x22) [Unknown data]
+	dc.b	$4E, $B9, $00, $00, $8B, $34, $65, $D6, $4E, $75
+loc_00023B86:
+	dc.b	$3C, $04, $08, $05, $05, $04, $05, $06, $00, $07, $FF, $00, $00, $02, $3B, $96, $07, $07, $04, $06, $18, $04 ;0x0 (0x00023B7C-0x00023B9E, Entry count: 0x22) [Unknown data]
 	dc.b	$FE, $00 ;0x20
 loc_00023B9E:
 	TST.b	$00FFF080
@@ -26890,7 +27458,7 @@ loc_00023C68:
 	LSL.w	#1, D0	;Predicted (Code-scan)
 	MOVE.w	loc_00023C58(PC,D0.w), $A(A1)	;Predicted (Code-scan)
 	MOVE.w	#$0138, $E(A1)	;Predicted (Code-scan)
-	MOVE.l	#$00023B86, $32(A1)	;Predicted (Code-scan)
+	MOVE.l	#loc_00023B86, $32(A1)	;Predicted (Code-scan)
 	MOVE.l	A0, $2E(A1)	;Predicted (Code-scan)
 loc_00023CD2:
 	MOVE.l	#$35383338, D0	;Predicted (Code-scan)
@@ -27046,7 +27614,7 @@ loc_00023ECC:
 	JSR	ObjSys_UpdateObjNextOpTimer
 	TST.b	$00FFF048
 	BNE.w	loc_0002408A
-	MOVE.l	#$0001AD22, $00FFF04C
+	MOVE.l	#loc_0001AD22, $00FFF04C
 	JSR	loc_0001B190
 	CLR.b	rbBytecode_StopRun
 	JMP	ObjSys_DeleteObjectA0
@@ -28699,7 +29267,9 @@ loc_00025EEC:
 	dc.b	$0C, $04, $C4, $00, $00, $00, $06, $22, $96, $00, $FF, $FF, $80, $00, $03, $0E, $80, $00, $00, $00, $03, $0C, $B0, $00, $FF, $FF, $80, $00, $03, $12, $80, $00 ;0x20
 	dc.b	$00, $00, $03, $10, $B0, $C8, $FF, $FF, $80, $00, $03, $2A, $80, $00, $00, $00, $03, $28, $B0, $C8, $FF, $FF, $80, $00, $04, $02, $20, $00, $00, $00, $04, $00 ;0x40
 	dc.b	$B0, $00, $FF, $FF ;0x60
+loc_00025F80:
 	dc.b	$01, $0A, $2F, $22 ;0x0 (0x00025F80-0x00025F84, Entry count: 0x4)
+loc_00025F84:
 	dc.b	$80
 	dc.b	$00 ;0x0 (0x00025F85-0x00025F86, Entry count: 0x1) [Unknown data]
 	dc.w	$0C16
@@ -28772,7 +29342,9 @@ loc_00025FA6:
 	dc.b	$FF, $80, $00, $0E, $10, $53, $00, $FF, $FF, $80, $00, $0E, $12, $53, $00, $FF, $FF, $80, $00, $0E, $14, $53, $00, $FF, $FF, $80, $00, $0E, $16, $53, $00, $FF ;0x0 (0x000260F1-0x00026132, Entry count: 0x41) [Unknown data]
 	dc.b	$FF, $80, $00, $0E, $18, $53, $00, $FF, $FF, $80, $00, $0A, $32, $53, $00, $FF, $FF, $80, $00, $0E, $1A, $53, $00, $FF, $FF, $80, $00, $0A, $30, $53, $00, $FF ;0x20
 	dc.b	$FF ;0x40
+loc_00026132:
 	dc.b	$08, $07, $35, $09 ;0x0 (0x00026132-0x00026136, Entry count: 0x4)
+loc_00026136:
 	dc.b	$80
 	dc.b	$00 ;0x0 (0x00026137-0x00026138, Entry count: 0x1) [Unknown data]
 	dc.w	$0C10
@@ -28826,6 +29398,7 @@ loc_00026182:
 loc_00026186:
 	dc.b	$12, $0F, $32, $12 ;0x0 (0x00026186-0x0002618A, Entry count: 0x4)
 	dc.b	'51.-,1.-' ;0x0 (0x0002618A-0x00026192, Entry count: 0x8) [Unknown data]
+loc_00026192:
 	dc.b	$80
 	dc.b	$00 ;0x0 (0x00026193-0x00026194, Entry count: 0x1) [Unknown data]
 	dc.w	$0F06
@@ -30894,7 +31467,7 @@ loc_0002BCF2:
 	dc.b	$0F, $00, $22, $A4, $FF, $E4, $FF, $FC, $0B, $00, $22, $B4, $00, $04, $00, $01, $FF, $F4, $0C, $00, $22, $C0, $FF, $EC, $00, $01, $FF, $F4, $0C, $00, $22, $C4 ;0x140
 	dc.b	$FF, $EC, $00, $02, $FF, $F4, $08, $04, $22, $C8, $FF, $E4, $FF, $F4, $04, $00, $A2, $CE, $FF, $FC, $00, $02, $FF, $F4, $08, $00, $22, $CB, $FF, $E4, $FF, $F4 ;0x160
 	dc.b	$04, $00, $22, $CE, $FF, $FC ;0x180
-loc_0002BE78:
+loc_0002BE78: ; TODO (Shiftability): MANY POINTERS
 	dc.b	$00, $02, $BF, $58, $00, $02, $BF, $58, $00, $02, $BF, $58, $00, $02, $BF, $58, $00, $02, $BF, $58, $00, $02, $BF, $58, $00, $02, $BF, $58, $00, $02, $BF, $58 ;0x0 (0x0002BE78-0x0002BFDA, Entry count: 0x162) [Unknown data]
 	dc.b	$00, $02, $BF, $58, $00, $02, $BF, $58, $00, $02, $94, $64, $00, $02, $94, $7E, $00, $02, $AF, $62, $00, $02, $AF, $8E, $00, $02, $A2, $1C, $00, $02, $BE, $16 ;0x20
 	dc.b	$00, $02, $BE, $40, $00, $02, $BE, $4A, $00, $02, $BE, $54, $00, $02, $BE, $66, $00, $02, $B8, $F8, $00, $02, $B9, $02, $00, $02, $B9, $0C, $00, $02, $B9, $16 ;0x40
